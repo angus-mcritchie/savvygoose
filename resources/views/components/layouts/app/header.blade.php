@@ -10,13 +10,21 @@
         <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
         <a class="ml-2 mr-5 flex items-center space-x-2 lg:ml-0" href="{{ route('dashboard') }}" wire:navigate>
-            <x-app-logo class="size-8" href="#"></x-app-logo>
+            <x-app-logo class="size-8" href="/"></x-app-logo>
         </a>
 
         <flux:navbar class="-mb-px max-lg:hidden">
             {{-- blade-formatter-disable-next-line --}}
-                <flux:navbar.item icon="layout-grid" href="{{ route('dashboard') }}" :current="request()->routeIs('dashboard')" wire:navigate>
-            {{ __('Dashboard') }}
+            <flux:navbar.item icon="layout-grid" href="{{ route('dashboard') }}" :current="request()->routeIs('barcode-generator')" wire:navigate>
+            {{ __('Barcode Generator') }}
+            </flux:navbar.item>
+            {{-- blade-formatter-disable-next-line --}}
+            <flux:navbar.item icon="layout-grid" href="{{ route('dashboard') }}" :current="request()->routeIs('character-counter')" wire:navigate>
+            {{ __('Character Counter') }}
+            </flux:navbar.item>
+            {{-- blade-formatter-disable-next-line --}}
+            <flux:navbar.item icon="layout-grid" href="{{ route('dashboard') }}" :current="request()->routeIs('percentage-calculator')" wire:navigate>
+            {{ __('Percentage Calculator') }}
             </flux:navbar.item>
         </flux:navbar>
 
