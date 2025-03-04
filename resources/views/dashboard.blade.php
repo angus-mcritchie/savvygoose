@@ -3,7 +3,7 @@
         Helpful apps, for free
     </h1>
 
-    <div class="mx-auto max-w-[1200px] px-4">
+    <div class="mx-auto max-w-[1200px]">
         <div class="grid gap-8 lg:grid-cols-3">
             <flux:link class="!grid gap-8 rounded-lg border border-white/10 px-8 py-12 !no-underline transition duration-300 hover:-translate-y-1 hover:shadow-xl" href="{{ route('barcode-generator') }}">
                 <img class="size-20" src="{{ asset('image/barcode.png') }}" width="128" height="128" />
