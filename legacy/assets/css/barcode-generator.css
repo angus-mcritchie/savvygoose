@@ -1,0 +1,76 @@
+@import url("https://fonts.googleapis.com/css2?family=Libre+Barcode+128&family=Roboto+Mono:wght@400;700&display=swap");
+#output-sticker-container {
+    color: black;
+    text-align: center;
+    font-family: "Roboto Mono", monospace;
+}
+
+#output-sticker {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translateY(-50%) translateX(-50%);
+}
+
+#output-label {
+    font-weight: 600;
+    font-size: 0.3cm;
+    white-space: nowrap;
+}
+
+#output-code {
+    font-family: "Libre Barcode 128", cursive;
+    font-size: 0.7cm;
+    line-height: 0.15cm;
+    margin-top: 0.31cm;
+    white-space: nowrap;
+}
+
+#output-value {
+    font-size: 0.25cm;
+    white-space: nowrap;
+}
+
+@media print {
+    #output-sticker-container {
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        left: 0;
+        top: 0;
+    }
+
+    #output-sticker {
+    }
+    #output-label {
+    }
+
+    #output-code {
+    }
+
+    #output-value {
+    }
+}
+
+@media screen {
+    #output-sticker-container {
+        margin: auto;
+        position: relative;
+        box-shadow: 0 0 0.5rem #00000050;
+        border-radius: 0.5rem;
+        width: 4cm;
+        height: 1.5cm;
+    }
+
+    #output-sticker {
+    }
+
+    #output-label {
+    }
+
+    #output-code {
+    }
+
+    #output-value {
+    }
+}

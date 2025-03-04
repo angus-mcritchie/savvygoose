@@ -14,18 +14,17 @@
         </a>
 
         <flux:navbar class="-mb-px max-lg:hidden">
-            {{-- blade-formatter-disable-next-line --}}
-            <flux:navbar.item icon="layout-grid" href="{{ route('dashboard') }}" :current="request()->routeIs('barcode-generator')" wire:navigate>
-            {{ __('Barcode Generator') }}
+            {{-- blade-formatter-disable --}}
+            <flux:navbar.item href="{{ route('dashboard') }}" :current="request()->routeIs('barcode-generator')" wire:navigate>
+                {{ __('Barcode Generator') }}
             </flux:navbar.item>
-            {{-- blade-formatter-disable-next-line --}}
-            <flux:navbar.item icon="layout-grid" href="{{ route('dashboard') }}" :current="request()->routeIs('character-counter')" wire:navigate>
-            {{ __('Character Counter') }}
+            <flux:navbar.item href="{{ route('dashboard') }}" :current="request()->routeIs('percentage-calculator')" wire:navigate>
+                {{ __('Percentage Calculator') }}
             </flux:navbar.item>
-            {{-- blade-formatter-disable-next-line --}}
-            <flux:navbar.item icon="layout-grid" href="{{ route('dashboard') }}" :current="request()->routeIs('percentage-calculator')" wire:navigate>
-            {{ __('Percentage Calculator') }}
+            <flux:navbar.item href="{{ route('dashboard') }}" :current="request()->routeIs('character-counter')" wire:navigate>
+                {{ __('Character Counter') }}
             </flux:navbar.item>
+            {{-- blade-formatter-enable --}}
         </flux:navbar>
 
         <flux:spacer />
