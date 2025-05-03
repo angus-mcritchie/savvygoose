@@ -14,6 +14,7 @@
         </div>
 
         <link href="{{ Vite::asset('resources/css/barcode-generator.css') }}" rel="stylesheet" x-ref="stylesheet">
+
         <div class="grid gap-6 lg:grid-cols-2">
             <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
                 <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">1. Generate</flux:heading>
