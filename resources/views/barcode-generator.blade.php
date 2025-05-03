@@ -34,7 +34,7 @@
                     Print
                 </flux:button>
             </div>
-            <div class="col-span-2 rounded-lg border border-black/10 p-8 dark:border-white/10">
+            <div class="rounded-lg border border-black/10 p-8 lg:col-span-2 dark:border-white/10">
                 <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">3. Share</flux:heading>
                 <flux:subheading class="mb-2">
                     You can link to this page with url parameters.
