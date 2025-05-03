@@ -1,9 +1,20 @@
 <x-layouts.app>
-    <h1 class="mb-8 text-center text-3xl font-bold text-neutral-900 dark:text-neutral-100">
-        Helpful apps, for free
-    </h1>
 
     <div class="mx-auto max-w-[1200px]">
+
+        <div class="mb-8 flex justify-center">
+            <div class="grid grid-cols-[auto_1fr] items-center gap-4">
+                <img class="mx-auto w-[128px]" src="{{ asset('image/barcode.png') }}"width="128" height="128">
+                <div>
+                    <flux:heading class="mb-1" level="1" size="xl">
+                        Helpful Tools, Free Forever
+                    </flux:heading>
+                    <flux:heading class="font-normal opacity-70" level="2">
+                        A collection of free tools to help you with your daily tasks.
+                    </flux:heading>
+                </div>
+            </div>
+        </div>
         <div class="grid gap-8 lg:grid-cols-3">
             <flux:link class="!grid gap-8 rounded-lg border border-black/10 p-8 px-8 py-12 !no-underline transition duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10" href="{{ route('barcode-generator') }}">
                 <img class="size-20" src="{{ asset('image/barcode.png') }}" width="128" height="128" />
