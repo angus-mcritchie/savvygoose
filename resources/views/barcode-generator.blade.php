@@ -1,10 +1,18 @@
 <x-layouts.app>
-    <h1 class="mb-8 text-center text-3xl font-bold text-neutral-900 dark:text-neutral-100">
-        Barcode Generator
-    </h1>
 
 
     <form class="mx-auto max-w-[1200px]" x-data="barcode" x-on:submit.prevent="printBarcode">
+
+        <div class="mb-8 flex justify-center">
+            <div class="grid grid-cols-[auto_1fr] items-center gap-4">
+                <img class="mx-auto w-[128px]" src="{{ asset('image/barcode.png') }}"width="128" height="128">
+                <div>
+                    <flux:heading class="mb-1" level="1" size="xl">Barcode Generator</flux:heading>
+                    <flux:heading class="font-normal opacity-70" level="2">Generate and print code 128 barcodes in seconds.</flux:heading>
+                </div>
+            </div>
+        </div>
+
         <link href="{{ Vite::asset('resources/css/barcode-generator.css') }}" rel="stylesheet" x-ref="stylesheet">
         <div class="grid gap-6 lg:grid-cols-2">
             <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
@@ -41,7 +49,6 @@
                 </flux:subheading>
 
                 <div class="grid gap-4">
-
                     <flux:input
                         type="url"
                         x-model="url"
@@ -54,6 +61,5 @@
                 </div>
             </div>
         </div>
-
     </form>
 </x-layouts.app>

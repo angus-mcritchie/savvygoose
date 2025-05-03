@@ -1,14 +1,23 @@
 <x-layouts.app>
-    <h1 class="mb-8 text-center text-3xl font-bold text-neutral-900 dark:text-neutral-100">
-        Character Counter
-    </h1>
 
     <div class="mx-auto max-w-[1200px]" x-data="characterCounter">
+        <div class="mb-8 flex justify-center">
+            <div class="grid grid-cols-[auto_1fr] items-center gap-4">
+                <img class="mx-auto w-[128px]" src="{{ asset('image/discount.png') }}"width="128" height="128">
+                <div>
+                    <flux:heading class="mb-1" level="1" size="xl">Character Counter</flux:heading>
+                    <flux:heading class="font-normal opacity-70" level="2">
+                        Count characters, words, and lines in your text.
+                    </flux:heading>
+                </div>
+            </div>
+        </div>
+
         <div class="grid gap-6">
             <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
                 <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">Count characters, words & lines</flux:heading>
                 <div class="mb-8 grid gap-4">
-                    <flux:textarea x-model="text" label="Text to count" name="text" placeholder="Type or paste text here" />
+                    <flux:textarea name="text" x-model="text" label="Text to count" placeholder="Type or paste text here" />
                 </div>
 
                 <div class="grid gap-8 lg:grid-cols-3">
