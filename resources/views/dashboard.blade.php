@@ -16,7 +16,9 @@
             </div>
         </div>
         <div class="grid gap-8 lg:grid-cols-3">
-            <flux:link class="!grid gap-8 rounded-lg border border-black/10 p-8 px-8 py-12 !no-underline transition duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10" href="{{ route('barcode-generator') }}">
+            <flux:link class="!grid gap-8 rounded-lg border border-black/10 p-8 px-8 py-12 !no-underline transition duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10" href="{{ route('barcode-generator') }}"
+                wire:navigate
+            >
                 <img class="size-20" src="{{ asset('image/barcode.png') }}" width="128" height="128" />
 
                 <div>
@@ -28,7 +30,9 @@
                     </flux:subheading>
                 </div>
             </flux:link>
-            <flux:link class="!grid gap-8 rounded-lg border border-black/10 p-8 px-8 py-12 !no-underline transition duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10" href="{{ route('percentage-calculator') }}">
+            <flux:link class="!grid gap-8 rounded-lg border border-black/10 p-8 px-8 py-12 !no-underline transition duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10" href="{{ route('percentage-calculator') }}"
+                wire:navigate
+            >
                 <img class="size-20" src="{{ asset('image/discount.png') }}" width="128" height="128" />
 
                 <div>
@@ -40,7 +44,9 @@
                     </flux:subheading>
                 </div>
             </flux:link>
-            <flux:link class="!grid gap-8 rounded-lg border border-black/10 p-8 px-8 py-12 !no-underline transition duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10" href="{{ route('character-counter') }}">
+            <flux:link class="!grid gap-8 rounded-lg border border-black/10 p-8 px-8 py-12 !no-underline transition duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10" href="{{ route('character-counter') }}"
+                wire:navigate
+            >
                 <img class="size-20" src="{{ asset('image/keyboard.png') }}" width="128" height="128" />
 
                 <div>
