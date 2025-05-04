@@ -3,7 +3,7 @@
     <div class="mx-auto max-w-[1200px]" x-data="characterCounter">
         <div class="mb-8 flex justify-center">
             <div class="grid grid-cols-[auto_1fr] items-center gap-4">
-                <img class="mx-auto w-[128px]" src="{{ asset('image/keyboard.png') }}"width="128" height="128">
+                <img class="mx-auto w-[128px]" src="{{ asset('image/keyboard.png') }}" width="128" height="128">
                 <div>
                     <flux:heading class="mb-1" level="1" size="xl">Character Counter</flux:heading>
                     <flux:heading class="font-normal opacity-70" level="2">
