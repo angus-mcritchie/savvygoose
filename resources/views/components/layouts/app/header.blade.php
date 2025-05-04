@@ -38,7 +38,7 @@
             <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
             <a class="ml-1 flex items-center space-x-2" href="{{ route('dashboard') }}" wire:navigate>
-                <x-app-logo class="size-8" href="#"></x-app-logo>
+                <x-app-logo class="size-8" href="/"></x-app-logo>
             </a>
 
             <flux:navlist variant="outline">
