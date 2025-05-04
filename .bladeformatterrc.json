@@ -1,0 +1,7 @@
+{
+    "componentPrefix": [
+        "x-",
+        "livewire:",
+        "flux:"
+    ]
+}

@@ -14,17 +14,15 @@
             </a>
 
             <flux:navbar class="-mb-px max-lg:hidden">
-                {{-- blade-formatter-disable --}}
-            <flux:navbar.item href="{{ route('barcode-generator') }}" :current="request()->routeIs('barcode-generator')" wire:navigate>
-                {{ __('Barcode Generator') }}
-            </flux:navbar.item>
-            <flux:navbar.item href="{{ route('percentage-calculator') }}" :current="request()->routeIs('percentage-calculator')" wire:navigate>
-                {{ __('Percentage Calculator') }}
-            </flux:navbar.item>
-            <flux:navbar.item href="{{ route('character-counter') }}" :current="request()->routeIs('character-counter')" wire:navigate>
-                {{ __('Character Counter') }}
-            </flux:navbar.item>
-            {{-- blade-formatter-enable --}}
+                <flux:navbar.item href="{{ route('barcode-generator') }}" :current="request()->routeIs('barcode-generator')" wire:navigate>
+                    {{ __('Barcode Generator') }}
+                </flux:navbar.item>
+                <flux:navbar.item href="{{ route('percentage-calculator') }}" :current="request()->routeIs('percentage-calculator')" wire:navigate>
+                    {{ __('Percentage Calculator') }}
+                </flux:navbar.item>
+                <flux:navbar.item href="{{ route('character-counter') }}" :current="request()->routeIs('character-counter')" wire:navigate>
+                    {{ __('Character Counter') }}
+                </flux:navbar.item>
             </flux:navbar>
             <flux:button
                 class="ml-auto"
@@ -45,17 +43,15 @@
 
             <flux:navlist variant="outline">
                 <flux:navlist.group heading="Tools">
-                    {{-- blade-formatter-disable --}}
-                <flux:navlist.item href="{{ route('barcode-generator') }}" :current="request()->routeIs('barcode-generator')" wire:navigate>
-                    {{ __('Barcode Generator') }}
-                </flux:navlist.item>
-                <flux:navlist.item href="{{ route('percentage-calculator') }}" :current="request()->routeIs('percentage-calculator')" wire:navigate>
-                    {{ __('Percentage Calculator') }}
-                </flux:navlist.item>
-                <flux:navlist.item href="{{ route('character-counter') }}" :current="request()->routeIs('character-counter')" wire:navigate>
-                    {{ __('Character Counter') }}
-                </flux:navlist.item>
-                {{-- blade-formatter-enable --}}
+                    <flux:navlist.item href="{{ route('barcode-generator') }}" :current="request()->routeIs('barcode-generator')" wire:navigate>
+                        {{ __('Barcode Generator') }}
+                    </flux:navlist.item>
+                    <flux:navlist.item href="{{ route('percentage-calculator') }}" :current="request()->routeIs('percentage-calculator')" wire:navigate>
+                        {{ __('Percentage Calculator') }}
+                    </flux:navlist.item>
+                    <flux:navlist.item href="{{ route('character-counter') }}" :current="request()->routeIs('character-counter')" wire:navigate>
+                        {{ __('Character Counter') }}
+                    </flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
         </flux:sidebar>
