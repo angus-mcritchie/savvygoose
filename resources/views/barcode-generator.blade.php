@@ -5,7 +5,7 @@
 
         <div class="mb-8 flex justify-center">
             <div class="grid grid-cols-[auto_1fr] items-center gap-4">
-                <img class="mx-auto w-[128px]" src="{{ asset('image/barcode.png') }}"width="128" height="128">
+                <img class="w-[128px]" src="{{ asset('image/barcode.png') }}" width="128" height="128" alt="" fetchpriority="high">
                 <div>
                     <flux:heading class="mb-1" level="1" size="xl">Barcode Generator</flux:heading>
                     <flux:heading class="font-normal opacity-70" level="2">Generate and print code 128 barcodes in seconds.</flux:heading>
@@ -39,7 +39,7 @@
                         </div>
                     </div>
                 </div>
-                <flux:button class="w-full cursor-pointer" type="submit" variant="primary">
+                <flux:button class="w-full" type="submit" variant="primary">
                     Print
                 </flux:button>
             </div>
