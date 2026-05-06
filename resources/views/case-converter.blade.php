@@ -1,0 +1,77 @@
+<x-layouts.app>
+
+    <div class="mx-auto max-w-[1200px]" x-data="caseConverter">
+        <div class="mb-8 flex justify-center">
+            <div class="grid grid-cols-[auto_1fr] items-center gap-4">
+                <flux:icon.language class="size-20 text-zinc-700 dark:text-zinc-200" />
+                <div>
+                    <flux:heading class="mb-1" level="1" size="xl">Case Converter</flux:heading>
+                    <flux:heading class="font-normal opacity-70" level="2">
+                        Convert text into camelCase, snake_case, kebab-case, and more.
+                    </flux:heading>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid gap-6">
+            <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
+                <flux:textarea
+                    name="text"
+                    x-model="text"
+                    label="Input"
+                    placeholder="hello world example phrase"
+                    rows="3"
+                />
+
+                <div class="mt-4 flex flex-wrap items-center gap-3">
+                    <flux:button x-on:click="clear()" x-bind:disabled="!text" icon="trash" size="sm" variant="filled">
+                        Clear
+                    </flux:button>
+                    <flux:text size="sm" class="opacity-60">
+                        Words separated by spaces, hyphens, underscores, dots, or case boundaries are all detected.
+                    </flux:text>
+                </div>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2">
+                <template x-for="c in converters" :key="c.key">
+                    <div
+                        class="rounded-lg border border-black/10 p-6 transition dark:border-white/10"
+                        x-bind:class="{ 'opacity-50': !text }"
+                    >
+                        <div class="mb-3 flex items-start justify-between gap-3">
+                            <div>
+                                <flux:heading class="!font-bold" size="lg" x-text="c.label"></flux:heading>
+                                <flux:subheading size="sm" x-text="c.description"></flux:subheading>
+                            </div>
+                            <flux:button
+                                x-on:click="copy(c.key)"
+                                x-bind:disabled="!text"
+                                icon="document-duplicate"
+                                size="xs"
+                                variant="ghost"
+                            >
+                                <span x-text="copiedKey === c.key ? 'Copied!' : 'Copy'">Copy</span>
+                            </flux:button>
+                        </div>
+                        <div
+                            class="break-all rounded-md bg-zinc-100 p-3 font-mono text-sm dark:bg-zinc-900"
+                            x-text="convert(c.key) || '—'"
+                        ></div>
+                    </div>
+                </template>
+            </div>
+
+            <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
+                <flux:heading class="mb-2" size="xl">Share</flux:heading>
+                <flux:subheading class="mb-4">
+                    The URL below carries your input — anyone who opens it sees the same conversions.
+                </flux:subheading>
+                <p x-show="urlTooLong" x-cloak class="mb-4 text-sm text-amber-600 dark:text-amber-400">
+                    Input is too long to include in the URL.
+                </p>
+                <flux:input type="url" x-model="url" readonly copyable label="Share URL" />
+            </div>
+        </div>
+    </div>
+</x-layouts.app>

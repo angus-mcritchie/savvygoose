@@ -19,23 +19,27 @@
             </a>
 
             <flux:navbar class="-mb-px max-lg:hidden">
-                <flux:dropdown>
-                    <flux:navbar.item icon:trailing="chevron-down">{{ __('Tools') }}</flux:navbar.item>
+                @foreach ($categories as $key => $label)
+                    @if ($toolsByCategory->has($key))
+                        <flux:dropdown>
+                            <flux:navbar.item icon:trailing="chevron-down" :current="request()->routeIs('category.'.$key)">
+                                {{ __($label) }}
+                            </flux:navbar.item>
 
-                    <flux:menu>
-                        @foreach ($categories as $key => $label)
-                            @if ($toolsByCategory->has($key))
-                                <flux:menu.group :heading="$label">
-                                    @foreach ($toolsByCategory[$key] as $tool)
-                                        <flux:menu.item href="{{ route($tool['slug']) }}" wire:navigate>
-                                            {{ __($tool['name']) }}
-                                        </flux:menu.item>
-                                    @endforeach
-                                </flux:menu.group>
-                            @endif
-                        @endforeach
-                    </flux:menu>
-                </flux:dropdown>
+                            <flux:menu>
+                                <flux:menu.item href="{{ route('category.'.$key) }}" icon="squares-2x2" wire:navigate>
+                                    {{ __('All :label', ['label' => $label]) }}
+                                </flux:menu.item>
+                                <flux:menu.separator />
+                                @foreach ($toolsByCategory[$key] as $tool)
+                                    <flux:menu.item href="{{ route($tool['slug']) }}" wire:navigate>
+                                        {{ __($tool['name']) }}
+                                    </flux:menu.item>
+                                @endforeach
+                            </flux:menu>
+                        </flux:dropdown>
+                    @endif
+                @endforeach
             </flux:navbar>
             <flux:button
                 class="ml-auto"
@@ -58,6 +62,9 @@
                 @foreach ($categories as $key => $label)
                     @if ($toolsByCategory->has($key))
                         <flux:navlist.group :heading="$label">
+                            <flux:navlist.item href="{{ route('category.'.$key) }}" :current="request()->routeIs('category.'.$key)" icon="squares-2x2" wire:navigate>
+                                {{ __('All :label', ['label' => $label]) }}
+                            </flux:navlist.item>
                             @foreach ($toolsByCategory[$key] as $tool)
                                 <flux:navlist.item href="{{ route($tool['slug']) }}" :current="request()->routeIs($tool['slug'])" wire:navigate>
                                     {{ __($tool['name']) }}
