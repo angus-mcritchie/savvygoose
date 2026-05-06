@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <div class="mx-auto grid max-w-[600px] gap-12">
+    <div class="mx-auto grid max-w-2xl gap-12">
         <div x-data="xPercentOfY">
 
             <div class="mb-8 flex justify-center">
@@ -17,7 +17,7 @@
             <div class="grid gap-6">
                 <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
                     <div class="mb-2 flex items-start justify-between gap-2">
-                        <flux:heading size="xl">What is <flux:badge>X%</flux:badge> of <flux:badge>Y</flux:badge></flux:heading>
+                        <flux:heading size="xl"><flux:badge>X%</flux:badge> of <flux:badge>Y</flux:badge></flux:heading>
                         <flux:dropdown position="bottom" align="end">
                             <flux:button icon="information-circle" variant="ghost" size="sm" aria-label="Explain the math" />
                             <flux:popover class="max-w-xs">
@@ -60,7 +60,7 @@
             <div class="grid gap-6">
                 <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
                     <div class="mb-2 flex items-start justify-between gap-2">
-                        <flux:heading size="xl"><flux:badge>X</flux:badge> is what percent of <flux:badge>Y</flux:badge></flux:heading>
+                        <flux:heading size="xl"><flux:badge>X</flux:badge> is what % of <flux:badge>Y</flux:badge></flux:heading>
                         <flux:dropdown position="bottom" align="end">
                             <flux:button icon="information-circle" variant="ghost" size="sm" aria-label="Explain the math" />
                             <flux:popover class="max-w-xs">
@@ -94,7 +94,7 @@
             <div class="grid gap-6">
                 <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
                     <div class="mb-2 flex items-start justify-between gap-2">
-                        <flux:heading size="xl">What is the % increase/decrease from <flux:badge>X</flux:badge> to <flux:badge>Y</flux:badge></flux:heading>
+                        <flux:heading size="xl">% change from <flux:badge>X</flux:badge> to <flux:badge>Y</flux:badge></flux:heading>
                         <flux:dropdown position="bottom" align="end">
                             <flux:button icon="information-circle" variant="ghost" size="sm" aria-label="Explain the math" />
                             <flux:popover class="max-w-xs">
