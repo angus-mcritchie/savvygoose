@@ -2,6 +2,12 @@
 @import url("https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap");
 
 [data-barcode-canvas] {
+    --barcode-width: 4cm;
+    --barcode-height: 1.5cm;
+    --barcode-label-size: 0.3cm;
+    --barcode-code-size: 0.7cm;
+    --barcode-value-size: 0.25cm;
+
     color: black;
     text-align: center;
     font-family: "Roboto Mono", monospace;
@@ -17,20 +23,20 @@
 
 [data-barcode-label] {
     font-weight: 600;
-    font-size: 0.3cm;
+    font-size: var(--barcode-label-size);
     white-space: nowrap;
 }
 
 [data-barcode-code] {
     font-family: "Libre Barcode 128", cursive;
-    font-size: 0.7cm;
-    line-height: 0.15cm;
-    margin-top: 0.31cm;
+    font-size: var(--barcode-code-size);
+    line-height: 0.214;
+    margin-top: 0.443em;
     white-space: nowrap;
 }
 
 [data-barcode-value] {
-    font-size: 0.25cm;
+    font-size: var(--barcode-value-size);
     white-space: nowrap;
 }
 
@@ -50,7 +56,7 @@
         position: relative;
         box-shadow: 0 0 0.5rem #00000050;
         border-radius: 0.5rem;
-        width: 4cm;
-        height: 1.5cm;
+        width: var(--barcode-width);
+        height: var(--barcode-height);
     }
 }

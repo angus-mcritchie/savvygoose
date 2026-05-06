@@ -5,7 +5,14 @@
 
         <div class="mb-8 flex justify-center">
             <div class="grid grid-cols-[auto_1fr] items-center gap-4">
-                <img class="w-[128px]" src="{{ asset('image/barcode.png') }}" width="128" height="128" alt="" fetchpriority="high">
+                <img
+                    class="w-[128px]"
+                    src="{{ asset('image/barcode.png') }}"
+                    alt=""
+                    width="128"
+                    height="128"
+                    fetchpriority="high"
+                >
                 <div>
                     <flux:heading class="mb-1" level="1" size="xl">Barcode Generator</flux:heading>
                     <flux:heading class="font-normal opacity-70" level="2">Generate and print code 128 barcodes in seconds.</flux:heading>
@@ -29,12 +36,12 @@
                     <flux:subheading class="text-center !font-normal" size="lg">
                         Here's your barcode.
                     </flux:subheading>
-                    <div data-barcode-canvas x-ref="barcodeCanvas">
+                    <div data-barcode-canvas x-ref="barcodeCanvas" :style="canvasStyle()">
                         <div data-barcode-paper>
                             <div data-barcode>
-                                <div data-barcode-label><span x-text="getLabel()">my label</span></div>
+                                <div data-barcode-label x-show="showLabel"><span x-text="getLabel()">my label</span></div>
                                 <div data-barcode-code><span style="font-family: 'Libre Barcode 128';" x-text="getCode()">ÌvalueÈÎ</span></div>
-                                <div data-barcode-value><span x-text="getValue()">value</span></div>
+                                <div data-barcode-value x-show="showValue"><span x-text="getValue()">value</span></div>
                             </div>
                         </div>
                     </div>
@@ -44,7 +51,55 @@
                 </flux:button>
             </div>
             <div class="rounded-lg border border-black/10 p-8 lg:col-span-2 dark:border-white/10">
-                <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">3. Share</flux:heading>
+                <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">3. Customize</flux:heading>
+                <flux:subheading class="mb-6">
+                    Tweak the sticker size and visibility.
+                </flux:subheading>
+
+                <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    <flux:input
+                        type="number"
+                        step="0.1"
+                        min="0.5"
+                        x-model.number="width"
+                        label="Sticker width (cm)"
+                    />
+                    <flux:input
+                        type="number"
+                        step="0.1"
+                        min="0.5"
+                        x-model.number="height"
+                        label="Sticker height (cm)"
+                    />
+                    <flux:input
+                        type="number"
+                        step="0.05"
+                        min="0.05"
+                        x-model.number="labelSize"
+                        label="Label font size (cm)"
+                    />
+                    <flux:input
+                        type="number"
+                        step="0.05"
+                        min="0.05"
+                        x-model.number="codeSize"
+                        label="Barcode font size (cm)"
+                    />
+                    <flux:input
+                        type="number"
+                        step="0.05"
+                        min="0.05"
+                        x-model.number="valueSize"
+                        label="Value font size (cm)"
+                    />
+                </div>
+                <div class="mt-6 grid gap-4 sm:grid-cols-2">
+                    <flux:checkbox x-model="showLabel" label="Show label" />
+                    <flux:checkbox x-model="showValue" label="Show value" />
+                </div>
+            </div>
+            <div class="rounded-lg border border-black/10 p-8 lg:col-span-2 dark:border-white/10">
+                <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">4. Share</flux:heading>
                 <flux:subheading class="mb-2">
                     You can link to this page with url parameters.
                 </flux:subheading>
