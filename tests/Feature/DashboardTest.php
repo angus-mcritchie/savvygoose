@@ -1,18 +1,17 @@
 <?php
 
-use App\Models\User;
-
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
-
-test('guests are redirected to the login page', function () {
-    $response = $this->get('/dashboard');
-    $response->assertRedirect('/login');
+test('the dashboard renders', function () {
+    $this->get('/')->assertOk();
 });
 
-test('authenticated users can visit the dashboard', function () {
-    $user = User::factory()->create();
-    $this->actingAs($user);
+test('the barcode generator renders', function () {
+    $this->get('/barcode-generator')->assertOk();
+});
 
-    $response = $this->get('/dashboard');
-    $response->assertStatus(200);
+test('the percentage calculator renders', function () {
+    $this->get('/percentage-calculator')->assertOk();
+});
+
+test('the character counter renders', function () {
+    $this->get('/character-counter')->assertOk();
 });
