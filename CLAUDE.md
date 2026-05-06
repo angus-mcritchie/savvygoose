@@ -27,11 +27,14 @@ Tests bind `Tests\TestCase` via Pest (`tests/Pest.php`) — **no `RefreshDatabas
 
 ### Adding a tool
 
-1. Add a route in `routes/web.php` as `Route::view('/foo', 'foo')->name('foo')`.
-2. Add the top-level Blade view at `resources/views/foo.blade.php`. Wrap content in `<x-layouts.app>`.
-3. Add an Alpine data file at `resources/js/data/foo.js` and register it in `resources/js/app.js` via `Alpine.data('foo', foo)`.
-4. Link it from the dashboard tile (`resources/views/dashboard.blade.php`) **and** the header navbar (`resources/views/components/layouts/app/header.blade.php` — both `flux:navbar` desktop and `flux:sidebar`/`flux:navlist` mobile).
-5. Add a smoke test in `tests/Feature/DashboardTest.php`.
+The tool list is driven by `config/tools.php` — routes, the dashboard, and both nav locations all iterate over it. Adding a tool is:
+
+1. Append an entry to `config/tools.php` (`slug`, `name`, `tagline`, `category`, `icon`). Use an existing category key from the `categories` array, or add a new category.
+2. Add the Blade view at `resources/views/{slug}.blade.php` wrapped in `<x-layouts.app>`. The route is registered automatically from the registry.
+3. Add an Alpine data file at `resources/js/data/{slug}.js` (camelCased export) and register it in `resources/js/app.js` via `Alpine.data('foo', foo)`.
+4. Add a smoke test in `tests/Feature/DashboardTest.php`.
+
+Icons in the registry are a tagged union: `['type' => 'image', 'src' => 'image/foo.png']` for PNGs in `public/image/`, or `['type' => 'flux', 'name' => 'code-bracket-square']` for a Flux icon. The `<x-tool-icon>` component handles both.
 
 ### URL-as-state convention
 

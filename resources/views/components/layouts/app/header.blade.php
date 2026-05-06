@@ -6,6 +6,11 @@
     </head>
 
     <body class="min-h-screen bg-white dark:bg-zinc-800">
+        @php
+            $categories = config('tools.categories');
+            $toolsByCategory = collect(config('tools.tools'))->groupBy('category');
+        @endphp
+
         <flux:header class="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900" container>
             <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
@@ -14,18 +19,23 @@
             </a>
 
             <flux:navbar class="-mb-px max-lg:hidden">
-                <flux:navbar.item href="{{ route('barcode-generator') }}" :current="request()->routeIs('barcode-generator')" wire:navigate>
-                    {{ __('Barcode Generator') }}
-                </flux:navbar.item>
-                <flux:navbar.item href="{{ route('percentage-calculator') }}" :current="request()->routeIs('percentage-calculator')" wire:navigate>
-                    {{ __('Percentage Calculator') }}
-                </flux:navbar.item>
-                <flux:navbar.item href="{{ route('character-counter') }}" :current="request()->routeIs('character-counter')" wire:navigate>
-                    {{ __('Character Counter') }}
-                </flux:navbar.item>
-                <flux:navbar.item href="{{ route('markdown-converter') }}" :current="request()->routeIs('markdown-converter')" wire:navigate>
-                    {{ __('Markdown Converter') }}
-                </flux:navbar.item>
+                <flux:dropdown>
+                    <flux:navbar.item icon:trailing="chevron-down">{{ __('Tools') }}</flux:navbar.item>
+
+                    <flux:menu>
+                        @foreach ($categories as $key => $label)
+                            @if ($toolsByCategory->has($key))
+                                <flux:menu.group :heading="$label">
+                                    @foreach ($toolsByCategory[$key] as $tool)
+                                        <flux:menu.item href="{{ route($tool['slug']) }}" wire:navigate>
+                                            {{ __($tool['name']) }}
+                                        </flux:menu.item>
+                                    @endforeach
+                                </flux:menu.group>
+                            @endif
+                        @endforeach
+                    </flux:menu>
+                </flux:dropdown>
             </flux:navbar>
             <flux:button
                 class="ml-auto"
@@ -45,20 +55,17 @@
             </a>
 
             <flux:navlist variant="outline">
-                <flux:navlist.group heading="Tools">
-                    <flux:navlist.item href="{{ route('barcode-generator') }}" :current="request()->routeIs('barcode-generator')" wire:navigate>
-                        {{ __('Barcode Generator') }}
-                    </flux:navlist.item>
-                    <flux:navlist.item href="{{ route('percentage-calculator') }}" :current="request()->routeIs('percentage-calculator')" wire:navigate>
-                        {{ __('Percentage Calculator') }}
-                    </flux:navlist.item>
-                    <flux:navlist.item href="{{ route('character-counter') }}" :current="request()->routeIs('character-counter')" wire:navigate>
-                        {{ __('Character Counter') }}
-                    </flux:navlist.item>
-                    <flux:navlist.item href="{{ route('markdown-converter') }}" :current="request()->routeIs('markdown-converter')" wire:navigate>
-                        {{ __('Markdown Converter') }}
-                    </flux:navlist.item>
-                </flux:navlist.group>
+                @foreach ($categories as $key => $label)
+                    @if ($toolsByCategory->has($key))
+                        <flux:navlist.group :heading="$label">
+                            @foreach ($toolsByCategory[$key] as $tool)
+                                <flux:navlist.item href="{{ route($tool['slug']) }}" :current="request()->routeIs($tool['slug'])" wire:navigate>
+                                    {{ __($tool['name']) }}
+                                </flux:navlist.item>
+                            @endforeach
+                        </flux:navlist.group>
+                    @endif
+                @endforeach
             </flux:navlist>
         </flux:sidebar>
 

@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'dashboard')->name('dashboard');
-Route::view('/barcode-generator', 'barcode-generator')->name('barcode-generator');
-Route::view('/percentage-calculator', 'percentage-calculator')->name('percentage-calculator');
-Route::view('/character-counter', 'character-counter')->name('character-counter');
-Route::view('/markdown-converter', 'markdown-converter')->name('markdown-converter');
+
+foreach (config('tools.tools') as $tool) {
+    Route::view('/'.$tool['slug'], $tool['slug'])->name($tool['slug']);
+}

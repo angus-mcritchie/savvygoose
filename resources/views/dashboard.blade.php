@@ -2,9 +2,9 @@
 
     <div class="mx-auto max-w-[1200px]">
 
-        <div class="mb-8 flex justify-center">
+        <div class="mb-12 flex justify-center">
             <div class="grid grid-cols-[auto_1fr] items-center gap-4">
-                <img class="mx-auto w-[128px]" src="{{ asset('image/window-cloud.png') }}"width="128" height="128">
+                <img class="mx-auto w-[128px]" src="{{ asset('image/window-cloud.png') }}" width="128" height="128">
                 <div>
                     <flux:heading class="mb-1" level="1" size="xl">
                         Helpful Tools, Free Forever
@@ -15,63 +15,42 @@
                 </div>
             </div>
         </div>
-        <div class="grid gap-8 lg:grid-cols-3">
-            <flux:link class="!grid gap-8 rounded-lg border border-black/10 p-8 px-8 py-12 !no-underline transition duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10" href="{{ route('barcode-generator') }}"
-                wire:navigate
-            >
-                <img class="size-20" src="{{ asset('image/barcode.png') }}" width="128" height="128" />
 
-                <div>
-                    <flux:heading class="!text-xl !font-bold">
-                        Barcode Generator
-                    </flux:heading>
-                    <flux:subheading>
-                        Generates & print 128 barcodes.
-                    </flux:subheading>
-                </div>
-            </flux:link>
-            <flux:link class="!grid gap-8 rounded-lg border border-black/10 p-8 px-8 py-12 !no-underline transition duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10" href="{{ route('percentage-calculator') }}"
-                wire:navigate
-            >
-                <img class="size-20" src="{{ asset('image/discount.png') }}" width="128" height="128" />
+        @php
+            $categories = config('tools.categories');
+            $toolsByCategory = collect(config('tools.tools'))->groupBy('category');
+        @endphp
 
-                <div>
-                    <flux:heading class="!text-xl !font-bold">
-                        Percentage Calculator
-                    </flux:heading>
-                    <flux:subheading>
-                        Common percentage calculations.
-                    </flux:subheading>
-                </div>
-            </flux:link>
-            <flux:link class="!grid gap-8 rounded-lg border border-black/10 p-8 px-8 py-12 !no-underline transition duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10" href="{{ route('character-counter') }}"
-                wire:navigate
-            >
-                <img class="size-20" src="{{ asset('image/keyboard.png') }}" width="128" height="128" />
+        <div class="grid gap-12">
+            @foreach ($categories as $key => $label)
+                @if ($toolsByCategory->has($key))
+                    <section>
+                        <flux:heading class="mb-4" level="2" size="lg">
+                            {{ $label }}
+                        </flux:heading>
+                        <div class="grid gap-8 lg:grid-cols-3">
+                            @foreach ($toolsByCategory[$key] as $tool)
+                                <flux:link
+                                    class="!grid gap-8 rounded-lg border border-black/10 p-8 px-8 py-12 !no-underline transition duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10"
+                                    href="{{ route($tool['slug']) }}"
+                                    wire:navigate
+                                >
+                                    <x-tool-icon :icon="$tool['icon']" />
 
-                <div>
-                    <flux:heading class="!text-xl !font-bold">
-                        Character Counter
-                    </flux:heading>
-                    <flux:subheading>
-                        Count characters & words.
-                    </flux:subheading>
-                </div>
-            </flux:link>
-            <flux:link class="!grid gap-8 rounded-lg border border-black/10 p-8 px-8 py-12 !no-underline transition duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10" href="{{ route('markdown-converter') }}"
-                wire:navigate
-            >
-                <flux:icon.code-bracket-square class="size-20 text-zinc-700 dark:text-zinc-200" />
-
-                <div>
-                    <flux:heading class="!text-xl !font-bold">
-                        Markdown Converter
-                    </flux:heading>
-                    <flux:subheading>
-                        Convert between Markdown & HTML.
-                    </flux:subheading>
-                </div>
-            </flux:link>
+                                    <div>
+                                        <flux:heading class="!text-xl !font-bold">
+                                            {{ $tool['name'] }}
+                                        </flux:heading>
+                                        <flux:subheading>
+                                            {{ $tool['tagline'] }}
+                                        </flux:subheading>
+                                    </div>
+                                </flux:link>
+                            @endforeach
+                        </div>
+                    </section>
+                @endif
+            @endforeach
         </div>
     </div>
 </x-layouts.app>
