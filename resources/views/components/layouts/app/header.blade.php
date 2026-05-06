@@ -23,6 +23,9 @@
                 <flux:navbar.item href="{{ route('character-counter') }}" :current="request()->routeIs('character-counter')" wire:navigate>
                     {{ __('Character Counter') }}
                 </flux:navbar.item>
+                <flux:navbar.item href="{{ route('markdown-converter') }}" :current="request()->routeIs('markdown-converter')" wire:navigate>
+                    {{ __('Markdown Converter') }}
+                </flux:navbar.item>
             </flux:navbar>
             <flux:button
                 class="ml-auto"
@@ -51,6 +54,9 @@
                     </flux:navlist.item>
                     <flux:navlist.item href="{{ route('character-counter') }}" :current="request()->routeIs('character-counter')" wire:navigate>
                         {{ __('Character Counter') }}
+                    </flux:navlist.item>
+                    <flux:navlist.item href="{{ route('markdown-converter') }}" :current="request()->routeIs('markdown-converter')" wire:navigate>
+                        {{ __('Markdown Converter') }}
                     </flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>

@@ -58,6 +58,20 @@
                     </flux:subheading>
                 </div>
             </flux:link>
+            <flux:link class="!grid gap-8 rounded-lg border border-black/10 p-8 px-8 py-12 !no-underline transition duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10" href="{{ route('markdown-converter') }}"
+                wire:navigate
+            >
+                <flux:icon.code-bracket-square class="size-20 text-zinc-700 dark:text-zinc-200" />
+
+                <div>
+                    <flux:heading class="!text-xl !font-bold">
+                        Markdown Converter
+                    </flux:heading>
+                    <flux:subheading>
+                        Convert between Markdown & HTML.
+                    </flux:subheading>
+                </div>
+            </flux:link>
         </div>
     </div>
 </x-layouts.app>

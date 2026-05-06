@@ -8,14 +8,19 @@
     "dependencies": {
         "@alpinejs/mask": "^3.15.12",
         "@syncfusion/ej2-barcode-generator": "^33.0.0",
+        "@tailwindcss/typography": "^0.5.19",
         "@tailwindcss/vite": "^4.2.4",
         "autoprefixer": "^10.5.0",
         "axios": "^1.16.0",
         "code-128-encoder": "^3.1.1",
         "concurrently": "^9.2.1",
+        "highlight.js": "^11.11.1",
         "laravel-vite-plugin": "^3.0",
+        "marked": "^18.0.3",
+        "marked-highlight": "^2.2.4",
         "printd": "^1.6.0",
         "tailwindcss": "^4.2.4",
+        "turndown": "^7.2.4",
         "vite": "^8.0"
     },
     "optionalDependencies": {
