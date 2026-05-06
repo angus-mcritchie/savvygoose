@@ -3,7 +3,7 @@
     <div class="mx-auto max-w-[1200px]" x-data="characterCounter">
         <div class="mb-8 flex justify-center">
             <div class="grid grid-cols-[auto_1fr] items-center gap-4">
-                <img class="mx-auto w-[128px]" src="{{ asset('image/keyboard.png') }}" width="128" height="128">
+                <img class="mx-auto w-[128px]" src="{{ asset('image/keyboard.png') }}" alt="Keyboard" width="128" height="128">
                 <div>
                     <flux:heading class="mb-1" level="1" size="xl">Character Counter</flux:heading>
                     <flux:heading class="font-normal opacity-70" level="2">
@@ -15,24 +15,27 @@
 
         <div class="grid gap-6">
             <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
-                <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">Count characters, words & lines</flux:heading>
-                <div class="mb-8 grid gap-4">
-                    <flux:textarea name="text" x-model="text" label="Text to count" placeholder="Type or paste text here" />
+                <div class="mb-4 grid gap-4">
+                    <flux:textarea name="text" x-model="text" label="Text" placeholder="Type or paste text here" rows="6" />
                 </div>
 
-                <div class="grid gap-8 lg:grid-cols-3">
-                    <div class="rounded-lg border border-black/10 p-8 text-center dark:border-white/10">
-                        <flux:subheading class="mb-4" size="xl">Characters</flux:subheading>
-                        <flux:heading class="!text-6xl" x-text="getCharacterCount()">0</flux:heading>
-                    </div>
-                    <div class="rounded-lg border border-black/10 p-8 text-center dark:border-white/10">
-                        <flux:subheading class="mb-4" size="xl">Words</flux:subheading>
-                        <flux:heading class="!text-6xl" x-text="getWordCount()">0</flux:heading>
-                    </div>
-                    <div class="rounded-lg border border-black/10 p-8 text-center dark:border-white/10">
-                        <flux:subheading class="mb-4" size="xl">Lines</flux:subheading>
-                        <flux:heading class="!text-6xl" x-text="getLineCount()">0</flux:heading>
-                    </div>
+                <div class="mb-8 flex gap-2">
+                    <flux:button x-on:click="copy()" x-bind:disabled="!text" icon="document-duplicate" size="sm">
+                        <span x-text="copied ? 'Copied!' : 'Copy'">Copy</span>
+                    </flux:button>
+                    <flux:button x-on:click="clear()" x-bind:disabled="!text" icon="trash" size="sm" variant="filled">
+                        Clear
+                    </flux:button>
+                </div>
+
+                <div class="grid gap-4 transition-opacity lg:grid-cols-3" x-bind:class="{ 'opacity-50': !text }">
+                    <x-stat label="Characters" value="characterCount" />
+                    <x-stat label="Characters (no spaces)" value="characterCountNoSpaces" />
+                    <x-stat label="Words" value="wordCount" />
+                    <x-stat label="Sentences" value="sentenceCount" />
+                    <x-stat label="Lines" value="lineCount" />
+                    <x-stat label="Avg word length" value="averageWordLength" />
+                    <x-stat label="Reading time" value="readingTime" placeholder="0 min" class="lg:col-span-3" />
                 </div>
             </div>
         </div>
