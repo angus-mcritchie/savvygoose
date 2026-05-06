@@ -1,6 +1,6 @@
 <x-layouts.app>
-    <div class="grid gap-12">
-        <div class="mx-auto max-w-[600px]" x-data="xPercentOfY">
+    <div class="mx-auto grid max-w-[600px] gap-12">
+        <div x-data="xPercentOfY">
 
             <div class="mb-8 flex justify-center">
                 <div class="grid grid-cols-[auto_1fr] items-center gap-4">
@@ -16,21 +16,33 @@
 
             <div class="grid gap-6">
                 <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
-                    <flux:heading class="mb-2" size="xl">What is <flux:badge>X%</flux:badge> of <flux:badge>Y</flux:badge>
-                    </flux:heading>
+                    <div class="mb-2 flex items-start justify-between gap-2">
+                        <flux:heading size="xl">What is <flux:badge>X%</flux:badge> of <flux:badge>Y</flux:badge></flux:heading>
+                        <flux:dropdown position="bottom" align="end">
+                            <flux:button icon="information-circle" variant="ghost" size="sm" aria-label="Explain the math" />
+                            <flux:popover class="max-w-xs">
+                                <flux:heading size="sm">How it works</flux:heading>
+                                <p class="mt-2 text-sm">Multiply Y by X expressed as a decimal:</p>
+                                <p class="mt-2 font-mono text-sm">result = Y × (X ÷ 100)</p>
+                                <flux:separator class="my-3" />
+                                <p class="text-sm">Example:</p>
+                                <p class="mt-1 font-mono text-sm">1,000 × (50 ÷ 100) = 500</p>
+                            </flux:popover>
+                        </flux:dropdown>
+                    </div>
                     <flux:subheading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10">Example: 50% of 1,000 = 500.</flux:subheading>
                     <div class="grid gap-4 lg:grid-cols-3">
                         <flux:field>
                             <flux:label>X</flux:label>
                             <flux:input.group>
-                                <flux:input type="number" x-model="x" />
+                                <flux:input type="number" inputmode="decimal" step="any" x-model.number="x" />
                                 <flux:input.group.suffix>%</flux:input.group.suffix>
                             </flux:input.group>
                         </flux:field>
                         <flux:field>
                             <flux:label>Y</flux:label>
                             <flux:input.group>
-                                <flux:input type="number" x-model="y" />
+                                <flux:input type="number" inputmode="decimal" step="any" x-model.number="y" />
                             </flux:input.group>
                         </flux:field>
                         <flux:field>
@@ -44,16 +56,27 @@
             </div>
         </div>
 
-        <div class="mx-auto max-w-[600px]" x-data="xPercentageOfY">
+        <div x-data="xPercentageOfY">
             <div class="grid gap-6">
                 <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
-                    <flux:heading class="mb-2" size="xl">
-                        <flux:badge>X</flux:badge> is what percent of <flux:badge>Y</flux:badge>
-                    </flux:heading>
+                    <div class="mb-2 flex items-start justify-between gap-2">
+                        <flux:heading size="xl"><flux:badge>X</flux:badge> is what percent of <flux:badge>Y</flux:badge></flux:heading>
+                        <flux:dropdown position="bottom" align="end">
+                            <flux:button icon="information-circle" variant="ghost" size="sm" aria-label="Explain the math" />
+                            <flux:popover class="max-w-xs">
+                                <flux:heading size="sm">How it works</flux:heading>
+                                <p class="mt-2 text-sm">Divide X by Y, then convert to a percentage:</p>
+                                <p class="mt-2 font-mono text-sm">result = (X ÷ Y) × 100</p>
+                                <flux:separator class="my-3" />
+                                <p class="text-sm">Example:</p>
+                                <p class="mt-1 font-mono text-sm">(50 ÷ 1,000) × 100 = 5%</p>
+                            </flux:popover>
+                        </flux:dropdown>
+                    </div>
                     <flux:subheading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10">Example: 50 is 5% of 1,000.</flux:subheading>
                     <div class="grid gap-4 lg:grid-cols-3">
-                        <flux:input name="x" type="number" x-model="x" label="X" />
-                        <flux:input name="y" type="number" x-model="y" label="Y" />
+                        <flux:input name="x" type="number" inputmode="decimal" step="any" x-model.number="x" label="X" />
+                        <flux:input name="y" type="number" inputmode="decimal" step="any" x-model.number="y" label="Y" />
                         <flux:input
                             name="result"
                             type="text"
@@ -67,18 +90,30 @@
             </div>
         </div>
 
-        <div class="mx-auto max-w-[600px]" x-data="percentageDifferenceOfXAndY">
+        <div x-data="percentageDifferenceOfXAndY">
             <div class="grid gap-6">
                 <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
-                    <flux:heading class="mb-2" size="xl">What is the % increase/decrease from <flux:badge>X</flux:badge> to <flux:badge>Y</flux:badge>
-                    </flux:heading>
+                    <div class="mb-2 flex items-start justify-between gap-2">
+                        <flux:heading size="xl">What is the % increase/decrease from <flux:badge>X</flux:badge> to <flux:badge>Y</flux:badge></flux:heading>
+                        <flux:dropdown position="bottom" align="end">
+                            <flux:button icon="information-circle" variant="ghost" size="sm" aria-label="Explain the math" />
+                            <flux:popover class="max-w-xs">
+                                <flux:heading size="sm">How it works</flux:heading>
+                                <p class="mt-2 text-sm">Take the change (Y − X), divide by the starting value X, then convert to a percentage:</p>
+                                <p class="mt-2 font-mono text-sm">result = ((Y − X) ÷ X) × 100</p>
+                                <flux:separator class="my-3" />
+                                <p class="text-sm">Example:</p>
+                                <p class="mt-1 font-mono text-sm">((1,000 − 50) ÷ 50) × 100 = 1,900%</p>
+                            </flux:popover>
+                        </flux:dropdown>
+                    </div>
                     <flux:subheading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10">
-                        Example 1: the difference from 50 to 1,000 is 1,900%.<br>
-                        Example 2: the difference from 100 to 200 is 100%.
+                        <span class="block">Example 1: the difference from 50 to 1,000 is 1,900%.</span>
+                        <span class="block">Example 2: the difference from 100 to 200 is 100%.</span>
                     </flux:subheading>
                     <div class="grid gap-4 lg:grid-cols-3">
-                        <flux:input name="x" type="number" x-model="x" label="X" />
-                        <flux:input name="y" type="number" x-model="y" label="Y" />
+                        <flux:input name="x" type="number" inputmode="decimal" step="any" x-model.number="x" label="X" />
+                        <flux:input name="y" type="number" inputmode="decimal" step="any" x-model.number="y" label="Y" />
                         <flux:input
                             name="result"
                             type="text"

@@ -1,3 +1,6 @@
+const formatter = new Intl.NumberFormat(undefined, {
+    maximumFractionDigits: 2,
+});
 
 export default () => ({
     x: null,
@@ -5,7 +8,7 @@ export default () => ({
 
     getResult() {
         if (this.x && this.y) {
-            return Number(this.y * (this.x / 100)).toFixed(2);
+            return formatter.format(this.y * (this.x / 100));
         }
         return '--';
     },
