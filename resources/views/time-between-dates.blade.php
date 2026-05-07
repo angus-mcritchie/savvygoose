@@ -3,7 +3,7 @@
         $countries = config('countries');
     @endphp
 
-    <div class="mx-auto max-w-[1100px]" x-data="timeBetweenDates">
+    <div class="mx-auto max-w-[1100px]" x-data="timeBetweenDates({{ Js::from(['supported' => array_keys($countries)]) }})">
         <div class="mb-8 flex justify-center">
             <div class="grid grid-cols-[auto_1fr] items-center gap-4">
                 <flux:icon.calendar-days class="size-20 text-zinc-700 dark:text-zinc-200" />

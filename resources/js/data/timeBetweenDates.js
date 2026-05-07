@@ -1,5 +1,24 @@
 const DAY_MS = 86400000;
-const DEFAULT_COUNTRY = 'us';
+const FALLBACK_COUNTRY = 'au';
+
+function detectCountry(supported) {
+    const set = new Set(supported);
+    const candidates = [navigator.language, ...(navigator.languages || [])].filter(Boolean);
+    for (const tag of candidates) {
+        // Pull a region out of "en-AU", "pt-BR", "en-GB", etc.
+        const match = /[-_]([A-Za-z]{2,3})\b/.exec(tag);
+        if (!match) continue;
+        const code = match[1].toLowerCase();
+        if (set.has(code)) return code;
+        // Map a few common UK variants to the per-nation codes Spatie exposes.
+        if (code === 'gb' || code === 'uk') {
+            for (const fallback of ['gb-eng', 'gb-sct', 'gb-cym', 'gb-nir']) {
+                if (set.has(fallback)) return fallback;
+            }
+        }
+    }
+    return set.has(FALLBACK_COUNTRY) ? FALLBACK_COUNTRY : supported[0] || '';
+}
 
 function todayIso() {
     const d = new Date();
@@ -67,10 +86,12 @@ function calendarBreakdown(from, to) {
     return parts.join(', ');
 }
 
-export default () => ({
+export default ({ supported = [] } = {}) => ({
+    supported,
+    defaultCountry: detectCountry(supported),
     start: todayIso(),
     end: todayIso(),
-    country: DEFAULT_COUNTRY,
+    country: '',
     inclusive: true,
     holidays: [],
     holidaysLoading: false,
@@ -79,6 +100,7 @@ export default () => ({
     url: window.location.href,
 
     init() {
+        this.country = this.defaultCountry;
         this.initFromUrl();
 
         ['start', 'end', 'country', 'inclusive'].forEach((prop) => {
@@ -263,7 +285,7 @@ export default () => ({
         const params = new URLSearchParams();
         params.set('start', this.start);
         params.set('end', this.end);
-        if (this.country !== DEFAULT_COUNTRY) params.set('country', this.country);
+        if (this.country !== this.defaultCountry) params.set('country', this.country);
         if (!this.inclusive) params.set('inclusive', '0');
         const qs = params.toString();
         const newUrl = `${window.location.origin}${window.location.pathname}${qs ? '?' + qs : ''}`;
