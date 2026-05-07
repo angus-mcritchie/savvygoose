@@ -114,13 +114,14 @@
 
                     <flux:separator class="my-6" />
 
-                    <flux:label class="mb-2">Image size</flux:label>
+                    <flux:label class="mb-2">Image size & transform</flux:label>
                     <flux:subheading class="mb-3 text-xs">
-                        How large the source is drawn on the canvas. Capped at the source's natural size
-                        (<span class="font-mono tabular-nums" x-text="sourceWidth"></span>×<span class="font-mono tabular-nums" x-text="sourceHeight"></span>).
+                        Drag the image in the preview to move it; use the corner handles to scale, the lollipop to rotate.
+                        Hold <kbd class="rounded border border-black/15 px-1 font-mono text-[0.65rem] dark:border-white/15">Shift</kbd> while rotating to snap to 15°.
+                        Source: <span class="font-mono tabular-nums" x-text="sourceWidth"></span>×<span class="font-mono tabular-nums" x-text="sourceHeight"></span>.
                     </flux:subheading>
                     <div class="mb-4 grid grid-cols-[1fr_auto_1fr] items-end gap-2">
-                        <flux:input type="number" min="1" x-bind:max="sourceWidth || 4096" step="1" x-model.number="imageWidth" label="Width (px)" />
+                        <flux:input type="number" min="1" max="4096" step="1" x-model.number="imageWidth" label="Width (px)" />
                         <button
                             type="button"
                             x-on:click="toggleLock"
@@ -134,12 +135,19 @@
                             <flux:icon :name="'link'" class="size-4" x-show="locked" />
                             <flux:icon :name="'link-slash'" class="size-4" x-show="!locked" />
                         </button>
-                        <flux:input type="number" min="1" x-bind:max="sourceHeight || 4096" step="1" x-model.number="imageHeight" label="Height (px)" />
+                        <flux:input type="number" min="1" max="4096" step="1" x-model.number="imageHeight" label="Height (px)" />
+                    </div>
+
+                    <div class="mb-4 grid grid-cols-3 gap-2">
+                        <flux:input type="number" step="1" x-model.number="imageX" label="X (px)" />
+                        <flux:input type="number" step="1" x-model.number="imageY" label="Y (px)" />
+                        <flux:input type="number" min="-180" max="180" step="1" x-model.number="imageRotation" label="Rotation (°)" />
                     </div>
 
                     <div class="mb-6 flex flex-wrap gap-2">
                         <flux:button size="sm" variant="subtle" x-on:click="matchSource">Match source</flux:button>
                         <flux:button size="sm" variant="subtle" x-on:click="fitImageToCanvas">Fit to canvas</flux:button>
+                        <flux:button size="sm" variant="subtle" x-on:click="centerImage">Center</flux:button>
                     </div>
 
                     <flux:separator class="my-6" />
@@ -192,13 +200,54 @@
                 <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
                     <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">3. Preview</flux:heading>
 
-                    <div class="mb-6 grid place-items-center rounded-md border border-black/10 bg-[conic-gradient(at_50%_50%,_#0001_0deg_90deg,_transparent_90deg_180deg,_#0001_180deg_270deg,_transparent_270deg)] bg-[length:16px_16px] p-4 dark:border-white/10">
-                        <img
-                            x-show="previewUrl"
-                            :src="previewUrl"
-                            class="max-h-[360px] max-w-full"
-                            alt="Preview"
-                        />
+                    <div
+                        class="mb-6 grid place-items-center rounded-md border border-black/10 bg-zinc-50 p-4 select-none dark:border-white/10 dark:bg-zinc-900/40"
+                        x-on:pointermove.window="onPointerMove($event)"
+                        x-on:pointerup.window="onPointerUp($event)"
+                        x-on:pointercancel.window="onPointerUp($event)"
+                    >
+                        <div class="relative inline-block">
+                            <canvas
+                                x-ref="preview"
+                                class="block max-h-[360px] max-w-full bg-[conic-gradient(at_50%_50%,_#0001_0deg_90deg,_transparent_90deg_180deg,_#0001_180deg_270deg,_transparent_270deg)] bg-[length:16px_16px] outline outline-1 outline-black/15 dark:outline-white/20"
+                            ></canvas>
+                            <div
+                                class="pointer-events-none absolute inset-0"
+                                x-show="source"
+                                x-cloak
+                            >
+                                <div
+                                    class="pointer-events-none absolute origin-center"
+                                    :style="`left:${imageScreenLeft}px;top:${imageScreenTop}px;width:${imageScreenWidth}px;height:${imageScreenHeight}px;transform:translate(-50%,-50%) rotate(${imageRotation}deg);`"
+                                >
+                                    <div
+                                        class="pointer-events-auto absolute inset-0 cursor-move border border-dashed border-sky-500/80 touch-none"
+                                        x-on:pointerdown="startDrag($event)"
+                                    ></div>
+                                    <div
+                                        class="pointer-events-auto absolute -left-1.5 -top-1.5 size-3 cursor-nwse-resize rounded-sm border border-sky-500 bg-white shadow touch-none dark:bg-zinc-900"
+                                        x-on:pointerdown="startScale($event, 'nw')"
+                                    ></div>
+                                    <div
+                                        class="pointer-events-auto absolute -right-1.5 -top-1.5 size-3 cursor-nesw-resize rounded-sm border border-sky-500 bg-white shadow touch-none dark:bg-zinc-900"
+                                        x-on:pointerdown="startScale($event, 'ne')"
+                                    ></div>
+                                    <div
+                                        class="pointer-events-auto absolute -bottom-1.5 -left-1.5 size-3 cursor-nesw-resize rounded-sm border border-sky-500 bg-white shadow touch-none dark:bg-zinc-900"
+                                        x-on:pointerdown="startScale($event, 'sw')"
+                                    ></div>
+                                    <div
+                                        class="pointer-events-auto absolute -bottom-1.5 -right-1.5 size-3 cursor-nwse-resize rounded-sm border border-sky-500 bg-white shadow touch-none dark:bg-zinc-900"
+                                        x-on:pointerdown="startScale($event, 'se')"
+                                    ></div>
+                                    <div class="pointer-events-none absolute -top-6 left-1/2 h-6 w-px -translate-x-1/2 bg-sky-500"></div>
+                                    <div
+                                        class="pointer-events-auto absolute -top-8 left-1/2 size-3 -translate-x-1/2 cursor-grab rounded-full border border-sky-500 bg-white shadow touch-none dark:bg-zinc-900"
+                                        x-on:pointerdown="startRotate($event)"
+                                    ></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="mb-6 grid grid-cols-2 gap-4 text-sm">

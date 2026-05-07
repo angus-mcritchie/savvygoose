@@ -3,6 +3,9 @@ const DEFAULTS = {
     canvasHeight: 512,
     imageWidth: 512,
     imageHeight: 512,
+    imageX: 0,
+    imageY: 0,
+    imageRotation: 0,
     format: 'image/png',
     quality: 92,
     bg: '#ffffff',
@@ -36,12 +39,20 @@ const FORMATS = {
 };
 
 const MAX_FILE_BYTES = 20 * 1024 * 1024;
+const MAX_DIM = 4096;
+const MIN_DIM = 1;
+
+const deg2rad = (d) => (d * Math.PI) / 180;
+const normalizeAngle = (a) => (((a + 180) % 360) + 360) % 360 - 180;
 
 export default () => ({
     canvasWidth: DEFAULTS.canvasWidth,
     canvasHeight: DEFAULTS.canvasHeight,
     imageWidth: DEFAULTS.imageWidth,
     imageHeight: DEFAULTS.imageHeight,
+    imageX: DEFAULTS.imageX,
+    imageY: DEFAULTS.imageY,
+    imageRotation: DEFAULTS.imageRotation,
     format: DEFAULTS.format,
     quality: DEFAULTS.quality,
     bg: DEFAULTS.bg,
@@ -55,19 +66,27 @@ export default () => ({
     sourceRatio: 1,
     error: null,
     dragging: false,
-    previewUrl: '',
     previewBytes: 0,
+    displayScale: 1,
     formats: FORMATS,
     sizePresets: SIZE_PRESETS,
     ratioPresets: RATIO_PRESETS,
     url: window.location.href,
     _previewToken: 0,
     _ratioGuard: false,
+    _drag: null,
+    _resizeObserver: null,
 
     init() {
         this.initFromUrl();
 
-        ['canvasWidth', 'canvasHeight', 'imageWidth', 'imageHeight', 'format', 'quality', 'bg', 'transparent'].forEach((prop) => {
+        const renderProps = [
+            'canvasWidth', 'canvasHeight',
+            'imageWidth', 'imageHeight',
+            'imageX', 'imageY', 'imageRotation',
+            'format', 'quality', 'bg', 'transparent',
+        ];
+        renderProps.forEach((prop) => {
             this.$watch(prop, () => {
                 this.updateUrl();
                 this.renderPreview();
@@ -75,25 +94,29 @@ export default () => ({
         });
 
         this.$watch('imageWidth', (val) => {
-            if (this.sourceWidth && val > this.sourceWidth) {
-                this.imageWidth = this.sourceWidth;
-                return;
-            }
             if (!this.locked || this._ratioGuard || !this.sourceRatio) return;
             this._ratioGuard = true;
-            this.imageHeight = Math.max(1, Math.round(val / this.sourceRatio));
+            this.imageHeight = Math.max(MIN_DIM, Math.round(val / this.sourceRatio));
             this.$nextTick(() => (this._ratioGuard = false));
         });
 
         this.$watch('imageHeight', (val) => {
-            if (this.sourceHeight && val > this.sourceHeight) {
-                this.imageHeight = this.sourceHeight;
-                return;
-            }
             if (!this.locked || this._ratioGuard || !this.sourceRatio) return;
             this._ratioGuard = true;
-            this.imageWidth = Math.max(1, Math.round(val * this.sourceRatio));
+            this.imageWidth = Math.max(MIN_DIM, Math.round(val * this.sourceRatio));
             this.$nextTick(() => (this._ratioGuard = false));
+        });
+
+        this.$watch('canvasWidth', () => this.$nextTick(() => this.recomputeDisplayScale()));
+        this.$watch('canvasHeight', () => this.$nextTick(() => this.recomputeDisplayScale()));
+
+        this.$nextTick(() => {
+            if (this.$refs.preview && window.ResizeObserver) {
+                this._resizeObserver = new ResizeObserver(() => this.recomputeDisplayScale());
+                this._resizeObserver.observe(this.$refs.preview);
+            }
+            this.recomputeDisplayScale();
+            this.renderPreview();
         });
 
         this.updateUrl();
@@ -114,6 +137,19 @@ export default () => ({
     get baseName() {
         if (!this.sourceName) return 'image';
         return this.sourceName.replace(/\.[^.]+$/, '') || 'image';
+    },
+
+    get imageScreenLeft() {
+        return (this.canvasWidth / 2 + this.imageX) * this.displayScale;
+    },
+    get imageScreenTop() {
+        return (this.canvasHeight / 2 + this.imageY) * this.displayScale;
+    },
+    get imageScreenWidth() {
+        return this.imageWidth * this.displayScale;
+    },
+    get imageScreenHeight() {
+        return this.imageHeight * this.displayScale;
     },
 
     onDrop(event) {
@@ -168,13 +204,18 @@ export default () => ({
             this._ratioGuard = true;
             this.imageWidth = this.sourceWidth;
             this.imageHeight = this.sourceHeight;
+            this.imageX = 0;
+            this.imageY = 0;
+            this.imageRotation = 0;
             if (isFirstLoad && canvasWasDefault) {
                 this.canvasWidth = this.sourceWidth;
                 this.canvasHeight = this.sourceHeight;
             }
-            this.$nextTick(() => (this._ratioGuard = false));
-
-            this.renderPreview();
+            this.$nextTick(() => {
+                this._ratioGuard = false;
+                this.recomputeDisplayScale();
+                this.renderPreview();
+            });
         } catch {
             this.error = 'Could not decode that image.';
         }
@@ -196,9 +237,12 @@ export default () => ({
         this.sourceWidth = 0;
         this.sourceHeight = 0;
         this.sourceRatio = 1;
-        this.previewUrl = '';
         this.previewBytes = 0;
         this.error = null;
+        if (this.$refs.preview) {
+            const ctx = this.$refs.preview.getContext('2d');
+            ctx.clearRect(0, 0, this.$refs.preview.width, this.$refs.preview.height);
+        }
     },
 
     drawTo(canvas, cw, ch, iw, ih) {
@@ -213,32 +257,41 @@ export default () => ({
             ctx.fillRect(0, 0, cw, ch);
         }
 
-        const x = (cw - iw) / 2;
-        const y = (ch - ih) / 2;
-        ctx.drawImage(this.source, x, y, iw, ih);
+        if (!this.source) return;
+
+        ctx.save();
+        ctx.translate(cw / 2 + this.imageX, ch / 2 + this.imageY);
+        if (this.imageRotation) ctx.rotate(deg2rad(this.imageRotation));
+        ctx.drawImage(this.source, -iw / 2, -ih / 2, iw, ih);
+        ctx.restore();
     },
 
     async renderPreview() {
+        const canvas = this.$refs.preview;
+        if (!canvas) return;
+
+        const cw = Math.max(MIN_DIM, Math.min(MAX_DIM, parseInt(this.canvasWidth, 10) || MIN_DIM));
+        const ch = Math.max(MIN_DIM, Math.min(MAX_DIM, parseInt(this.canvasHeight, 10) || MIN_DIM));
+
         if (!this.source) {
-            this.previewUrl = '';
+            canvas.width = cw;
+            canvas.height = ch;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, cw, ch);
             this.previewBytes = 0;
+            this.recomputeDisplayScale();
             return;
         }
 
-        const cw = Math.max(1, Math.min(4096, parseInt(this.canvasWidth, 10) || 1));
-        const ch = Math.max(1, Math.min(4096, parseInt(this.canvasHeight, 10) || 1));
-        const iw = Math.max(1, parseInt(this.imageWidth, 10) || 1);
-        const ih = Math.max(1, parseInt(this.imageHeight, 10) || 1);
+        const iw = Math.max(MIN_DIM, parseInt(this.imageWidth, 10) || MIN_DIM);
+        const ih = Math.max(MIN_DIM, parseInt(this.imageHeight, 10) || MIN_DIM);
         const token = ++this._previewToken;
 
-        const canvas = document.createElement('canvas');
         this.drawTo(canvas, cw, ch, iw, ih);
+        this.recomputeDisplayScale();
 
         const blob = await this.canvasBlob(canvas);
         if (token !== this._previewToken) return;
-
-        if (this.previewUrl) URL.revokeObjectURL(this.previewUrl);
-        this.previewUrl = URL.createObjectURL(blob);
         this.previewBytes = blob.size;
     },
 
@@ -252,10 +305,10 @@ export default () => ({
 
     async download() {
         if (!this.source) return;
-        const cw = Math.max(1, parseInt(this.canvasWidth, 10));
-        const ch = Math.max(1, parseInt(this.canvasHeight, 10));
-        const iw = Math.max(1, parseInt(this.imageWidth, 10));
-        const ih = Math.max(1, parseInt(this.imageHeight, 10));
+        const cw = Math.max(MIN_DIM, parseInt(this.canvasWidth, 10));
+        const ch = Math.max(MIN_DIM, parseInt(this.canvasHeight, 10));
+        const iw = Math.max(MIN_DIM, parseInt(this.imageWidth, 10));
+        const ih = Math.max(MIN_DIM, parseInt(this.imageHeight, 10));
         const canvas = document.createElement('canvas');
         this.drawTo(canvas, cw, ch, iw, ih);
         const blob = await this.canvasBlob(canvas);
@@ -274,11 +327,19 @@ export default () => ({
         setTimeout(() => URL.revokeObjectURL(url), 1000);
     },
 
+    recomputeDisplayScale() {
+        const canvas = this.$refs.preview;
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        if (!rect.width || !this.canvasWidth) return;
+        this.displayScale = rect.width / this.canvasWidth;
+    },
+
     toggleLock() {
         this.locked = !this.locked;
         if (this.locked && this.source) {
             this._ratioGuard = true;
-            this.imageHeight = Math.max(1, Math.round(this.imageWidth / this.sourceRatio));
+            this.imageHeight = Math.max(MIN_DIM, Math.round(this.imageWidth / this.sourceRatio));
             this.$nextTick(() => (this._ratioGuard = false));
         }
     },
@@ -288,6 +349,9 @@ export default () => ({
         this._ratioGuard = true;
         this.imageWidth = this.sourceWidth;
         this.imageHeight = this.sourceHeight;
+        this.imageX = 0;
+        this.imageY = 0;
+        this.imageRotation = 0;
         this.$nextTick(() => (this._ratioGuard = false));
     },
 
@@ -296,12 +360,19 @@ export default () => ({
         const scale = Math.min(
             this.canvasWidth / this.sourceWidth,
             this.canvasHeight / this.sourceHeight,
-            1,
         );
         this._ratioGuard = true;
-        this.imageWidth = Math.max(1, Math.round(this.sourceWidth * scale));
-        this.imageHeight = Math.max(1, Math.round(this.sourceHeight * scale));
+        this.imageWidth = Math.max(MIN_DIM, Math.round(this.sourceWidth * scale));
+        this.imageHeight = Math.max(MIN_DIM, Math.round(this.sourceHeight * scale));
+        this.imageX = 0;
+        this.imageY = 0;
+        this.imageRotation = 0;
         this.$nextTick(() => (this._ratioGuard = false));
+    },
+
+    centerImage() {
+        this.imageX = 0;
+        this.imageY = 0;
     },
 
     canvasMatchSource() {
@@ -316,8 +387,141 @@ export default () => ({
     },
 
     applyCanvasRatio(rw, rh) {
-        const w = Math.max(1, parseInt(this.canvasWidth, 10) || rw);
-        this.canvasHeight = Math.max(1, Math.min(4096, Math.round((w * rh) / rw)));
+        const w = Math.max(MIN_DIM, parseInt(this.canvasWidth, 10) || rw);
+        this.canvasHeight = Math.max(MIN_DIM, Math.min(MAX_DIM, Math.round((w * rh) / rw)));
+    },
+
+    pointerToCanvas(event) {
+        const rect = this.$refs.preview.getBoundingClientRect();
+        return {
+            x: (event.clientX - rect.left) / this.displayScale,
+            y: (event.clientY - rect.top) / this.displayScale,
+        };
+    },
+
+    startDrag(event) {
+        if (!this.source) return;
+        event.preventDefault();
+        this._drag = {
+            type: 'drag',
+            startX: event.clientX,
+            startY: event.clientY,
+            origImageX: this.imageX,
+            origImageY: this.imageY,
+        };
+    },
+
+    startScale(event, corner) {
+        if (!this.source) return;
+        event.preventDefault();
+        event.stopPropagation();
+
+        const sign = {
+            nw: { x: -1, y: -1 },
+            ne: { x: 1, y: -1 },
+            sw: { x: -1, y: 1 },
+            se: { x: 1, y: 1 },
+        }[corner];
+
+        const rad = deg2rad(this.imageRotation);
+        const cosR = Math.cos(rad);
+        const sinR = Math.sin(rad);
+
+        // Anchor = opposite corner in canvas coords (held fixed during scale).
+        const localAx = -sign.x * this.imageWidth / 2;
+        const localAy = -sign.y * this.imageHeight / 2;
+        const anchorX = this.canvasWidth / 2 + this.imageX + cosR * localAx - sinR * localAy;
+        const anchorY = this.canvasHeight / 2 + this.imageY + sinR * localAx + cosR * localAy;
+
+        this._drag = {
+            type: 'scale',
+            sign,
+            cosR,
+            sinR,
+            anchorX,
+            anchorY,
+            startW: this.imageWidth,
+            startH: this.imageHeight,
+        };
+    },
+
+    startRotate(event) {
+        if (!this.source) return;
+        event.preventDefault();
+        event.stopPropagation();
+
+        const rect = this.$refs.preview.getBoundingClientRect();
+        const cx = rect.left + (this.canvasWidth / 2 + this.imageX) * this.displayScale;
+        const cy = rect.top + (this.canvasHeight / 2 + this.imageY) * this.displayScale;
+
+        const startAngle = Math.atan2(event.clientY - cy, event.clientX - cx) * 180 / Math.PI;
+
+        this._drag = {
+            type: 'rotate',
+            cx,
+            cy,
+            startAngle,
+            origRotation: this.imageRotation,
+        };
+    },
+
+    onPointerMove(event) {
+        if (!this._drag) return;
+        const d = this._drag;
+
+        if (d.type === 'drag') {
+            const dx = (event.clientX - d.startX) / this.displayScale;
+            const dy = (event.clientY - d.startY) / this.displayScale;
+            this.imageX = Math.round(d.origImageX + dx);
+            this.imageY = Math.round(d.origImageY + dy);
+            return;
+        }
+
+        if (d.type === 'scale') {
+            const p = this.pointerToCanvas(event);
+            const vx = p.x - d.anchorX;
+            const vy = p.y - d.anchorY;
+
+            // Project pointer-from-anchor into image-local axes (inverse rotation).
+            const localX = d.cosR * vx + d.sinR * vy;
+            const localY = -d.sinR * vx + d.cosR * vy;
+
+            let newW = Math.max(MIN_DIM, Math.abs(localX));
+            let newH = Math.max(MIN_DIM, Math.abs(localY));
+
+            if (this.locked) {
+                const ratio = d.startW / d.startH;
+                if (newW / newH > ratio) newH = newW / ratio;
+                else newW = newH * ratio;
+            }
+
+            // Place center so the anchor (opposite corner) stays put.
+            const localAx = -d.sign.x * newW / 2;
+            const localAy = -d.sign.y * newH / 2;
+            const rotAx = d.cosR * localAx - d.sinR * localAy;
+            const rotAy = d.sinR * localAx + d.cosR * localAy;
+            const newCenterX = d.anchorX - rotAx;
+            const newCenterY = d.anchorY - rotAy;
+
+            this._ratioGuard = true;
+            this.imageWidth = Math.round(newW);
+            this.imageHeight = Math.round(newH);
+            this.imageX = Math.round(newCenterX - this.canvasWidth / 2);
+            this.imageY = Math.round(newCenterY - this.canvasHeight / 2);
+            this.$nextTick(() => (this._ratioGuard = false));
+            return;
+        }
+
+        if (d.type === 'rotate') {
+            const angle = Math.atan2(event.clientY - d.cy, event.clientX - d.cx) * 180 / Math.PI;
+            let next = d.origRotation + (angle - d.startAngle);
+            if (event.shiftKey) next = Math.round(next / 15) * 15;
+            this.imageRotation = Math.round(normalizeAngle(next) * 10) / 10;
+        }
+    },
+
+    onPointerUp() {
+        this._drag = null;
     },
 
     formatBytes(n) {
@@ -352,11 +556,18 @@ export default () => ({
             if (Number.isFinite(n) && n >= min && n <= max) this[prop] = n;
         };
 
-        intParam('cw', 'canvasWidth', 1, 4096);
-        intParam('ch', 'canvasHeight', 1, 4096);
-        intParam('iw', 'imageWidth', 1, 4096);
-        intParam('ih', 'imageHeight', 1, 4096);
+        intParam('cw', 'canvasWidth', MIN_DIM, MAX_DIM);
+        intParam('ch', 'canvasHeight', MIN_DIM, MAX_DIM);
+        intParam('iw', 'imageWidth', MIN_DIM, MAX_DIM);
+        intParam('ih', 'imageHeight', MIN_DIM, MAX_DIM);
+        intParam('x', 'imageX', -MAX_DIM, MAX_DIM);
+        intParam('y', 'imageY', -MAX_DIM, MAX_DIM);
         intParam('q', 'quality', 1, 100);
+
+        if (params.has('r')) {
+            const n = parseFloat(params.get('r'));
+            if (Number.isFinite(n)) this.imageRotation = normalizeAngle(n);
+        }
 
         if (params.has('fmt')) {
             const v = 'image/' + params.get('fmt').toLowerCase().replace('jpg', 'jpeg');
@@ -382,6 +593,14 @@ export default () => ({
         setOrDelete('ch', parseInt(this.canvasHeight, 10), DEFAULTS.canvasHeight);
         setOrDelete('iw', parseInt(this.imageWidth, 10), DEFAULTS.imageWidth);
         setOrDelete('ih', parseInt(this.imageHeight, 10), DEFAULTS.imageHeight);
+        setOrDelete('x', parseInt(this.imageX, 10), DEFAULTS.imageX);
+        setOrDelete('y', parseInt(this.imageY, 10), DEFAULTS.imageY);
+
+        if (this.imageRotation !== DEFAULTS.imageRotation) {
+            params.set('r', String(this.imageRotation));
+        } else {
+            params.delete('r');
+        }
 
         const fmtShort = this.format.replace('image/', '').replace('jpeg', 'jpg');
         const defShort = DEFAULTS.format.replace('image/', '').replace('jpeg', 'jpg');
