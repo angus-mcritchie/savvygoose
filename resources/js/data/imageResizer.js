@@ -9,8 +9,9 @@ const DEFAULTS = {
     format: 'image/png',
     quality: 92,
     bg: '#ffffff',
-    transparent: true,
+    transparent: false,
     locked: true,
+    allowExceedCanvas: false,
 };
 
 const SIZE_PRESETS = [
@@ -58,6 +59,7 @@ export default () => ({
     bg: DEFAULTS.bg,
     transparent: DEFAULTS.transparent,
     locked: DEFAULTS.locked,
+    allowExceedCanvas: DEFAULTS.allowExceedCanvas,
     source: null,
     sourceName: '',
     sourceWidth: 0,
@@ -85,6 +87,7 @@ export default () => ({
             'imageWidth', 'imageHeight',
             'imageX', 'imageY', 'imageRotation',
             'format', 'quality', 'bg', 'transparent',
+            'allowExceedCanvas',
         ];
         renderProps.forEach((prop) => {
             this.$watch(prop, () => {
@@ -94,21 +97,37 @@ export default () => ({
         });
 
         this.$watch('imageWidth', (val) => {
-            if (!this.locked || this._ratioGuard || !this.sourceRatio) return;
+            if (this._ratioGuard || !this.sourceRatio) return;
             this._ratioGuard = true;
-            this.imageHeight = Math.max(MIN_DIM, Math.round(val / this.sourceRatio));
+            if (this.locked) {
+                this.imageHeight = Math.max(MIN_DIM, Math.round(val / this.sourceRatio));
+            }
+            this.clampImageToCanvas();
             this.$nextTick(() => (this._ratioGuard = false));
         });
 
         this.$watch('imageHeight', (val) => {
-            if (!this.locked || this._ratioGuard || !this.sourceRatio) return;
+            if (this._ratioGuard || !this.sourceRatio) return;
             this._ratioGuard = true;
-            this.imageWidth = Math.max(MIN_DIM, Math.round(val * this.sourceRatio));
+            if (this.locked) {
+                this.imageWidth = Math.max(MIN_DIM, Math.round(val * this.sourceRatio));
+            }
+            this.clampImageToCanvas();
             this.$nextTick(() => (this._ratioGuard = false));
         });
 
-        this.$watch('canvasWidth', () => this.$nextTick(() => this.recomputeDisplayScale()));
-        this.$watch('canvasHeight', () => this.$nextTick(() => this.recomputeDisplayScale()));
+        this.$watch('canvasWidth', () => {
+            this.clampImageToCanvas();
+            this.$nextTick(() => this.recomputeDisplayScale());
+        });
+        this.$watch('canvasHeight', () => {
+            this.clampImageToCanvas();
+            this.$nextTick(() => this.recomputeDisplayScale());
+        });
+
+        this.$watch('allowExceedCanvas', () => {
+            if (!this.allowExceedCanvas) this.clampImageToCanvas();
+        });
 
         this.$nextTick(() => {
             if (this.$refs.preview && window.ResizeObserver) {
@@ -137,6 +156,27 @@ export default () => ({
     get baseName() {
         if (!this.sourceName) return 'image';
         return this.sourceName.replace(/\.[^.]+$/, '') || 'image';
+    },
+
+    get scaleLabel() {
+        if (!this.sourceWidth || !this.sourceHeight) return '';
+        const wPct = Math.round((this.imageWidth / this.sourceWidth) * 100);
+        const hPct = Math.round((this.imageHeight / this.sourceHeight) * 100);
+        if (wPct === hPct) return `${wPct}%`;
+        return `W ${wPct}% · H ${hPct}%`;
+    },
+
+    get isUpscaled() {
+        if (!this.sourceWidth || !this.sourceHeight) return false;
+        return this.imageWidth > this.sourceWidth + 1
+            || this.imageHeight > this.sourceHeight + 1;
+    },
+
+    get isStretched() {
+        if (!this.sourceWidth || !this.sourceHeight || !this.imageHeight) return false;
+        const srcAspect = this.sourceWidth / this.sourceHeight;
+        const aspect = this.imageWidth / this.imageHeight;
+        return Math.abs(aspect - srcAspect) / srcAspect > 0.01;
     },
 
     get imageScreenLeft() {
@@ -202,15 +242,22 @@ export default () => ({
             this.sourceRatio = img.naturalWidth / img.naturalHeight;
 
             this._ratioGuard = true;
-            this.imageWidth = this.sourceWidth;
-            this.imageHeight = this.sourceHeight;
-            this.imageX = 0;
-            this.imageY = 0;
-            this.imageRotation = 0;
             if (isFirstLoad && canvasWasDefault) {
                 this.canvasWidth = this.sourceWidth;
                 this.canvasHeight = this.sourceHeight;
+                this.imageWidth = this.sourceWidth;
+                this.imageHeight = this.sourceHeight;
+            } else {
+                const scale = Math.min(
+                    this.canvasWidth / this.sourceWidth,
+                    this.canvasHeight / this.sourceHeight,
+                );
+                this.imageWidth = Math.max(MIN_DIM, Math.round(this.sourceWidth * scale));
+                this.imageHeight = Math.max(MIN_DIM, Math.round(this.sourceHeight * scale));
             }
+            this.imageX = 0;
+            this.imageY = 0;
+            this.imageRotation = 0;
             this.$nextTick(() => {
                 this._ratioGuard = false;
                 this.recomputeDisplayScale();
@@ -352,6 +399,7 @@ export default () => ({
         this.imageX = 0;
         this.imageY = 0;
         this.imageRotation = 0;
+        this.clampImageToCanvas();
         this.$nextTick(() => (this._ratioGuard = false));
     },
 
@@ -373,6 +421,36 @@ export default () => ({
     centerImage() {
         this.imageX = 0;
         this.imageY = 0;
+    },
+
+    clampImageToCanvas() {
+        if (this.allowExceedCanvas) return;
+        if (!this.canvasWidth || !this.canvasHeight) return;
+        if (!this.imageWidth || !this.imageHeight) return;
+        const scale = Math.min(
+            1,
+            this.canvasWidth / this.imageWidth,
+            this.canvasHeight / this.imageHeight,
+        );
+        if (scale >= 1) return;
+        const wasGuarded = this._ratioGuard;
+        if (!wasGuarded) this._ratioGuard = true;
+        this.imageWidth = Math.max(MIN_DIM, Math.round(this.imageWidth * scale));
+        this.imageHeight = Math.max(MIN_DIM, Math.round(this.imageHeight * scale));
+        if (!wasGuarded) this.$nextTick(() => (this._ratioGuard = false));
+    },
+
+    resetImageSize() {
+        if (!this.source) return;
+        this._ratioGuard = true;
+        this.imageWidth = this.sourceWidth;
+        this.imageHeight = this.sourceHeight;
+        this.clampImageToCanvas();
+        this.$nextTick(() => (this._ratioGuard = false));
+    },
+
+    resetRotation() {
+        this.imageRotation = 0;
     },
 
     canvasMatchSource() {
@@ -495,6 +573,18 @@ export default () => ({
                 else newW = newH * ratio;
             }
 
+            if (event.shiftKey && this.sourceWidth && this.sourceHeight) {
+                const step = 0.25;
+                const snap = (val, base) => Math.max(step, Math.round(val / base / step) * step) * base;
+                newW = snap(newW, this.sourceWidth);
+                if (this.locked) {
+                    const ratio = d.startW / d.startH;
+                    newH = newW / ratio;
+                } else {
+                    newH = snap(newH, this.sourceHeight);
+                }
+            }
+
             // Place center so the anchor (opposite corner) stays put.
             const localAx = -d.sign.x * newW / 2;
             const localAy = -d.sign.y * newH / 2;
@@ -578,7 +668,8 @@ export default () => ({
             this.bg = '#' + params.get('bg').replace('#', '');
         }
 
-        if (params.get('fill') === '1') this.transparent = false;
+        if (params.get('tr') === '1') this.transparent = true;
+        if (params.get('over') === '1') this.allowExceedCanvas = true;
     },
 
     updateUrl() {
@@ -618,8 +709,11 @@ export default () => ({
             params.delete('bg');
         }
 
-        if (!this.transparent) params.set('fill', '1');
-        else params.delete('fill');
+        if (this.transparent) params.set('tr', '1');
+        else params.delete('tr');
+
+        if (this.allowExceedCanvas) params.set('over', '1');
+        else params.delete('over');
 
         const qs = params.toString();
         const newUrl = `${window.location.origin}${window.location.pathname}${qs ? '?' + qs : ''}`;

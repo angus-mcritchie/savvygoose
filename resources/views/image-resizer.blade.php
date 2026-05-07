@@ -117,9 +117,28 @@
                     <flux:label class="mb-2">Image size & transform</flux:label>
                     <flux:subheading class="mb-3 text-xs">
                         Drag the image in the preview to move it; use the corner handles to scale, the lollipop to rotate.
-                        Hold <kbd class="rounded border border-black/15 px-1 font-mono text-[0.65rem] dark:border-white/15">Shift</kbd> while rotating to snap to 15°.
+                        Hold <kbd class="rounded border border-black/15 px-1 font-mono text-[0.65rem] dark:border-white/15">Shift</kbd> to snap — 15° when rotating, 25% of source when scaling.
                         Source: <span class="font-mono tabular-nums" x-text="sourceWidth"></span>×<span class="font-mono tabular-nums" x-text="sourceHeight"></span>.
                     </flux:subheading>
+
+                    <div class="mb-3 flex flex-wrap items-center gap-2 text-xs" x-show="source" x-cloak>
+                        <span
+                            class="font-mono tabular-nums"
+                            :class="isUpscaled ? 'text-amber-600 dark:text-amber-400' : 'opacity-60'"
+                        >Scale: <span x-text="scaleLabel"></span></span>
+                        <span
+                            x-show="isUpscaled"
+                            x-cloak
+                            class="rounded border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-[0.65rem] font-medium uppercase tracking-wide text-amber-700 dark:text-amber-400"
+                            title="Image is rendered larger than the source's natural pixels — may look soft."
+                        >Upscaled</span>
+                        <span
+                            x-show="isStretched"
+                            x-cloak
+                            class="rounded border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-[0.65rem] font-medium uppercase tracking-wide text-amber-700 dark:text-amber-400"
+                            title="Width and height aspect differs from the source — image is distorted."
+                        >Stretched</span>
+                    </div>
                     <div class="mb-4 grid grid-cols-[1fr_auto_1fr] items-end gap-2">
                         <flux:input type="number" min="1" max="4096" step="1" x-model.number="imageWidth" label="Width (px)" />
                         <button
@@ -142,6 +161,14 @@
                         <flux:input type="number" step="1" x-model.number="imageX" label="X (px)" />
                         <flux:input type="number" step="1" x-model.number="imageY" label="Y (px)" />
                         <flux:input type="number" min="-180" max="180" step="1" x-model.number="imageRotation" label="Rotation (°)" />
+                    </div>
+
+                    <div class="mb-4">
+                        <flux:checkbox
+                            x-model="allowExceedCanvas"
+                            label="Allow image larger than canvas"
+                            description="When off, typed sizes and presets are clamped so the image fits within the canvas."
+                        />
                     </div>
 
                     <div class="mb-6 flex flex-wrap gap-2">
@@ -201,12 +228,12 @@
                     <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">3. Preview</flux:heading>
 
                     <div
-                        class="mb-6 grid place-items-center rounded-md border border-black/10 bg-zinc-50 p-4 select-none dark:border-white/10 dark:bg-zinc-900/40"
+                        class="mb-6 flex justify-center overflow-hidden rounded-md border border-black/10 bg-zinc-50 p-4 select-none dark:border-white/10 dark:bg-zinc-900/40"
                         x-on:pointermove.window="onPointerMove($event)"
                         x-on:pointerup.window="onPointerUp($event)"
                         x-on:pointercancel.window="onPointerUp($event)"
                     >
-                        <div class="relative inline-block">
+                        <div class="relative max-w-full">
                             <canvas
                                 x-ref="preview"
                                 class="block max-h-[360px] max-w-full bg-[conic-gradient(at_50%_50%,_#0001_0deg_90deg,_transparent_90deg_180deg,_#0001_180deg_270deg,_transparent_270deg)] bg-[length:16px_16px] outline outline-1 outline-black/15 dark:outline-white/20"
@@ -227,23 +254,33 @@
                                     <div
                                         class="pointer-events-auto absolute -left-1.5 -top-1.5 size-3 cursor-nwse-resize rounded-sm border border-sky-500 bg-white shadow touch-none dark:bg-zinc-900"
                                         x-on:pointerdown="startScale($event, 'nw')"
+                                        x-on:dblclick="resetImageSize()"
+                                        title="Drag to scale · double-click to reset to source"
                                     ></div>
                                     <div
                                         class="pointer-events-auto absolute -right-1.5 -top-1.5 size-3 cursor-nesw-resize rounded-sm border border-sky-500 bg-white shadow touch-none dark:bg-zinc-900"
                                         x-on:pointerdown="startScale($event, 'ne')"
+                                        x-on:dblclick="resetImageSize()"
+                                        title="Drag to scale · double-click to reset to source"
                                     ></div>
                                     <div
                                         class="pointer-events-auto absolute -bottom-1.5 -left-1.5 size-3 cursor-nesw-resize rounded-sm border border-sky-500 bg-white shadow touch-none dark:bg-zinc-900"
                                         x-on:pointerdown="startScale($event, 'sw')"
+                                        x-on:dblclick="resetImageSize()"
+                                        title="Drag to scale · double-click to reset to source"
                                     ></div>
                                     <div
                                         class="pointer-events-auto absolute -bottom-1.5 -right-1.5 size-3 cursor-nwse-resize rounded-sm border border-sky-500 bg-white shadow touch-none dark:bg-zinc-900"
                                         x-on:pointerdown="startScale($event, 'se')"
+                                        x-on:dblclick="resetImageSize()"
+                                        title="Drag to scale · double-click to reset to source"
                                     ></div>
                                     <div class="pointer-events-none absolute -top-6 left-1/2 h-6 w-px -translate-x-1/2 bg-sky-500"></div>
                                     <div
                                         class="pointer-events-auto absolute -top-8 left-1/2 size-3 -translate-x-1/2 cursor-grab rounded-full border border-sky-500 bg-white shadow touch-none dark:bg-zinc-900"
                                         x-on:pointerdown="startRotate($event)"
+                                        x-on:dblclick="resetRotation()"
+                                        title="Drag to rotate · double-click to reset to 0°"
                                     ></div>
                                 </div>
                             </div>
