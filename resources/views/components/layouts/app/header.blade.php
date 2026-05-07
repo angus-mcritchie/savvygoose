@@ -41,8 +41,9 @@
                     @endif
                 @endforeach
             </flux:navbar>
+            <x-command-palette />
+
             <flux:button
-                class="ml-auto"
                 href="https://buymeacoffee.com/angus_mcritchie"
                 target="_blank"
                 rel="noopener"
