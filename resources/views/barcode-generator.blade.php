@@ -119,7 +119,9 @@
                     :heading="false"
                     subheading="You can link to this page with url parameters."
                 >
-                    <flux:checkbox class="mt-4" x-model="print" label="Print when opening link" />
+                    <div class="mt-4">
+                        <flux:checkbox x-model="print" label="Print when opening link" />
+                    </div>
                 </x-share-field>
             </div>
         </div>
