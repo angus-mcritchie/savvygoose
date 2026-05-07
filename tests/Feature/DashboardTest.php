@@ -72,6 +72,10 @@ test('the json formatter renders', function () {
     $this->get('/json-formatter')->assertOk();
 });
 
+test('the format converter renders', function () {
+    $this->get('/format-converter')->assertOk();
+});
+
 test('the diff viewer renders', function () {
     $this->get('/diff-viewer')->assertOk();
 });

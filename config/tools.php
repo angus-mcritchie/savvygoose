@@ -64,8 +64,8 @@ return [
             'category' => 'text',
             'icon' => ['type' => 'flux', 'name' => 'language'],
             'meta' => [
-                'title' => 'Case Converter — camelCase, snake_case & more',
-                'description' => 'Convert text between camelCase, snake_case, kebab-case, PascalCase, Title Case, UPPER, and lower case — instantly, in your browser.',
+                'title' => 'Case Converter: camelCase, snake_case & more',
+                'description' => 'Converts text between camelCase, snake_case, kebab-case, PascalCase, Title Case, UPPER, and lower. Instant, browser-only.',
             ],
             'howto' => [
                 'Enter or paste your text.',
@@ -74,8 +74,8 @@ return [
             ],
             'faqs' => [
                 ['q' => 'Which cases are supported?', 'a' => 'camelCase, PascalCase, snake_case, SCREAMING_SNAKE_CASE, kebab-case, Title Case, sentence case, UPPER, and lower.'],
-                ['q' => 'Does it handle non-English text?', 'a' => 'Yes — Unicode letters are preserved. Diacritics are kept rather than stripped.'],
-                ['q' => 'Is my text sent anywhere?', 'a' => 'No. Conversion runs in your browser.'],
+                ['q' => 'Does it handle non-English text?', 'a' => 'Unicode letters are preserved, and diacritics are kept rather than stripped.'],
+                ['q' => 'Is my text sent anywhere?', 'a' => 'No. The conversion runs locally.'],
             ],
         ],
         [
@@ -85,17 +85,17 @@ return [
             'category' => 'text',
             'icon' => ['type' => 'flux', 'name' => 'arrows-right-left'],
             'meta' => [
-                'title' => 'Text Diff Viewer — Compare Two Texts',
-                'description' => 'Compare two pieces of text side-by-side and see additions, deletions, and changed lines. Free, fast, and runs in your browser.',
+                'title' => 'Text Diff Viewer: Compare Two Texts',
+                'description' => 'Drop in two pieces of text and see what changed. Additions, deletions, and edited lines are called out side-by-side.',
             ],
             'howto' => [
                 'Paste the original text on the left.',
                 'Paste the changed version on the right.',
-                'See additions and deletions highlighted line-by-line.',
+                'Additions and deletions are highlighted line-by-line.',
             ],
             'faqs' => [
-                ['q' => 'How is the diff computed?', 'a' => 'A line-based diff runs locally in your browser. Lines that only differ slightly are still highlighted as changed.'],
-                ['q' => 'Can I diff long files?', 'a' => 'Yes — there is no enforced limit, though very large inputs may slow your browser.'],
+                ['q' => 'How is the diff computed?', 'a' => 'It\'s a line-based diff that runs locally. Lines that only differ slightly are still highlighted as changed.'],
+                ['q' => 'Can I diff long files?', 'a' => 'There\'s no hard limit, but very large inputs can slow the browser down.'],
                 ['q' => 'Is my text uploaded?', 'a' => 'No. Both inputs stay in your browser.'],
             ],
         ],
@@ -107,7 +107,7 @@ return [
             'icon' => ['type' => 'flux', 'name' => 'code-bracket-square'],
             'meta' => [
                 'title' => 'Markdown to HTML Converter',
-                'description' => 'Convert Markdown to HTML and HTML back to Markdown. CommonMark-compatible with GitHub-flavored extensions. Free and runs in your browser.',
+                'description' => 'Convert Markdown to HTML and HTML back to Markdown. CommonMark-compatible with GitHub-flavored extensions.',
             ],
             'howto' => [
                 'Paste Markdown or HTML into the editor.',
@@ -116,8 +116,8 @@ return [
             ],
             'faqs' => [
                 ['q' => 'Which Markdown flavor is supported?', 'a' => 'CommonMark with GitHub-flavored extensions, including tables and fenced code blocks.'],
-                ['q' => 'Does it support tables?', 'a' => 'Yes — GFM tables convert in both directions.'],
-                ['q' => 'Is my content sent to a server?', 'a' => 'No. Conversion happens entirely in your browser.'],
+                ['q' => 'Does it support tables?', 'a' => 'GFM tables convert in both directions.'],
+                ['q' => 'Is my content sent to a server?', 'a' => 'No. The conversion happens locally in your browser.'],
             ],
         ],
         [
@@ -128,16 +128,16 @@ return [
             'icon' => ['type' => 'flux', 'name' => 'calculator'],
             'meta' => [
                 'title' => 'Percentage Calculator',
-                'description' => 'Free online percentage calculator: percent of a number, percent change, percent of total, discounts, and tips. Runs in your browser.',
+                'description' => 'Covers the percentage questions you actually run into: percent of a number, percent change, percent of total, discounts, and tips.',
             ],
             'howto' => [
                 'Pick the percentage operation you need.',
-                'Enter the values; the result updates as you type.',
-                'Copy the result or share the URL — calculations are URL-encoded.',
+                'Enter the values. The result updates as you type.',
+                'Copy the result, or share the URL (calculations are URL-encoded).',
             ],
             'faqs' => [
                 ['q' => 'What can it calculate?', 'a' => 'Percent of a number, percent change, percent of total, discounts, and tip splits.'],
-                ['q' => 'Is the calculation private?', 'a' => 'Yes — everything runs locally in your browser.'],
+                ['q' => 'Is the calculation private?', 'a' => 'Yes. Everything runs locally in your browser.'],
             ],
         ],
         [
@@ -147,13 +147,13 @@ return [
             'category' => 'numbers',
             'icon' => ['type' => 'flux', 'name' => 'scale'],
             'meta' => [
-                'title' => 'Unit Converter — Length, Weight, Temperature, Data',
-                'description' => 'Convert between metric and imperial units: length, weight, temperature, volume, area, and digital data sizes. Free and instant.',
+                'title' => 'Unit Converter: Length, Weight, Temperature, Data',
+                'description' => 'Convert between metric and imperial units. Covers length, weight, temperature, volume, area, and digital data sizes.',
             ],
             'howto' => [
                 'Pick a unit category (length, weight, etc.).',
                 'Choose the source and target units.',
-                'Type a value to see the conversion update live.',
+                'Type a value. The conversion updates live.',
             ],
             'faqs' => [
                 ['q' => 'Which categories are supported?', 'a' => 'Length, weight/mass, temperature, volume, area, and digital data sizes (bytes through terabytes).'],
@@ -167,17 +167,17 @@ return [
             'category' => 'numbers',
             'icon' => ['type' => 'flux', 'name' => 'clock'],
             'meta' => [
-                'title' => 'Unix Timestamp Converter — Epoch ↔ ISO ↔ Human',
-                'description' => 'Convert Unix timestamps to ISO 8601 and human-readable dates, or back. Supports timezones, seconds, and milliseconds.',
+                'title' => 'Unix Timestamp Converter (Epoch ↔ ISO ↔ Human)',
+                'description' => 'Convert Unix timestamps to ISO 8601 and human-readable dates, or back the other way. Handles timezones, seconds, and milliseconds.',
             ],
             'howto' => [
-                'Paste a Unix timestamp (seconds or milliseconds) or pick a date.',
+                'Paste a Unix timestamp (seconds or milliseconds), or pick a date.',
                 'Adjust the timezone if needed.',
-                'Copy the format you need — Unix, ISO 8601, RFC 2822, or human-readable.',
+                'Copy the format you need: Unix, ISO 8601, RFC 2822, or human-readable.',
             ],
             'faqs' => [
-                ['q' => 'Does it support milliseconds?', 'a' => 'Yes — both seconds and milliseconds are auto-detected and selectable.'],
-                ['q' => 'Are timezones handled?', 'a' => 'Yes — pick from any IANA timezone; the conversion updates instantly.'],
+                ['q' => 'Does it support milliseconds?', 'a' => 'Yes. Both seconds and milliseconds are auto-detected, and you can switch manually.'],
+                ['q' => 'Are timezones handled?', 'a' => 'Pick any IANA timezone and the conversion updates instantly.'],
             ],
         ],
         [
@@ -187,17 +187,17 @@ return [
             'category' => 'numbers',
             'icon' => ['type' => 'flux', 'name' => 'calendar-days'],
             'meta' => [
-                'title' => 'Time Between Dates — Calendar, Business Days & Holidays',
-                'description' => 'Calculate days, weeks, business days, and country-specific holidays between two dates. Free and instant.',
+                'title' => 'Time Between Dates: Calendar, Business Days & Holidays',
+                'description' => 'Counts days, weeks, business days, and country-specific public holidays between two dates.',
             ],
             'howto' => [
                 'Pick a start and end date.',
-                'Optionally select a country to count public holidays.',
+                'Optionally pick a country to count public holidays.',
                 'See calendar days, weekdays, business days, and the list of holidays in range.',
             ],
             'faqs' => [
-                ['q' => 'How are business days counted?', 'a' => 'Business days exclude weekends. If you select a country, public holidays falling on weekdays are also excluded.'],
-                ['q' => 'Which countries are supported for holidays?', 'a' => 'A growing list — pick yours from the dropdown to see whether your country is supported.'],
+                ['q' => 'How are business days counted?', 'a' => 'Business days exclude weekends. If you pick a country, public holidays falling on weekdays are also excluded.'],
+                ['q' => 'Which countries are supported for holidays?', 'a' => 'A growing list. Open the dropdown to see whether yours is in there.'],
             ],
         ],
         [
@@ -207,18 +207,18 @@ return [
             'category' => 'generators',
             'icon' => ['type' => 'flux', 'name' => 'tag'],
             'meta' => [
-                'title' => 'Free Barcode Generator — Code 128, Print or Share',
-                'description' => 'Generate Code 128 barcodes online for free. Print directly, share via URL, or open the print view from a link — no sign-up, mobile-friendly.',
+                'title' => 'Free Barcode Generator: Code 128, Print or Share',
+                'description' => 'Generates Code 128 barcodes you can print straight from the page, or share by URL. No sign-up, works on mobile.',
             ],
             'howto' => [
                 'Type the value you want to encode.',
                 'Adjust the size and label as needed.',
-                'Click Print to print, or copy the share URL — opening it later restores the same barcode.',
+                'Hit Print, or copy the share URL. Opening it later restores the same barcode.',
             ],
             'faqs' => [
                 ['q' => 'Which symbology is used?', 'a' => 'Code 128, which encodes any printable ASCII (letters, digits, and most punctuation).'],
-                ['q' => 'How do shareable URLs work?', 'a' => 'Settings are encoded in the URL query string — anyone opening the link sees the same barcode. Add ?print=true to auto-open the print dialog.'],
-                ['q' => 'Is the barcode generated on a server?', 'a' => 'No. The SVG is rendered entirely in your browser — values never leave your device.'],
+                ['q' => 'How do shareable URLs work?', 'a' => 'Settings are encoded in the URL query string, so anyone opening the link sees the same barcode. Add ?print=true to auto-open the print dialog.'],
+                ['q' => 'Is the barcode generated on a server?', 'a' => 'No. The SVG is rendered locally, so the value you type never leaves your device.'],
             ],
         ],
         [
@@ -228,8 +228,8 @@ return [
             'category' => 'generators',
             'icon' => ['type' => 'flux', 'name' => 'qr-code'],
             'meta' => [
-                'title' => 'QR Code Generator — Free, No Sign-up',
-                'description' => 'Generate QR codes for URLs, text, Wi-Fi, and contacts. Download as PNG, free, runs in your browser.',
+                'title' => 'QR Code Generator (Free, No Sign-up)',
+                'description' => 'Make QR codes for URLs, text, Wi-Fi credentials, or contacts, and download them as PNGs. No sign-up.',
             ],
             'howto' => [
                 'Enter the URL or text you want to encode.',
@@ -237,8 +237,8 @@ return [
                 'Download the QR code as a PNG.',
             ],
             'faqs' => [
-                ['q' => 'Is there a size or character limit?', 'a' => 'QR codes have a maximum capacity that depends on the chosen error correction level. Plain ASCII allows the most characters.'],
-                ['q' => 'Will it work for Wi-Fi credentials?', 'a' => 'Yes — encode a Wi-Fi connection string and a phone\'s camera will offer to join the network.'],
+                ['q' => 'Is there a size or character limit?', 'a' => 'QR codes have a maximum capacity that depends on the error correction level you pick. Plain ASCII fits the most.'],
+                ['q' => 'Will it work for Wi-Fi credentials?', 'a' => 'Encode a Wi-Fi connection string and a phone\'s camera will offer to join the network.'],
                 ['q' => 'Is data sent to a server?', 'a' => 'No. QR codes are generated locally in your browser.'],
             ],
         ],
@@ -249,8 +249,8 @@ return [
             'category' => 'data',
             'icon' => ['type' => 'flux', 'name' => 'arrows-right-left'],
             'meta' => [
-                'title' => 'Base64 Encoder & Decoder — Text and Files',
-                'description' => 'Encode and decode Base64 for text or files entirely in your browser. Free, fast, and private — input never leaves your device.',
+                'title' => 'Base64 Encoder & Decoder (Text and Files)',
+                'description' => 'Encode and decode Base64 for text or files. Everything happens locally, so the input never leaves your device.',
             ],
             'howto' => [
                 'Pick text or file mode.',
@@ -258,8 +258,8 @@ return [
                 'Copy the encoded or decoded output.',
             ],
             'faqs' => [
-                ['q' => 'Is URL-safe Base64 supported?', 'a' => 'Yes — toggle URL-safe encoding for use in query strings or filenames.'],
-                ['q' => 'Are files uploaded to a server?', 'a' => 'No. Files are read locally and encoded in your browser.'],
+                ['q' => 'Is URL-safe Base64 supported?', 'a' => 'Yes. Flip the URL-safe toggle if you need it for query strings or filenames.'],
+                ['q' => 'Are files uploaded to a server?', 'a' => 'No. Files are read and encoded right in your browser.'],
             ],
         ],
         [
@@ -269,8 +269,8 @@ return [
             'category' => 'data',
             'icon' => ['type' => 'flux', 'name' => 'link'],
             'meta' => [
-                'title' => 'URL Encoder & Decoder — Percent-encode Online',
-                'description' => 'Percent-encode and decode URLs and URL components. Free, instant, and runs in your browser.',
+                'title' => 'URL Encoder & Decoder (Percent-encode Online)',
+                'description' => 'Percent-encode and decode URLs and URL components in the browser. No sign-up.',
             ],
             'howto' => [
                 'Paste a URL or component.',
@@ -288,16 +288,16 @@ return [
             'category' => 'data',
             'icon' => ['type' => 'flux', 'name' => 'key'],
             'meta' => [
-                'title' => 'JWT Decoder — Inspect Header, Payload, Expiry',
-                'description' => 'Decode and inspect JSON Web Tokens (JWTs): header, payload, and expiry. Tokens never leave your browser.',
+                'title' => 'JWT Decoder: Inspect Header, Payload, Expiry',
+                'description' => 'Decode JSON Web Tokens to see the header, payload, and expiry. Tokens stay in your browser.',
             ],
             'howto' => [
                 'Paste a JWT.',
                 'See the decoded header and payload, plus expiry status.',
             ],
             'faqs' => [
-                ['q' => 'Does this verify the signature?', 'a' => 'No — it only decodes the token. Signature verification needs the issuer\'s key.'],
-                ['q' => 'Are tokens uploaded?', 'a' => 'No. Decoding is done entirely in your browser, so it\'s safe to paste sensitive tokens.'],
+                ['q' => 'Does this verify the signature?', 'a' => 'No, it only decodes the token. Verifying the signature needs the issuer\'s key.'],
+                ['q' => 'Are tokens uploaded?', 'a' => 'No. Decoding happens locally, so it\'s safe to paste sensitive tokens.'],
             ],
         ],
         [
@@ -307,8 +307,8 @@ return [
             'category' => 'data',
             'icon' => ['type' => 'flux', 'name' => 'finger-print'],
             'meta' => [
-                'title' => 'Hash Generator — MD5, SHA-1, SHA-256, SHA-512',
-                'description' => 'Generate MD5, SHA-1, SHA-256, and SHA-512 hashes for text or files. Runs entirely in your browser — input never uploaded.',
+                'title' => 'Hash Generator: MD5, SHA-1, SHA-256, SHA-512',
+                'description' => 'Hash text or files with MD5, SHA-1, SHA-256, and SHA-512. Runs locally, so nothing is uploaded.',
             ],
             'howto' => [
                 'Pick text or file mode.',
@@ -316,7 +316,7 @@ return [
                 'Copy the hash for any algorithm shown.',
             ],
             'faqs' => [
-                ['q' => 'Which algorithms are available?', 'a' => 'MD5, SHA-1, SHA-256, and SHA-512. Note that MD5 and SHA-1 are insecure for cryptographic use.'],
+                ['q' => 'Which algorithms are available?', 'a' => 'MD5, SHA-1, SHA-256, and SHA-512. MD5 and SHA-1 are no longer safe for cryptographic use.'],
                 ['q' => 'Are files uploaded?', 'a' => 'No. Files are read locally with the Web Crypto API.'],
             ],
         ],
@@ -327,13 +327,13 @@ return [
             'category' => 'data',
             'icon' => ['type' => 'flux', 'name' => 'swatch'],
             'meta' => [
-                'title' => 'Color Converter — HEX ↔ RGB ↔ HSL with Contrast',
-                'description' => 'Convert colors between HEX, RGB, and HSL, and check WCAG contrast ratios. Free online color tool.',
+                'title' => 'Color Converter (HEX ↔ RGB ↔ HSL with Contrast)',
+                'description' => 'Convert colors between HEX, RGB, and HSL, and check WCAG contrast ratios between two colors.',
             ],
             'howto' => [
-                'Enter a color in any format — HEX, RGB, or HSL.',
-                'See the equivalents in the other formats.',
-                'Pair two colors to check the WCAG contrast ratio.',
+                'Enter a color in any format: HEX, RGB, or HSL.',
+                'The equivalents in the other formats appear alongside.',
+                'Pair two colors to see the WCAG contrast ratio.',
             ],
             'faqs' => [
                 ['q' => 'How is contrast measured?', 'a' => 'Using the WCAG 2.1 luminance ratio formula. Pass/fail thresholds for AA and AAA at normal and large text are shown.'],
@@ -346,8 +346,8 @@ return [
             'category' => 'data',
             'icon' => ['type' => 'flux', 'name' => 'code-bracket'],
             'meta' => [
-                'title' => 'JSON Formatter — Pretty-print, Minify, Validate',
-                'description' => 'Format, prettify, minify, and validate JSON in your browser. Free, instant, no sign-up.',
+                'title' => 'JSON Formatter: Pretty-print, Minify, Validate',
+                'description' => 'Format, prettify, minify, and validate JSON. Pasted JSON stays in your browser, no sign-up.',
             ],
             'howto' => [
                 'Paste JSON.',
@@ -355,8 +355,33 @@ return [
                 'Errors point at the offending line and column.',
             ],
             'faqs' => [
-                ['q' => 'Are comments or trailing commas allowed?', 'a' => 'Strict JSON does not allow either. The parser reports the location of the first issue.'],
+                ['q' => 'Are comments or trailing commas allowed?', 'a' => 'Strict JSON allows neither. The parser reports the location of the first issue it hits.'],
                 ['q' => 'Is my JSON sent to a server?', 'a' => 'No. Parsing and formatting happen in your browser.'],
+            ],
+        ],
+        [
+            'slug' => 'format-converter',
+            'name' => 'Format Converter',
+            'tagline' => 'Convert between JSON, YAML, CSV & XML.',
+            'category' => 'data',
+            'icon' => ['type' => 'flux', 'name' => 'arrow-path-rounded-square'],
+            'meta' => [
+                'title' => 'Format Converter: JSON, YAML, CSV, XML',
+                'description' => 'Convert data between JSON, YAML, CSV, and XML. Pick a source and target. No sign-up, no upload.',
+            ],
+            'howto' => [
+                'Pick the source format your data is in (JSON, YAML, CSV, or XML).',
+                'Pick the target format to convert to.',
+                'Paste your data. The converted output appears on the right.',
+                'Adjust per-format options as needed: CSV delimiter, XML root element, indent.',
+                'Use the swap button to flip the conversion direction without retyping.',
+            ],
+            'faqs' => [
+                ['q' => 'Is my data uploaded anywhere?', 'a' => 'No. The conversion runs in your browser, so nothing is sent to a server.'],
+                ['q' => 'How does CSV ↔ JSON work?', 'a' => 'A CSV with a header row becomes an array of objects keyed by column. Going the other way, an array of objects becomes rows, and a single object becomes a one-row CSV.'],
+                ['q' => 'How does JSON → XML choose tag names?', 'a' => 'Object keys become element names. The whole document is wrapped in a single root element; you can rename it with the Root field.'],
+                ['q' => 'Are XML attributes preserved?', 'a' => 'Yes. Attributes appear in the parsed object with an "@_" prefix and round-trip back to attributes when serialising to XML.'],
+                ['q' => 'What about YAML anchors and tags?', 'a' => 'Standard YAML 1.2 features parse correctly. Custom tags and complex anchors may not survive a round trip through other formats.'],
             ],
         ],
         [
@@ -366,8 +391,8 @@ return [
             'category' => 'data',
             'icon' => ['type' => 'flux', 'name' => 'magnifying-glass'],
             'meta' => [
-                'title' => 'Regex Tester — Build & Debug Regular Expressions',
-                'description' => 'Test JavaScript regular expressions against sample text with live match highlighting and capture group inspection.',
+                'title' => 'Regex Tester: Build & Debug Regular Expressions',
+                'description' => 'Test JavaScript regular expressions against sample text. Matches and capture groups highlight as you type.',
             ],
             'howto' => [
                 'Type a regex and pick flags (g, i, m, s, u, y).',
@@ -385,15 +410,15 @@ return [
             'category' => 'data',
             'icon' => ['type' => 'flux', 'name' => 'computer-desktop'],
             'meta' => [
-                'title' => 'Browser Info — Viewport, Screen, DPR, Device',
-                'description' => 'See your viewport size, screen resolution, device pixel ratio, browser, and OS — useful for debugging responsive layouts.',
+                'title' => 'Browser Info: Viewport, Screen, DPR, Device',
+                'description' => 'Shows your viewport size, screen resolution, device pixel ratio, browser, and OS. Handy when debugging responsive layouts.',
             ],
             'howto' => [
                 'Open this page on the device you want to inspect.',
                 'Resize the window to watch the viewport update live.',
             ],
             'faqs' => [
-                ['q' => 'What\'s the difference between viewport and screen size?', 'a' => 'Viewport is the visible area of the page; screen size is the full physical display, including any space outside the browser.'],
+                ['q' => 'What\'s the difference between viewport and screen size?', 'a' => 'Viewport is the visible area of the page. Screen size is the full physical display, including space outside the browser window.'],
             ],
         ],
         [
@@ -403,17 +428,17 @@ return [
             'category' => 'generators',
             'icon' => ['type' => 'flux', 'name' => 'lock-closed'],
             'meta' => [
-                'title' => 'Password Generator — Strong & Random',
-                'description' => 'Generate strong, random passwords with a built-in strength meter. Free, no sign-up, runs in your browser.',
+                'title' => 'Password Generator: Strong & Random',
+                'description' => 'Generates strong, random passwords with a built-in strength meter. No sign-up, runs in your browser.',
             ],
             'howto' => [
-                'Pick length and which character classes to include.',
+                'Pick a length and the character classes to include.',
                 'Click generate to roll a new password.',
                 'Copy with one click.',
             ],
             'faqs' => [
-                ['q' => 'How are passwords generated?', 'a' => 'With the browser\'s cryptographically secure random source (window.crypto). Nothing leaves your device.'],
-                ['q' => 'How is strength estimated?', 'a' => 'Using zxcvbn-style heuristics that consider length, character classes, and common patterns.'],
+                ['q' => 'How are passwords generated?', 'a' => 'Using the browser\'s cryptographically secure random source (window.crypto). Nothing leaves your device.'],
+                ['q' => 'How is strength estimated?', 'a' => 'With zxcvbn-style heuristics that look at length, character classes, and common patterns.'],
             ],
         ],
         [
@@ -423,8 +448,8 @@ return [
             'category' => 'generators',
             'icon' => ['type' => 'flux', 'name' => 'identification'],
             'meta' => [
-                'title' => 'UUID Generator — v4 and v7 in Bulk',
-                'description' => 'Generate UUID v4 (random) or v7 (timestamp-ordered) identifiers in bulk. Copy or download — all free.',
+                'title' => 'UUID Generator: v4 and v7 in Bulk',
+                'description' => 'Generate UUID v4 (random) or v7 (timestamp-ordered) identifiers in bulk, then copy or download the list.',
             ],
             'howto' => [
                 'Pick UUID v4 or v7.',
@@ -432,7 +457,7 @@ return [
                 'Copy or download the list.',
             ],
             'faqs' => [
-                ['q' => 'What\'s the difference between v4 and v7?', 'a' => 'v4 is fully random. v7 embeds a millisecond timestamp prefix so IDs sort chronologically — useful for database keys.'],
+                ['q' => 'What\'s the difference between v4 and v7?', 'a' => 'v4 is fully random. v7 prepends a millisecond timestamp so IDs sort chronologically, which is friendlier to database indexes.'],
             ],
         ],
         [
@@ -442,8 +467,8 @@ return [
             'category' => 'generators',
             'icon' => ['type' => 'flux', 'name' => 'photo'],
             'meta' => [
-                'title' => 'Image Resizer — Resize, Convert, Build Favicons',
-                'description' => 'Resize images, convert between PNG, JPEG, and WebP, and build favicons in your browser. No upload — files stay on your device.',
+                'title' => 'Image Resizer: Resize, Convert, Build Favicons',
+                'description' => 'Resize images, convert between PNG, JPEG, and WebP, and build favicons. Nothing is uploaded; files stay on your device.',
             ],
             'howto' => [
                 'Drop in or pick an image.',
@@ -451,7 +476,7 @@ return [
                 'Pick an output format and download.',
             ],
             'faqs' => [
-                ['q' => 'Is my image uploaded?', 'a' => 'No. Resizing and conversion happen entirely in your browser using a canvas — files never leave your device.'],
+                ['q' => 'Is my image uploaded?', 'a' => 'No. Resizing and conversion run on a canvas in your browser, so files never leave your device.'],
                 ['q' => 'Which output formats are supported?', 'a' => 'PNG, JPEG, and WebP. Multi-size .ico is generated for favicons.'],
             ],
         ],
@@ -462,8 +487,8 @@ return [
             'category' => 'generators',
             'icon' => ['type' => 'flux', 'name' => 'link'],
             'meta' => [
-                'title' => 'Slug Generator — String to URL Slug',
-                'description' => 'Convert any string to a URL-friendly slug. Handles diacritics, emoji, and custom separators. Free and instant.',
+                'title' => 'Slug Generator: String to URL Slug',
+                'description' => 'Turn any string into a URL-friendly slug. Handles diacritics, emoji, and custom separators.',
             ],
             'howto' => [
                 'Type or paste the string you want to slugify.',
@@ -472,7 +497,7 @@ return [
             ],
             'faqs' => [
                 ['q' => 'How are diacritics handled?', 'a' => 'Diacritics (é, ü, ñ, etc.) are normalized to their ASCII equivalents.'],
-                ['q' => 'What about emoji?', 'a' => 'Emoji are stripped — slugs are plain ASCII suitable for URLs.'],
+                ['q' => 'What about emoji?', 'a' => 'Emoji are stripped, so slugs end up as plain ASCII suitable for URLs.'],
             ],
         ],
         [
@@ -482,8 +507,8 @@ return [
             'category' => 'generators',
             'icon' => ['type' => 'flux', 'name' => 'document-text'],
             'meta' => [
-                'title' => 'Lorem Ipsum Generator — Placeholder Text',
-                'description' => 'Generate Lorem Ipsum placeholder text by paragraphs, sentences, or words. Free and copy-friendly.',
+                'title' => 'Lorem Ipsum Generator: Placeholder Text',
+                'description' => 'Generate Lorem Ipsum placeholder text by paragraphs, sentences, or words.',
             ],
             'howto' => [
                 'Pick paragraphs, sentences, or words.',
@@ -491,7 +516,7 @@ return [
                 'Copy with one click.',
             ],
             'faqs' => [
-                ['q' => 'Why use Lorem Ipsum?', 'a' => 'It approximates the visual weight of real prose without distracting reviewers with the meaning of placeholder copy.'],
+                ['q' => 'Why use Lorem Ipsum?', 'a' => 'It gives you the visual weight of real prose without pulling reviewers into reading the placeholder copy.'],
             ],
         ],
     ],

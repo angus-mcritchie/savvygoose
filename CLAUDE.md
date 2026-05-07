@@ -147,6 +147,19 @@ test('the word counter renders', function () {
 });
 ```
 
+### Tool copy voice
+
+Tool copy lives in `config/tools.php` (`tagline`, `meta.title`, `meta.description`, `howto`, `faqs`). The site has been scrubbed of AI-flavored phrasing more than once — keep new entries in the same voice. Hard rules:
+
+- **No em-dash as a connector in body copy.** They're fine in titles via the SEO helper (`Tool Name — Savvy Goose`) and as conversational asides in Blade views, but in `config/tools.php` body strings they're a strong AI tell when stacked. Use periods, colons, parens, or a comma instead. Em-dash count in `config/tools.php` should be ~0.
+- **Don't open FAQ answers with `Yes —` or `No —`.** Just answer. `Yes. Both seconds and milliseconds are auto-detected.` reads like a person; `Yes — both seconds and milliseconds are auto-detected.` reads like a model.
+- **Don't repeat the same privacy stamp on every entry.** "Runs in your browser", "never leaves your device", "no upload" are useful, but if they appear verbatim in 15 descriptions in a row it's boilerplate. Vary the wording or drop it where it's already obvious from context.
+- **Avoid triple-adjective lists** like "free, fast, privacy-friendly" or "free, instant, no sign-up". Pick one or two.
+- **Break parallel structure across siblings.** When writing the four `category_seo` descriptions, or the meta descriptions for ten tools in a row, deliberately vary sentence shape. If they all start with `Free online X — list, list, list`, the template itself is the tell.
+- **`meta.title` separator** — use a colon or parens (`Hash Generator: MD5, SHA-1, SHA-256, SHA-512`) rather than an em-dash, since `App\Support\Seo` already appends ` — Savvy Goose`.
+
+When extending an existing tool, mirror the surrounding entries' tone — terse, concrete, second person where it helps. The Blade views' inline copy is the best reference for the house voice.
+
 ### Shared primitives reference
 
 - **`withUrlState(schema, factory)`** in `resources/js/lib/urlState.js` — URL ↔ state binding, used by every tool with shareable settings.

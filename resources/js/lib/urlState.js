@@ -96,71 +96,80 @@ export function withUrlState(schema, factory) {
         const userInitFromUrl = base.initFromUrl;
         const userUpdateUrl = base.updateUrl;
 
-        const stateDefaults = {};
+        // Build the wrapped scope by copying property descriptors from `base`
+        // rather than spreading. Spread evaluates getters and replaces them with
+        // their return values, which (a) breaks reactivity and (b) crashes if a
+        // getter touches a schema field that only lives in stateDefaults.
+        const wrapped = {};
+
         for (const [key, def] of Object.entries(schema)) {
             if (!(key in base)) {
-                stateDefaults[key] = defaultFor(def);
+                wrapped[key] = defaultFor(def);
             }
         }
 
-        const wrapped = {
-            ...stateDefaults,
-            ...base,
-            url: 'url' in base ? base.url : window.location.href,
-            urlTooLong: 'urlTooLong' in base ? base.urlTooLong : false,
+        const baseDescriptors = Object.getOwnPropertyDescriptors(base);
+        delete baseDescriptors.init;
+        delete baseDescriptors.initFromUrl;
+        delete baseDescriptors.updateUrl;
+        delete baseDescriptors.url;
+        delete baseDescriptors.urlTooLong;
+        Object.defineProperties(wrapped, baseDescriptors);
 
-            initFromUrl() {
-                const params = new URLSearchParams(window.location.search);
-                for (const [key, def] of Object.entries(schema)) {
-                    const urlKey = def.alias || key;
-                    if (!params.has(urlKey)) continue;
-                    const raw = params.get(urlKey);
-                    const parsed = parseValue(raw, def, this);
-                    if (parsed !== undefined) this[key] = parsed;
-                }
-                if (userInitFromUrl) userInitFromUrl.call(this);
-            },
+        wrapped.url = 'url' in base ? base.url : window.location.href;
+        wrapped.urlTooLong = 'urlTooLong' in base ? base.urlTooLong : false;
 
-            updateUrl() {
-                const params = new URLSearchParams(window.location.search);
-                let urlTooLong = false;
+        wrapped.initFromUrl = function () {
+            const params = new URLSearchParams(window.location.search);
+            for (const [key, def] of Object.entries(schema)) {
+                const urlKey = def.alias || key;
+                if (!params.has(urlKey)) continue;
+                const raw = params.get(urlKey);
+                const parsed = parseValue(raw, def, this);
+                if (parsed !== undefined) this[key] = parsed;
+            }
+            if (userInitFromUrl) userInitFromUrl.call(this);
+        };
 
-                for (const [key, def] of Object.entries(schema)) {
-                    const urlKey = def.alias || key;
-                    const value = this[key];
-                    const dflt = defaultFor(def);
+        wrapped.updateUrl = function () {
+            const params = new URLSearchParams(window.location.search);
+            let urlTooLong = false;
 
-                    if (value === dflt || value == null) {
-                        params.delete(urlKey);
-                        continue;
-                    }
+            for (const [key, def] of Object.entries(schema)) {
+                const urlKey = def.alias || key;
+                const value = this[key];
+                const dflt = defaultFor(def);
 
-                    const result = serializeValue(value, def, this);
-                    if (result.tooLong) urlTooLong = true;
-                    if (result.skip) {
-                        params.delete(urlKey);
-                    } else {
-                        params.set(urlKey, result.value);
-                    }
+                if (value === dflt || value == null) {
+                    params.delete(urlKey);
+                    continue;
                 }
 
-                this.urlTooLong = urlTooLong;
-                const qs = params.toString();
-                const newUrl = `${window.location.origin}${window.location.pathname}${qs ? '?' + qs : ''}`;
-                this.url = newUrl;
-                window.history.replaceState({}, '', newUrl);
-
-                if (userUpdateUrl) userUpdateUrl.call(this);
-            },
-
-            init() {
-                this.initFromUrl();
-                for (const key of Object.keys(schema)) {
-                    this.$watch(key, () => this.updateUrl());
+                const result = serializeValue(value, def, this);
+                if (result.tooLong) urlTooLong = true;
+                if (result.skip) {
+                    params.delete(urlKey);
+                } else {
+                    params.set(urlKey, result.value);
                 }
-                this.updateUrl();
-                if (userInit) userInit.call(this);
-            },
+            }
+
+            this.urlTooLong = urlTooLong;
+            const qs = params.toString();
+            const newUrl = `${window.location.origin}${window.location.pathname}${qs ? '?' + qs : ''}`;
+            this.url = newUrl;
+            window.history.replaceState({}, '', newUrl);
+
+            if (userUpdateUrl) userUpdateUrl.call(this);
+        };
+
+        wrapped.init = function () {
+            this.initFromUrl();
+            for (const key of Object.keys(schema)) {
+                this.$watch(key, () => this.updateUrl());
+            }
+            this.updateUrl();
+            if (userInit) userInit.call(this);
         };
 
         return wrapped;
