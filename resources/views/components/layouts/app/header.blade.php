@@ -32,7 +32,11 @@
                                 </flux:menu.item>
                                 <flux:menu.separator />
                                 @foreach ($toolsByCategory[$key] as $tool)
-                                    <flux:menu.item href="{{ route($tool['slug']) }}" wire:navigate>
+                                    <flux:menu.item
+                                        href="{{ route($tool['slug']) }}"
+                                        :icon="$tool['icon']['type'] === 'flux' ? $tool['icon']['name'] : null"
+                                        wire:navigate
+                                    >
                                         {{ __($tool['name']) }}
                                     </flux:menu.item>
                                 @endforeach
@@ -76,7 +80,12 @@
                                 {{ __('All :label', ['label' => $label]) }}
                             </flux:navlist.item>
                             @foreach ($toolsByCategory[$key] as $tool)
-                                <flux:navlist.item href="{{ route($tool['slug']) }}" :current="request()->routeIs($tool['slug'])" wire:navigate>
+                                <flux:navlist.item
+                                    href="{{ route($tool['slug']) }}"
+                                    :current="request()->routeIs($tool['slug'])"
+                                    :icon="$tool['icon']['type'] === 'flux' ? $tool['icon']['name'] : null"
+                                    wire:navigate
+                                >
                                     {{ __($tool['name']) }}
                                 </flux:navlist.item>
                             @endforeach
