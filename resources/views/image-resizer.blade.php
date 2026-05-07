@@ -4,6 +4,8 @@
         class="mx-auto max-w-[1200px]"
         x-data="imageResizer"
         x-on:paste.window="onPaste"
+        x-on:keydown.window="onKeyDown($event)"
+        x-on:keyup.window="onKeyUp($event)"
     >
 
         <div class="mb-8 flex justify-center">
@@ -116,8 +118,13 @@
 
                     <flux:label class="mb-2">Image size & transform</flux:label>
                     <flux:subheading class="mb-3 text-xs">
-                        Drag the image in the preview to move it; use the corner handles to scale, the lollipop to rotate.
-                        Hold <kbd class="rounded border border-black/15 px-1 font-mono text-[0.65rem] dark:border-white/15">Shift</kbd> to snap — 15° when rotating, 25% of source when scaling.
+                        Use the centre handle to move, corners to scale, the lollipop to rotate. Hold
+                        <kbd class="rounded border border-black/15 px-1 font-mono text-[0.65rem] dark:border-white/15">Space</kbd>
+                        to drag from anywhere,
+                        <kbd class="rounded border border-black/15 px-1 font-mono text-[0.65rem] dark:border-white/15">Alt</kbd>
+                        to scale from the centre, or
+                        <kbd class="rounded border border-black/15 px-1 font-mono text-[0.65rem] dark:border-white/15">Shift</kbd>
+                        to snap — 15° rotating, 25% scaling.
                         Source: <span class="font-mono tabular-nums" x-text="sourceWidth"></span>×<span class="font-mono tabular-nums" x-text="sourceHeight"></span>.
                     </flux:subheading>
 
@@ -196,9 +203,9 @@
                                 </flux:dropdown>
                             </div>
                             <flux:select x-model="format">
-                                <template x-for="(meta, mime) in formats" :key="mime">
-                                    <option :value="mime" x-text="meta.label"></option>
-                                </template>
+                                <option value="image/jpeg">JPEG</option>
+                                <option value="image/png">PNG</option>
+                                <option value="image/webp">WebP</option>
                             </flux:select>
                         </flux:field>
                         <div x-show="supportsQuality" x-cloak>
@@ -228,7 +235,7 @@
                     <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">3. Preview</flux:heading>
 
                     <div
-                        class="mb-6 flex justify-center overflow-hidden rounded-md border border-black/10 bg-zinc-50 p-4 select-none dark:border-white/10 dark:bg-zinc-900/40"
+                        class="mb-6 flex justify-center rounded-md border border-black/10 bg-zinc-50 p-4 select-none dark:border-white/10 dark:bg-zinc-900/40"
                         x-on:pointermove.window="onPointerMove($event)"
                         x-on:pointerup.window="onPointerUp($event)"
                         x-on:pointercancel.window="onPointerUp($event)"
@@ -247,10 +254,19 @@
                                     class="pointer-events-none absolute origin-center"
                                     :style="`left:${imageScreenLeft}px;top:${imageScreenTop}px;width:${imageScreenWidth}px;height:${imageScreenHeight}px;transform:translate(-50%,-50%) rotate(${imageRotation}deg);`"
                                 >
+                                    <div class="pointer-events-none absolute inset-0 border border-dashed touch-none" :class="spaceHeld ? 'border-sky-500' : 'border-sky-500/80'"></div>
                                     <div
-                                        class="pointer-events-auto absolute inset-0 cursor-move border border-dashed border-sky-500/80 touch-none"
+                                        class="absolute inset-0 touch-none"
+                                        :class="spaceHeld ? 'pointer-events-auto cursor-grab' : 'pointer-events-none'"
                                         x-on:pointerdown="startDrag($event)"
                                     ></div>
+                                    <div
+                                        class="pointer-events-auto absolute left-1/2 top-1/2 grid size-6 -translate-x-1/2 -translate-y-1/2 cursor-move place-items-center rounded-full border border-sky-500 bg-white/90 shadow touch-none dark:bg-zinc-900/90"
+                                        x-on:pointerdown="startDrag($event)"
+                                        title="Drag to move"
+                                    >
+                                        <flux:icon name="arrows-pointing-out" class="size-3 text-sky-600 dark:text-sky-400" />
+                                    </div>
                                     <div
                                         class="pointer-events-auto absolute -left-1.5 -top-1.5 size-3 cursor-nwse-resize rounded-sm border border-sky-500 bg-white shadow touch-none dark:bg-zinc-900"
                                         x-on:pointerdown="startScale($event, 'nw')"

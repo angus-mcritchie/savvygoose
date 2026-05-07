@@ -6,8 +6,8 @@ const DEFAULTS = {
     imageX: 0,
     imageY: 0,
     imageRotation: 0,
-    format: 'image/png',
-    quality: 92,
+    format: 'image/jpeg',
+    quality: 80,
     bg: '#ffffff',
     transparent: false,
     locked: true,
@@ -70,6 +70,7 @@ export default () => ({
     dragging: false,
     previewBytes: 0,
     displayScale: 1,
+    spaceHeld: false,
     formats: FORMATS,
     sizePresets: SIZE_PRESETS,
     ratioPresets: RATIO_PRESETS,
@@ -117,11 +118,13 @@ export default () => ({
         });
 
         this.$watch('canvasWidth', () => {
-            this.clampImageToCanvas();
+            if (!this.allowExceedCanvas && this.source) this.fitImageToCanvas();
+            else this.clampImageToCanvas();
             this.$nextTick(() => this.recomputeDisplayScale());
         });
         this.$watch('canvasHeight', () => {
-            this.clampImageToCanvas();
+            if (!this.allowExceedCanvas && this.source) this.fitImageToCanvas();
+            else this.clampImageToCanvas();
             this.$nextTick(() => this.recomputeDisplayScale());
         });
 
@@ -505,11 +508,14 @@ export default () => ({
         const cosR = Math.cos(rad);
         const sinR = Math.sin(rad);
 
-        // Anchor = opposite corner in canvas coords (held fixed during scale).
+        const centerX = this.canvasWidth / 2 + this.imageX;
+        const centerY = this.canvasHeight / 2 + this.imageY;
+
+        // Opposite corner in canvas coords (held fixed during normal scale).
         const localAx = -sign.x * this.imageWidth / 2;
         const localAy = -sign.y * this.imageHeight / 2;
-        const anchorX = this.canvasWidth / 2 + this.imageX + cosR * localAx - sinR * localAy;
-        const anchorY = this.canvasHeight / 2 + this.imageY + sinR * localAx + cosR * localAy;
+        const anchorX = centerX + cosR * localAx - sinR * localAy;
+        const anchorY = centerY + sinR * localAx + cosR * localAy;
 
         this._drag = {
             type: 'scale',
@@ -518,6 +524,8 @@ export default () => ({
             sinR,
             anchorX,
             anchorY,
+            centerX,
+            centerY,
             startW: this.imageWidth,
             startH: this.imageHeight,
         };
@@ -557,15 +565,20 @@ export default () => ({
 
         if (d.type === 'scale') {
             const p = this.pointerToCanvas(event);
-            const vx = p.x - d.anchorX;
-            const vy = p.y - d.anchorY;
+            const fromCenter = event.altKey;
 
-            // Project pointer-from-anchor into image-local axes (inverse rotation).
+            const refX = fromCenter ? d.centerX : d.anchorX;
+            const refY = fromCenter ? d.centerY : d.anchorY;
+            const vx = p.x - refX;
+            const vy = p.y - refY;
+
+            // Project pointer-from-reference into image-local axes (inverse rotation).
             const localX = d.cosR * vx + d.sinR * vy;
             const localY = -d.sinR * vx + d.cosR * vy;
 
-            let newW = Math.max(MIN_DIM, Math.abs(localX));
-            let newH = Math.max(MIN_DIM, Math.abs(localY));
+            const factor = fromCenter ? 2 : 1;
+            let newW = Math.max(MIN_DIM, Math.abs(localX) * factor);
+            let newH = Math.max(MIN_DIM, Math.abs(localY) * factor);
 
             if (this.locked) {
                 const ratio = d.startW / d.startH;
@@ -585,13 +598,20 @@ export default () => ({
                 }
             }
 
-            // Place center so the anchor (opposite corner) stays put.
-            const localAx = -d.sign.x * newW / 2;
-            const localAy = -d.sign.y * newH / 2;
-            const rotAx = d.cosR * localAx - d.sinR * localAy;
-            const rotAy = d.sinR * localAx + d.cosR * localAy;
-            const newCenterX = d.anchorX - rotAx;
-            const newCenterY = d.anchorY - rotAy;
+            let newCenterX;
+            let newCenterY;
+            if (fromCenter) {
+                newCenterX = d.centerX;
+                newCenterY = d.centerY;
+            } else {
+                // Place center so the opposite corner stays put.
+                const localAx = -d.sign.x * newW / 2;
+                const localAy = -d.sign.y * newH / 2;
+                const rotAx = d.cosR * localAx - d.sinR * localAy;
+                const rotAy = d.sinR * localAx + d.cosR * localAy;
+                newCenterX = d.anchorX - rotAx;
+                newCenterY = d.anchorY - rotAy;
+            }
 
             this._ratioGuard = true;
             this.imageWidth = Math.round(newW);
@@ -612,6 +632,18 @@ export default () => ({
 
     onPointerUp() {
         this._drag = null;
+    },
+
+    onKeyDown(event) {
+        if (event.code !== 'Space') return;
+        const t = event.target;
+        if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
+        event.preventDefault();
+        this.spaceHeld = true;
+    },
+
+    onKeyUp(event) {
+        if (event.code === 'Space') this.spaceHeld = false;
     },
 
     formatBytes(n) {
