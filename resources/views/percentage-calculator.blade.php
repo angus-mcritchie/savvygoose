@@ -8,7 +8,7 @@
     <div class="mx-auto grid max-w-4xl gap-12">
         <div class="flex justify-center">
             <div class="grid grid-cols-[auto_1fr] items-center gap-4">
-                <img class="mx-auto w-[128px]" src="{{ asset('image/discount.png') }}" width="128" height="128">
+                <flux:icon.calculator class="size-20 text-zinc-700 dark:text-zinc-200" />
                 <div>
                     <flux:heading class="mb-1" level="1" size="xl">Percentage Calculator</flux:heading>
                     <flux:heading class="font-normal opacity-70" level="2">

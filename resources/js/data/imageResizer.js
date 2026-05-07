@@ -5,10 +5,27 @@ const DEFAULTS = {
     format: 'image/png',
     quality: 92,
     bg: '#ffffff',
-    locked: true,
+    locked: false,
 };
 
-const FAVICON_SIZES = [16, 32, 48, 64, 128, 180, 192, 256, 512];
+const SIZE_PRESETS = [
+    { label: '256²', w: 256, h: 256 },
+    { label: '512²', w: 512, h: 512 },
+    { label: '1024²', w: 1024, h: 1024 },
+    { label: '1200×630', w: 1200, h: 630 },
+    { label: '1920×1080', w: 1920, h: 1080 },
+    { label: '1280×720', w: 1280, h: 720 },
+];
+
+const RATIO_PRESETS = [
+    { label: '1:1', w: 1, h: 1 },
+    { label: '4:3', w: 4, h: 3 },
+    { label: '3:2', w: 3, h: 2 },
+    { label: '16:9', w: 16, h: 9 },
+    { label: '21:9', w: 21, h: 9 },
+    { label: '3:4', w: 3, h: 4 },
+    { label: '9:16', w: 9, h: 16 },
+];
 
 const FORMATS = {
     'image/png': { label: 'PNG', ext: 'png', supportsQuality: false },
@@ -63,9 +80,9 @@ export default () => ({
     dragging: false,
     previewUrl: '',
     previewBytes: 0,
-    favicons: FAVICON_SIZES.map((s) => ({ size: s, busy: false })),
     formats: FORMATS,
-    sizePresets: FAVICON_SIZES,
+    sizePresets: SIZE_PRESETS,
+    ratioPresets: RATIO_PRESETS,
     url: window.location.href,
     _previewToken: 0,
     _ratioGuard: false,
@@ -242,44 +259,6 @@ export default () => ({
         this.triggerDownload(blob, `${this.baseName}-${w}x${h}.${ext}`);
     },
 
-    async downloadFavicon(size) {
-        if (!this.source) return;
-        const entry = this.favicons.find((f) => f.size === size);
-        if (entry) entry.busy = true;
-        try {
-            const canvas = document.createElement('canvas');
-            const prevFit = this.fit;
-            const fit = prevFit; // honour current setting
-            const ctx = canvas.getContext('2d');
-            canvas.width = size;
-            canvas.height = size;
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
-
-            if (!this.supportsTransparency || this.fit === 'contain') {
-                ctx.fillStyle = this.bg;
-                ctx.fillRect(0, 0, size, size);
-            }
-
-            const rect = computeRect(this.sourceWidth, this.sourceHeight, size, size, fit);
-            ctx.drawImage(this.source, rect.x, rect.y, rect.w, rect.h);
-
-            const blob = await this.canvasBlob(canvas);
-            const ext = FORMATS[this.format].ext;
-            this.triggerDownload(blob, `${this.baseName}-${size}x${size}.${ext}`);
-        } finally {
-            if (entry) entry.busy = false;
-        }
-    },
-
-    async downloadAllFavicons() {
-        if (!this.source) return;
-        for (const { size } of this.favicons) {
-            await this.downloadFavicon(size);
-            await new Promise((r) => setTimeout(r, 150));
-        }
-    },
-
     triggerDownload(blob, filename) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -305,6 +284,20 @@ export default () => ({
         this._ratioGuard = true;
         this.width = this.sourceWidth;
         this.height = this.sourceHeight;
+        this.$nextTick(() => (this._ratioGuard = false));
+    },
+
+    applySize(w, h) {
+        this._ratioGuard = true;
+        this.width = w;
+        this.height = h;
+        this.$nextTick(() => (this._ratioGuard = false));
+    },
+
+    applyRatio(rw, rh) {
+        this._ratioGuard = true;
+        const w = Math.max(1, parseInt(this.width, 10) || rw);
+        this.height = Math.max(1, Math.round((w * rh) / rw));
         this.$nextTick(() => (this._ratioGuard = false));
     },
 

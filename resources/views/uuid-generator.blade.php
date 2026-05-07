@@ -21,10 +21,26 @@
                 </flux:heading>
 
                 <div class="grid gap-5">
-                    <flux:radio.group x-model="version" label="Version">
-                        <flux:radio value="v4" label="v4" description="Random — universally supported." />
-                        <flux:radio value="v7" label="v7" description="Time-ordered — friendlier to databases." />
-                    </flux:radio.group>
+                    <flux:field>
+                        <div class="flex items-center gap-1">
+                            <flux:label>Version</flux:label>
+                            <flux:dropdown position="bottom" align="start">
+                                <flux:button icon="information-circle" variant="ghost" size="xs" aria-label="v4 vs v7" />
+                                <flux:popover class="max-w-sm">
+                                    <flux:heading size="sm">v4 vs v7</flux:heading>
+                                    <p class="mt-2 text-sm"><strong>v4</strong>: 122 random bits. The classic UUID; supported everywhere; no order.</p>
+                                    <flux:separator class="my-3" />
+                                    <p class="text-sm"><strong>v7</strong>: first 48 bits are a Unix-millisecond timestamp, the rest random. Sortable by creation time.</p>
+                                    <flux:separator class="my-3" />
+                                    <p class="text-sm">v7 is much friendlier to B-tree indexes (Postgres, MySQL): inserts hit the rightmost page instead of scattering writes across the index. Use v7 unless you specifically need unguessable IDs.</p>
+                                </flux:popover>
+                            </flux:dropdown>
+                        </div>
+                        <flux:radio.group x-model="version">
+                            <flux:radio value="v4" label="v4" description="Random. Universally supported." />
+                            <flux:radio value="v7" label="v7" description="Time-ordered. Friendlier to databases." />
+                        </flux:radio.group>
+                    </flux:field>
 
                     <flux:input
                         type="number"
@@ -93,7 +109,7 @@
             <div class="rounded-lg border border-black/10 p-8 lg:col-span-2 dark:border-white/10">
                 <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">Share</flux:heading>
                 <flux:subheading class="mb-4">
-                    The URL below carries every option — open it to generate fresh UUIDs with the same settings.
+                    The URL below carries every option. Open it to generate fresh UUIDs with the same settings.
                 </flux:subheading>
                 <flux:input type="url" x-model="url" readonly copyable label="Share URL" />
             </div>

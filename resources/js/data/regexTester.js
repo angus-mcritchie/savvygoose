@@ -53,7 +53,7 @@ export default () => ({
     urlTooLong: false,
     allFlags: ALL_FLAGS,
     flagDescriptions: {
-        g: 'global — match all occurrences',
+        g: 'global, match all occurrences',
         i: 'ignore case',
         m: 'multiline (^ and $ match line boundaries)',
         s: 'dotall (. matches newlines)',

@@ -16,10 +16,29 @@
         <div class="grid gap-6">
             <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
                 <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
-                    <flux:radio.group x-model="direction" variant="segmented" size="sm">
-                        <flux:radio value="md-to-html" label="Markdown → HTML" />
-                        <flux:radio value="html-to-md" label="HTML → Markdown" />
-                    </flux:radio.group>
+                    <div class="flex items-center gap-1">
+                        <flux:radio.group x-model="direction" variant="segmented" size="sm">
+                            <flux:radio value="md-to-html" label="Markdown → HTML" />
+                            <flux:radio value="html-to-md" label="HTML → Markdown" />
+                        </flux:radio.group>
+                        <flux:dropdown position="bottom" align="start">
+                            <flux:button icon="information-circle" variant="ghost" size="sm" aria-label="Markdown cheat sheet" />
+                            <flux:popover class="max-w-sm">
+                                <flux:heading size="sm">Markdown cheat sheet</flux:heading>
+                                <ul class="mt-2 space-y-1 font-mono text-xs">
+                                    <li># Heading 1 · ## Heading 2</li>
+                                    <li>**bold** · *italic* · ~~strike~~</li>
+                                    <li>[link](https://…)</li>
+                                    <li>![alt](image.png)</li>
+                                    <li>`inline code` · ```fenced```</li>
+                                    <li>- bullet · 1. numbered</li>
+                                    <li>&gt; blockquote</li>
+                                </ul>
+                                <flux:separator class="my-3" />
+                                <p class="text-sm">HTML → Markdown is best-effort: complex layouts, classes, and inline styles will be dropped or simplified.</p>
+                            </flux:popover>
+                        </flux:dropdown>
+                    </div>
 
                     <div class="flex gap-2">
                         <flux:button x-on:click="swap()" x-bind:disabled="!output" icon="arrows-right-left" size="sm">
@@ -85,7 +104,7 @@
                 <div>
                     <flux:heading size="lg">Swap to edit this side?</flux:heading>
                     <flux:text class="mt-2">
-                        The output is generated from the input. Swap directions so the current output becomes the new input — then you can edit it freely.
+                        The output is generated from the input. Swap directions so the current output becomes the new input, then you can edit it freely.
                     </flux:text>
                 </div>
                 <div class="flex justify-end gap-2">

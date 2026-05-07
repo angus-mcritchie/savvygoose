@@ -12,7 +12,7 @@
                 <div>
                     <flux:heading class="mb-1" level="1" size="xl">Image Resizer</flux:heading>
                     <flux:heading class="font-normal opacity-70" level="2">
-                        Resize, convert & build favicon packs — entirely in your browser.
+                        Resize & convert images, entirely in your browser.
                     </flux:heading>
                 </div>
             </div>
@@ -36,7 +36,7 @@
                         <strong>Drop an image here</strong>, paste from your clipboard,
                     </flux:text>
                     <flux:text size="sm" class="mb-4 opacity-70">
-                        or use the button below. PNG, JPEG, WebP, SVG, GIF — up to 20 MB.
+                        or use the button below. PNG, JPEG, WebP, SVG, GIF, up to 20 MB.
                     </flux:text>
                     <input type="file" accept="image/*" x-ref="picker" x-on:change="onPick" class="hidden" />
                     <flux:button size="sm" x-on:click="$refs.picker.click()">Choose file</flux:button>
@@ -78,9 +78,9 @@
                         <button
                             type="button"
                             x-on:click="toggleLock"
-                            :title="locked ? 'Unlink — width and height move independently' : 'Link — keep aspect ratio'"
+                            :title="locked ? 'Unlink: width and height move independently' : 'Link: keep aspect ratio'"
                             :aria-pressed="locked"
-                            class="mb-1 grid size-10 place-items-center rounded-md border transition"
+                            class="grid size-10 place-items-center rounded-md border transition"
                             :class="locked
                                 ? 'border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-zinc-900'
                                 : 'border-black/15 hover:border-black/40 dark:border-white/15 dark:hover:border-white/40'"
@@ -91,9 +91,37 @@
                         <flux:input type="number" min="1" max="4096" step="1" x-model.number="height" label="Height (px)" />
                     </div>
 
-                    <flux:button class="mb-6" size="sm" variant="subtle" x-on:click="matchSource">
-                        Match source size
-                    </flux:button>
+                    <div class="mb-6 grid gap-3">
+                        <flux:label>Quick sizes</flux:label>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="preset in sizePresets" :key="preset.label">
+                                <button
+                                    type="button"
+                                    x-on:click="applySize(preset.w, preset.h)"
+                                    :class="width === preset.w && height === preset.h
+                                        ? 'border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-zinc-900'
+                                        : 'border-black/15 hover:border-black/40 dark:border-white/15 dark:hover:border-white/40'"
+                                    class="rounded-md border px-3 py-1.5 font-mono text-xs transition"
+                                    x-text="preset.label"
+                                ></button>
+                            </template>
+                            <flux:button size="sm" variant="subtle" x-on:click="matchSource">Source</flux:button>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 grid gap-3">
+                        <flux:label>Aspect ratio</flux:label>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="ratio in ratioPresets" :key="ratio.label">
+                                <button
+                                    type="button"
+                                    x-on:click="applyRatio(ratio.w, ratio.h)"
+                                    class="rounded-md border border-black/15 px-3 py-1.5 font-mono text-xs transition hover:border-black/40 dark:border-white/15 dark:hover:border-white/40"
+                                    x-text="ratio.label"
+                                ></button>
+                            </template>
+                        </div>
+                    </div>
 
                     <div class="mb-6 grid gap-3">
                         <flux:label>Fit</flux:label>
@@ -105,11 +133,29 @@
                     </div>
 
                     <div class="grid gap-6 sm:grid-cols-2">
-                        <flux:select x-model="format" label="Format">
-                            <template x-for="(meta, mime) in formats" :key="mime">
-                                <option :value="mime" x-text="meta.label"></option>
-                            </template>
-                        </flux:select>
+                        <flux:field>
+                            <div class="flex items-center gap-1">
+                                <flux:label>Format</flux:label>
+                                <flux:dropdown position="bottom" align="start">
+                                    <flux:button icon="information-circle" variant="ghost" size="xs" aria-label="Which format should I pick?" />
+                                    <flux:popover class="max-w-sm">
+                                        <flux:heading size="sm">Picking a format</flux:heading>
+                                        <ul class="mt-2 space-y-2 text-sm">
+                                            <li><strong>PNG</strong>: lossless, supports transparency. Best for logos, icons, screenshots.</li>
+                                            <li><strong>JPEG</strong>: lossy, no transparency. Best for photos.</li>
+                                            <li><strong>WebP</strong>: modern; smaller than both at similar quality. Universally supported in modern browsers.</li>
+                                        </ul>
+                                        <flux:separator class="my-3" />
+                                        <p class="text-sm">For opaque output formats (JPEG), the background colour fills any transparency in the source.</p>
+                                    </flux:popover>
+                                </flux:dropdown>
+                            </div>
+                            <flux:select x-model="format">
+                                <template x-for="(meta, mime) in formats" :key="mime">
+                                    <option :value="mime" x-text="meta.label"></option>
+                                </template>
+                            </flux:select>
+                        </flux:field>
                         <div x-show="supportsQuality" x-cloak>
                             <div class="mb-2 flex items-baseline justify-between">
                                 <flux:label>Quality</flux:label>
@@ -162,43 +208,10 @@
                 </div>
             </div>
 
-            <div
-                x-show="source"
-                x-cloak
-                class="rounded-lg border border-black/10 p-8 dark:border-white/10"
-            >
-                <div class="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-black/10 pb-4 dark:border-white/10">
-                    <flux:heading size="xl">4. Favicon pack</flux:heading>
-                    <flux:button size="sm" icon="arrow-down-tray" x-on:click="downloadAllFavicons">Download all</flux:button>
-                </div>
-                <flux:subheading class="mb-6">
-                    Each size uses the fit, format and background from above. Browsers may ask permission for the bulk download.
-                </flux:subheading>
-
-                <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-9">
-                    <template x-for="entry in favicons" :key="entry.size">
-                        <button
-                            type="button"
-                            x-on:click="downloadFavicon(entry.size)"
-                            x-bind:disabled="entry.busy"
-                            class="group grid place-items-center gap-2 rounded-md border border-black/10 px-3 py-4 text-xs transition hover:border-zinc-900 hover:shadow-sm disabled:opacity-50 dark:border-white/10 dark:hover:border-white"
-                        >
-                            <span
-                                class="grid place-items-center rounded bg-black/5 dark:bg-white/5"
-                                :style="`width: ${Math.min(entry.size, 64)}px; height: ${Math.min(entry.size, 64)}px;`"
-                            >
-                                <flux:icon name="arrow-down-tray" class="size-4 opacity-50 group-hover:opacity-100" />
-                            </span>
-                            <span class="font-mono"><span x-text="entry.size"></span>×<span x-text="entry.size"></span></span>
-                        </button>
-                    </template>
-                </div>
-            </div>
-
             <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
                 <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">Share</flux:heading>
                 <flux:subheading class="mb-4">
-                    The URL below carries your resize settings. Image data stays on your device — drop your own image after opening the link.
+                    The URL below carries your resize settings. Image data stays on your device, so drop your own image after opening the link.
                 </flux:subheading>
                 <flux:input type="url" x-model="url" readonly copyable label="Share URL" />
             </div>

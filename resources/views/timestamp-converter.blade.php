@@ -40,7 +40,7 @@
             <div class="rounded-lg border border-black/10 p-6 sm:p-8 dark:border-white/10">
                 <flux:heading class="mb-2" size="xl">1. Input</flux:heading>
                 <flux:subheading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10">
-                    Paste or type any timestamp — Unix seconds, milliseconds, or ISO 8601.
+                    Paste or type any timestamp: Unix seconds, milliseconds, or ISO 8601.
                 </flux:subheading>
 
                 <div class="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
@@ -74,24 +74,37 @@
                 <flux:separator class="my-6" />
 
                 <div class="grid gap-4 sm:grid-cols-2">
-                    <flux:input
-                        type="date"
-                        x-bind:value="dateInputValue()"
-                        x-on:change="setFromDateAndTime($event.target.value, timeInputValue())"
+                    <flux:date-picker
+                        type="input"
+                        x-model="selectedDate"
                         label="Date (in selected timezone)"
                     />
-                    <flux:input
-                        type="time"
-                        step="1"
-                        x-bind:value="timeInputValue()"
-                        x-on:change="setFromDateAndTime(dateInputValue(), $event.target.value)"
+                    <flux:time-picker
+                        type="input"
+                        x-model="selectedTime"
                         label="Time"
                     />
                 </div>
             </div>
 
             <div class="rounded-lg border border-black/10 p-6 sm:p-8 dark:border-white/10">
-                <flux:heading class="mb-2" size="xl">2. Conversions</flux:heading>
+                <div class="flex items-start justify-between gap-2">
+                    <flux:heading class="mb-2" size="xl">2. Conversions</flux:heading>
+                    <flux:dropdown position="bottom" align="end">
+                        <flux:button icon="information-circle" variant="ghost" size="sm" aria-label="About these formats" />
+                        <flux:popover class="max-w-sm">
+                            <flux:heading size="sm">The formats</flux:heading>
+                            <ul class="mt-2 space-y-2 text-sm">
+                                <li><strong>Unix seconds</strong>: integer count of seconds since 1970-01-01 UTC. Compact &amp; timezone-free.</li>
+                                <li><strong>Unix milliseconds</strong>: same epoch, ×1000. JavaScript's <code class="font-mono">Date.now()</code>.</li>
+                                <li><strong>ISO 8601 (UTC)</strong>: human-readable string ending in <code class="font-mono">Z</code>.</li>
+                                <li><strong>ISO 8601 (zoned)</strong>: same instant with a numeric offset like <code class="font-mono">+10:00</code>.</li>
+                            </ul>
+                            <flux:separator class="my-3" />
+                            <p class="text-sm">All four describe the <em>same instant</em>. Only the wall-clock display changes.</p>
+                        </flux:popover>
+                    </flux:dropdown>
+                </div>
                 <flux:subheading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10">
                     All times below reflect the selected timezone.
                 </flux:subheading>

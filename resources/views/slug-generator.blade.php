@@ -24,7 +24,19 @@
                 />
 
                 <div class="mt-6">
-                    <flux:label>Slug</flux:label>
+                    <div class="flex items-center gap-1">
+                        <flux:label>Slug</flux:label>
+                        <flux:dropdown position="bottom" align="start">
+                            <flux:button icon="information-circle" variant="ghost" size="xs" aria-label="What is a slug?" />
+                            <flux:popover class="max-w-sm">
+                                <flux:heading size="sm">What's a slug?</flux:heading>
+                                <p class="mt-2 text-sm">The human-readable, URL-safe portion of a URL, usually derived from a title.</p>
+                                <p class="mt-2 font-mono text-xs break-all">example.com/blog/<strong>my-awesome-post</strong></p>
+                                <flux:separator class="my-3" />
+                                <p class="text-sm">Slugs lowercase, transliterate accents, drop punctuation, and join words with a separator. They survive being copy-pasted, shared in chat, and indexed by search engines.</p>
+                            </flux:popover>
+                        </flux:dropdown>
+                    </div>
                     <div class="mt-2 flex items-stretch gap-2">
                         <div
                             class="grow rounded-md border border-black/10 bg-zinc-50 px-4 py-3 font-mono text-base dark:border-white/10 dark:bg-zinc-900"

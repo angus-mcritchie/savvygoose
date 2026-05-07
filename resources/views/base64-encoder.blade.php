@@ -7,7 +7,7 @@
                 <div>
                     <flux:heading class="mb-1" level="1" size="xl">Base64 Encoder</flux:heading>
                     <flux:heading class="font-normal opacity-70" level="2">
-                        Encode and decode Base64 — text or files, all in your browser.
+                        Encode and decode Base64. Text or files, all in your browser.
                     </flux:heading>
                 </div>
             </div>
@@ -31,7 +31,25 @@
                             </flux:radio.group>
 
                             <div class="flex flex-wrap items-center gap-3">
-                                <flux:checkbox x-model="urlSafe" label="URL-safe" />
+                                <div class="flex items-center gap-1">
+                                    <flux:checkbox x-model="urlSafe" label="URL-safe" />
+                                    <flux:dropdown position="bottom" align="end">
+                                        <flux:button icon="information-circle" variant="ghost" size="xs" aria-label="What is URL-safe Base64?" />
+                                        <flux:popover class="max-w-sm">
+                                            <flux:heading size="sm">URL-safe Base64</flux:heading>
+                                            <p class="mt-2 text-sm">Standard Base64 uses <code class="font-mono">+</code>, <code class="font-mono">/</code>, and <code class="font-mono">=</code>, all of which need percent-encoding inside URLs.</p>
+                                            <flux:separator class="my-3" />
+                                            <p class="text-sm">URL-safe Base64 (RFC 4648 §5) swaps:</p>
+                                            <ul class="mt-2 space-y-1 font-mono text-sm">
+                                                <li>+ → -</li>
+                                                <li>/ → _</li>
+                                                <li>= → (stripped)</li>
+                                            </ul>
+                                            <flux:separator class="my-3" />
+                                            <p class="text-sm">Used by JWTs, OAuth tokens, and anywhere Base64 ends up in a URL or filename.</p>
+                                        </flux:popover>
+                                    </flux:dropdown>
+                                </div>
                                 <flux:button x-on:click="swap()" x-bind:disabled="!output" icon="arrows-right-left" size="sm">
                                     Swap
                                 </flux:button>

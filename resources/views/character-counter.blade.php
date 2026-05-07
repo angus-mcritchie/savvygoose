@@ -3,7 +3,7 @@
     <div class="mx-auto max-w-[1200px]" x-data="characterCounter">
         <div class="mb-8 flex justify-center">
             <div class="grid grid-cols-[auto_1fr] items-center gap-4">
-                <img class="mx-auto w-[128px]" src="{{ asset('image/keyboard.png') }}" alt="Keyboard" width="128" height="128">
+                <flux:icon.hashtag class="size-20 text-zinc-700 dark:text-zinc-200" />
                 <div>
                     <flux:heading class="mb-1" level="1" size="xl">Character Counter</flux:heading>
                     <flux:heading class="font-normal opacity-70" level="2">
@@ -36,6 +36,23 @@
                     <x-stat label="Lines" value="lineCount" />
                     <x-stat label="Avg word length" value="averageWordLength" />
                     <x-stat label="Reading time" value="readingTime" placeholder="0 min" class="lg:col-span-3" />
+                </div>
+
+                <div class="mt-4 flex justify-end">
+                    <flux:dropdown position="bottom" align="end">
+                        <flux:button icon="information-circle" variant="ghost" size="xs">
+                            How are these counted?
+                        </flux:button>
+                        <flux:popover class="max-w-sm">
+                            <flux:heading size="sm">How each stat is counted</flux:heading>
+                            <ul class="mt-2 space-y-2 text-sm">
+                                <li><strong>Characters</strong>: every Unicode code point, including spaces &amp; line breaks.</li>
+                                <li><strong>Words</strong>: runs of non-whitespace separated by spaces or punctuation.</li>
+                                <li><strong>Sentences</strong>: segments terminated by <code class="font-mono">.</code>, <code class="font-mono">!</code>, or <code class="font-mono">?</code>.</li>
+                                <li><strong>Reading time</strong>: based on 200 words per minute (average adult silent reading).</li>
+                            </ul>
+                        </flux:popover>
+                    </flux:dropdown>
                 </div>
             </div>
         </div>

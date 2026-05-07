@@ -5,14 +5,7 @@
 
         <div class="mb-8 flex justify-center">
             <div class="grid grid-cols-[auto_1fr] items-center gap-4">
-                <img
-                    class="w-[128px]"
-                    src="{{ asset('image/barcode.png') }}"
-                    alt=""
-                    width="128"
-                    height="128"
-                    fetchpriority="high"
-                >
+                <flux:icon.tag class="size-20 text-zinc-700 dark:text-zinc-200" />
                 <div>
                     <flux:heading class="mb-1" level="1" size="xl">Barcode Generator</flux:heading>
                     <flux:heading class="font-normal opacity-70" level="2">Generate and print code 128 barcodes in seconds.</flux:heading>
@@ -24,7 +17,23 @@
 
         <div class="grid gap-6 lg:grid-cols-2">
             <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
-                <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">1. Generate</flux:heading>
+                <div class="mb-6 flex items-center justify-between gap-2 border-b border-black/10 pb-4 dark:border-white/10">
+                    <flux:heading size="xl">1. Generate</flux:heading>
+                    <flux:dropdown position="bottom" align="end">
+                        <flux:button icon="information-circle" variant="ghost" size="sm" aria-label="About Code 128" />
+                        <flux:popover class="max-w-sm">
+                            <flux:heading size="sm">Code 128</flux:heading>
+                            <p class="mt-2 text-sm">A high-density 1D barcode that encodes the full ASCII set: letters, digits, and common symbols.</p>
+                            <flux:separator class="my-3" />
+                            <ul class="space-y-1 text-sm">
+                                <li><strong>Label</strong>: printed above the bars; purely human-readable.</li>
+                                <li><strong>Value</strong>: what the scanner returns. Used for the bars and printed below.</li>
+                            </ul>
+                            <flux:separator class="my-3" />
+                            <p class="text-sm">Used widely in shipping, inventory, and warehousing. Stick to printable ASCII for best scanner support.</p>
+                        </flux:popover>
+                    </flux:dropdown>
+                </div>
                 <div class="grid gap-8">
                     <flux:input name="label" x-model="label" label="Label" placeholder="my label" />
                     <flux:input name="value" x-model="value" label="Value" placeholder="value" />

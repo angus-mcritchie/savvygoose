@@ -23,7 +23,7 @@
                     rows="6"
                 />
                 <flux:subheading class="mt-3" size="sm">
-                    Anything you'd put behind a link — URLs, plain text, contact details, Wi-Fi credentials.
+                    Anything you'd put behind a link: URLs, plain text, contact details, Wi-Fi credentials.
                 </flux:subheading>
             </div>
 
@@ -51,7 +51,7 @@
                     x-cloak
                     class="mb-4 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-300"
                 >
-                    Low contrast between foreground and background — scanners may struggle.
+                    Low contrast between foreground and background. Scanners may struggle.
                 </div>
 
                 <div class="grid gap-3 sm:grid-cols-2">
@@ -85,12 +85,33 @@
                         x-model.number="size"
                         label="Size (px)"
                     />
-                    <flux:select x-model="ec" label="Error correction">
-                        <flux:select.option value="L">L — ~7%</flux:select.option>
-                        <flux:select.option value="M">M — ~15%</flux:select.option>
-                        <flux:select.option value="Q">Q — ~25%</flux:select.option>
-                        <flux:select.option value="H">H — ~30%</flux:select.option>
-                    </flux:select>
+                    <flux:field>
+                        <div class="flex items-center gap-1">
+                            <flux:label>Error correction</flux:label>
+                            <flux:dropdown position="bottom" align="start">
+                                <flux:button icon="information-circle" variant="ghost" size="xs" aria-label="What is error correction?" />
+                                <flux:popover class="max-w-sm">
+                                    <flux:heading size="sm">Error correction</flux:heading>
+                                    <p class="mt-2 text-sm">QR codes embed redundant data so they still scan when partly damaged or obscured.</p>
+                                    <flux:separator class="my-3" />
+                                    <ul class="space-y-1 text-sm">
+                                        <li><strong>L</strong>: ~7% recoverable. Smallest code; clean prints.</li>
+                                        <li><strong>M</strong>: ~15%. Sensible default.</li>
+                                        <li><strong>Q</strong>: ~25%. Outdoors or with light scuffing.</li>
+                                        <li><strong>H</strong>: ~30%. Use whenever a logo overlaps the code.</li>
+                                    </ul>
+                                    <flux:separator class="my-3" />
+                                    <p class="text-sm">Higher levels make the code denser, so it needs a bigger size or more pixels per module.</p>
+                                </flux:popover>
+                            </flux:dropdown>
+                        </div>
+                        <flux:select x-model="ec">
+                            <flux:select.option value="L">L (~7%)</flux:select.option>
+                            <flux:select.option value="M">M (~15%)</flux:select.option>
+                            <flux:select.option value="Q">Q (~25%)</flux:select.option>
+                            <flux:select.option value="H">H (~30%)</flux:select.option>
+                        </flux:select>
+                    </flux:field>
                     <flux:input
                         type="number"
                         min="0"
@@ -205,7 +226,7 @@
             <div class="rounded-lg border border-black/10 p-8 lg:col-span-2 dark:border-white/10">
                 <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">5. Share</flux:heading>
                 <flux:subheading class="mb-2">
-                    The URL below carries every setting — anyone who opens it sees the same QR code.
+                    The URL below carries every setting. Anyone who opens it sees the same QR code.
                 </flux:subheading>
                 <p class="mb-4 text-sm opacity-60" x-show="logo" x-cloak>
                     Logos aren't included in the share URL. Download the PNG or SVG to share the QR with the logo embedded.

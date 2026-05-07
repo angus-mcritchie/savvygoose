@@ -7,7 +7,7 @@
                 <div>
                     <flux:heading class="mb-1" level="1" size="xl">JWT Decoder</flux:heading>
                     <flux:heading class="font-normal opacity-70" level="2">
-                        Inspect a JSON Web Token's header and payload — no signature verification.
+                        Inspect a JSON Web Token's header and payload. No signature verification.
                     </flux:heading>
                 </div>
             </div>
@@ -16,7 +16,25 @@
         <div class="grid gap-6">
             <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
                 <div class="mb-6 flex items-center justify-between gap-4">
-                    <flux:label>Token</flux:label>
+                    <div class="flex items-center gap-1">
+                        <flux:label>Token</flux:label>
+                        <flux:dropdown position="bottom" align="start">
+                            <flux:button icon="information-circle" variant="ghost" size="sm" aria-label="What is a JWT?" />
+                            <flux:popover class="max-w-sm">
+                                <flux:heading size="sm">Anatomy of a JWT</flux:heading>
+                                <p class="mt-2 text-sm">A JWT is three Base64url-encoded segments joined by dots:</p>
+                                <p class="mt-2 font-mono text-xs break-all">header.payload.signature</p>
+                                <flux:separator class="my-3" />
+                                <ul class="space-y-1 text-sm">
+                                    <li><strong>Header</strong>: algorithm &amp; token type.</li>
+                                    <li><strong>Payload</strong>: the claims (who, what, when).</li>
+                                    <li><strong>Signature</strong>: proves the token wasn't tampered with.</li>
+                                </ul>
+                                <flux:separator class="my-3" />
+                                <p class="text-sm">This tool only <strong>decodes</strong>. It doesn't verify the signature. Decoding requires no secret; verifying does.</p>
+                            </flux:popover>
+                        </flux:dropdown>
+                    </div>
                     <flux:button x-on:click="clear()" x-bind:disabled="!token" icon="trash" size="sm" variant="filled">
                         Clear
                     </flux:button>
@@ -37,7 +55,7 @@
 
                 <div class="mt-3 flex flex-wrap items-center gap-2 text-sm">
                     <span class="opacity-70">Decoding only.</span>
-                    <span class="opacity-70">We never verify the signature — anyone holding the secret could mint a token that decodes the same way.</span>
+                    <span class="opacity-70">We never verify the signature. Anyone holding the secret could mint a token that decodes the same way.</span>
                 </div>
             </div>
 
@@ -63,7 +81,7 @@
                     <template x-if="notYetActive">
                         <div class="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-amber-700 dark:text-amber-300">
                             <flux:subheading class="!text-current">Not yet active</flux:subheading>
-                            <p class="mt-1 text-sm">The <code>nbf</code> claim is in the future — most servers will reject this token until then.</p>
+                            <p class="mt-1 text-sm">The <code>nbf</code> claim is in the future. Most servers will reject this token until then.</p>
                         </div>
                     </template>
                 </div>
@@ -143,7 +161,7 @@
 
             <div class="rounded-lg border border-black/10 p-6 dark:border-white/10">
                 <flux:subheading>Signature</flux:subheading>
-                <p class="mt-2 break-all font-mono text-xs opacity-70" x-text="signature || '—'"></p>
+                <p class="mt-2 break-all font-mono text-xs opacity-70" x-text="signature || '(none)'"></p>
             </div>
         </div>
     </div>

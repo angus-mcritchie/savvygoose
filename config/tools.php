@@ -15,7 +15,7 @@ return [
             'name' => 'Character Counter',
             'tagline' => 'Count characters & words.',
             'category' => 'text',
-            'icon' => ['type' => 'image', 'src' => 'image/keyboard.png'],
+            'icon' => ['type' => 'flux', 'name' => 'hashtag'],
         ],
         [
             'slug' => 'case-converter',
@@ -43,7 +43,7 @@ return [
             'name' => 'Percentage Calculator',
             'tagline' => 'Common percentage calculations.',
             'category' => 'numbers',
-            'icon' => ['type' => 'image', 'src' => 'image/discount.png'],
+            'icon' => ['type' => 'flux', 'name' => 'calculator'],
         ],
         [
             'slug' => 'unit-converter',
@@ -64,7 +64,7 @@ return [
             'name' => 'Barcode Generator',
             'tagline' => 'Generate & print Code 128 barcodes.',
             'category' => 'generators',
-            'icon' => ['type' => 'image', 'src' => 'image/barcode.png'],
+            'icon' => ['type' => 'flux', 'name' => 'tag'],
         ],
         [
             'slug' => 'qr-code-generator',
@@ -76,7 +76,7 @@ return [
         [
             'slug' => 'base64-encoder',
             'name' => 'Base64 Encoder',
-            'tagline' => 'Encode & decode Base64 — text or files.',
+            'tagline' => 'Encode & decode Base64 for text or files.',
             'category' => 'data',
             'icon' => ['type' => 'flux', 'name' => 'arrows-right-left'],
         ],
@@ -90,14 +90,14 @@ return [
         [
             'slug' => 'jwt-decoder',
             'name' => 'JWT Decoder',
-            'tagline' => 'Inspect a JWT — header, payload, expiry.',
+            'tagline' => 'Inspect a JWT: header, payload, expiry.',
             'category' => 'data',
             'icon' => ['type' => 'flux', 'name' => 'key'],
         ],
         [
             'slug' => 'hash-generator',
             'name' => 'Hash Generator',
-            'tagline' => 'MD5, SHA-1, SHA-256 & SHA-512 — text or file.',
+            'tagline' => 'MD5, SHA-1, SHA-256 & SHA-512 for text or file.',
             'category' => 'data',
             'icon' => ['type' => 'flux', 'name' => 'finger-print'],
         ],

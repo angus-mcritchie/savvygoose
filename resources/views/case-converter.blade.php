@@ -30,6 +30,22 @@
                     <flux:text size="sm" class="opacity-60">
                         Words separated by spaces, hyphens, underscores, dots, or case boundaries are all detected.
                     </flux:text>
+                    <flux:dropdown position="bottom" align="end" class="ml-auto">
+                        <flux:button icon="information-circle" variant="ghost" size="xs">
+                            When to use which?
+                        </flux:button>
+                        <flux:popover class="max-w-sm">
+                            <flux:heading size="sm">Common conventions</flux:heading>
+                            <ul class="mt-2 space-y-1 text-sm">
+                                <li><strong>camelCase</strong>: JS, Java, C# variables &amp; functions.</li>
+                                <li><strong>PascalCase</strong>: classes &amp; types in most languages.</li>
+                                <li><strong>snake_case</strong>: Python, Ruby, Rust, SQL, file names.</li>
+                                <li><strong>SCREAMING_SNAKE_CASE</strong>: constants &amp; environment variables.</li>
+                                <li><strong>kebab-case</strong>: URL slugs, CSS classes, CLI flags.</li>
+                                <li><strong>Title Case</strong>: headings &amp; product names.</li>
+                            </ul>
+                        </flux:popover>
+                    </flux:dropdown>
                 </div>
             </div>
 
@@ -56,7 +72,7 @@
                         </div>
                         <div
                             class="break-all rounded-md bg-zinc-100 p-3 font-mono text-sm dark:bg-zinc-900"
-                            x-text="convert(c.key) || '—'"
+                            x-text="convert(c.key) || '...'"
                         ></div>
                     </div>
                 </template>
@@ -65,7 +81,7 @@
             <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
                 <flux:heading class="mb-2" size="xl">Share</flux:heading>
                 <flux:subheading class="mb-4">
-                    The URL below carries your input — anyone who opens it sees the same conversions.
+                    The URL below carries your input. Anyone who opens it sees the same conversions.
                 </flux:subheading>
                 <p x-show="urlTooLong" x-cloak class="mb-4 text-sm text-amber-600 dark:text-amber-400">
                     Input is too long to include in the URL.

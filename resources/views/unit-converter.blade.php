@@ -37,13 +37,27 @@
 
         <div class="grid gap-6">
             <div class="rounded-lg border border-black/10 p-6 sm:p-8 dark:border-white/10">
-                <div class="mb-8 flex justify-center">
+                <div class="mb-8 flex items-center justify-center gap-2">
                     <flux:radio.group x-model="cat" variant="segmented" size="sm">
                         <flux:radio value="length" label="Length" />
                         <flux:radio value="weight" label="Weight" />
                         <flux:radio value="temperature" label="Temperature" />
                         <flux:radio value="data" label="Data" />
                     </flux:radio.group>
+                    <flux:dropdown position="bottom" align="end" x-show="cat === 'data'" x-cloak>
+                        <flux:button icon="information-circle" variant="ghost" size="sm" aria-label="KB vs KiB" />
+                        <flux:popover class="max-w-sm">
+                            <flux:heading size="sm">KB vs KiB: decimal vs binary</flux:heading>
+                            <p class="mt-2 text-sm">Two competing conventions for "kilobyte":</p>
+                            <flux:separator class="my-3" />
+                            <ul class="space-y-1 text-sm">
+                                <li><strong>KB, MB, GB</strong>: powers of 1,000. Used by storage vendors and networks.</li>
+                                <li><strong>KiB, MiB, GiB</strong>: powers of 1,024. Used by most operating systems.</li>
+                            </ul>
+                            <flux:separator class="my-3" />
+                            <p class="text-sm">A "1 TB" disk shows as ~931 GiB in your OS. Same bytes, different yardstick.</p>
+                        </flux:popover>
+                    </flux:dropdown>
                 </div>
 
                 <div class="grid items-end gap-4 sm:grid-cols-[1fr_auto_1fr]">

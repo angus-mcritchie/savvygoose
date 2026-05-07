@@ -7,7 +7,7 @@
                 <div>
                     <flux:heading class="mb-1" level="1" size="xl">Hash Generator</flux:heading>
                     <flux:heading class="font-normal opacity-70" level="2">
-                        MD5, SHA-1, SHA-256 and SHA-512 — computed in your browser.
+                        MD5, SHA-1, SHA-256 and SHA-512, computed in your browser.
                     </flux:heading>
                 </div>
             </div>
@@ -33,7 +33,7 @@
                         <flux:textarea
                             name="text"
                             x-model="text"
-                            placeholder="Type or paste text — hashes update as you type"
+                            placeholder="Type or paste text. Hashes update as you type."
                             rows="8"
                             class="font-mono"
                         />
@@ -75,7 +75,23 @@
             </div>
 
             <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
-                <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="lg">Hashes</flux:heading>
+                <div class="mb-6 flex items-center justify-between gap-2 border-b border-black/10 pb-4 dark:border-white/10">
+                    <flux:heading size="lg">Hashes</flux:heading>
+                    <flux:dropdown position="bottom" align="end">
+                        <flux:button icon="information-circle" variant="ghost" size="sm" aria-label="Which hash should I use?" />
+                        <flux:popover class="max-w-sm">
+                            <flux:heading size="sm">Which one should I use?</flux:heading>
+                            <ul class="mt-2 space-y-2 text-sm">
+                                <li><strong>MD5</strong>: 128-bit. Fast but broken; only OK for non-security checksums.</li>
+                                <li><strong>SHA-1</strong>: 160-bit. Also broken for collisions; avoid for new work.</li>
+                                <li><strong>SHA-256</strong>: 256-bit. Safe default for integrity checks &amp; signatures.</li>
+                                <li><strong>SHA-512</strong>: 512-bit. Same family, larger digest, often faster on 64-bit CPUs.</li>
+                            </ul>
+                            <flux:separator class="my-3" />
+                            <p class="text-sm">For passwords, use bcrypt/argon2. These are too fast to be safe alone.</p>
+                        </flux:popover>
+                    </flux:dropdown>
+                </div>
                 <div class="grid gap-4">
                     <template x-for="algo in algos" :key="algo.key">
                         <div class="grid gap-2">
@@ -94,14 +110,14 @@
                             <flux:input
                                 x-bind:value="hashes[algo.key]"
                                 readonly
-                                placeholder="—"
+                                placeholder=""
                                 class="!font-mono"
                             />
                         </div>
                     </template>
                 </div>
                 <p class="mt-6 text-xs opacity-60">
-                    MD5 and SHA-1 are broken for collision resistance — use SHA-256 or SHA-512 for security-sensitive checks.
+                    MD5 and SHA-1 are broken for collision resistance. Use SHA-256 or SHA-512 for security-sensitive checks.
                 </p>
             </div>
         </div>

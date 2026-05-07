@@ -7,7 +7,7 @@
                 <div>
                     <flux:heading class="mb-1" level="1" size="xl">Diff Viewer</flux:heading>
                     <flux:heading class="font-normal opacity-70" level="2">
-                        Compare two pieces of text — line, word, or unified.
+                        Compare two pieces of text by line, word, or unified.
                     </flux:heading>
                 </div>
             </div>
@@ -49,7 +49,20 @@
 
             <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
                 <div class="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-black/10 pb-4 dark:border-white/10">
-                    <flux:heading size="xl">2. Diff</flux:heading>
+                    <div class="flex items-center gap-1">
+                        <flux:heading size="xl">2. Diff</flux:heading>
+                        <flux:dropdown position="bottom" align="start">
+                            <flux:button icon="information-circle" variant="ghost" size="sm" aria-label="Diff modes" />
+                            <flux:popover class="max-w-sm">
+                                <flux:heading size="sm">Three ways to view a diff</flux:heading>
+                                <ul class="mt-2 space-y-2 text-sm">
+                                    <li><strong>Side-by-side</strong>: original on the left, modified on the right. Best when there are many concurrent edits.</li>
+                                    <li><strong>Unified</strong>: one column with <code class="font-mono">+</code>/<code class="font-mono">-</code> markers (like <code class="font-mono">git diff</code>). Best for code review.</li>
+                                    <li><strong>Word</strong>: inline highlighting of changed words. Best for prose &amp; copy edits.</li>
+                                </ul>
+                            </flux:popover>
+                        </flux:dropdown>
+                    </div>
                     <flux:radio.group x-model="mode" variant="segmented" size="sm">
                         <flux:radio value="side-by-side" label="Side-by-side" />
                         <flux:radio value="unified" label="Unified" />
@@ -67,7 +80,7 @@
                 <template x-if="hasContent && !hasChanges">
                     <div class="flex flex-col items-center justify-center gap-2 py-10 text-center text-emerald-600 dark:text-emerald-400">
                         <flux:icon.check-circle class="size-8" />
-                        <flux:text>Identical — no differences detected.</flux:text>
+                        <flux:text>Identical. No differences detected.</flux:text>
                     </div>
                 </template>
 

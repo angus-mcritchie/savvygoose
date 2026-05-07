@@ -8,7 +8,7 @@
                 <div>
                     <flux:heading class="mb-1" level="1" size="xl">Password Generator</flux:heading>
                     <flux:heading class="font-normal opacity-70" level="2">
-                        Strong, random passwords — generated entirely in your browser.
+                        Strong, random passwords, generated entirely in your browser.
                     </flux:heading>
                 </div>
             </div>
@@ -45,7 +45,26 @@
 
                 <div x-show="hasCharset" x-cloak>
                     <div class="mb-2 flex items-baseline justify-between">
-                        <flux:subheading>Strength</flux:subheading>
+                        <div class="flex items-center gap-1">
+                            <flux:subheading>Strength</flux:subheading>
+                            <flux:dropdown position="bottom" align="start">
+                                <flux:button icon="information-circle" variant="ghost" size="xs" aria-label="What is entropy?" />
+                                <flux:popover class="max-w-sm">
+                                    <flux:heading size="sm">Bits of entropy</flux:heading>
+                                    <p class="mt-2 text-sm">Each bit doubles the number of possible passwords an attacker must try.</p>
+                                    <p class="mt-2 font-mono text-sm">entropy = length × log₂(charset size)</p>
+                                    <flux:separator class="my-3" />
+                                    <ul class="space-y-1 text-sm">
+                                        <li><strong>&lt; 40</strong>: weak; cracked in seconds offline.</li>
+                                        <li><strong>40–60</strong>: fair; OK for low-stakes accounts.</li>
+                                        <li><strong>60–80</strong>: strong; resists offline attacks for years.</li>
+                                        <li><strong>80+</strong>: very strong; future-proof.</li>
+                                    </ul>
+                                    <flux:separator class="my-3" />
+                                    <p class="text-sm">Assumes a uniformly random password. Reused or dictionary words have far less effective entropy.</p>
+                                </flux:popover>
+                            </flux:dropdown>
+                        </div>
                         <flux:subheading>
                             <span x-text="strength.label"></span>
                             <span class="opacity-60">·</span>
@@ -113,7 +132,7 @@
             <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
                 <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">Share</flux:heading>
                 <flux:subheading class="mb-4">
-                    The URL below carries your settings — not your password. Open it anywhere to generate a fresh password with the same options.
+                    The URL below carries your settings, not your password. Open it anywhere to generate a fresh password with the same options.
                 </flux:subheading>
                 <flux:input type="url" x-model="url" readonly copyable label="Share URL" />
             </div>

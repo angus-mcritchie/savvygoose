@@ -28,7 +28,7 @@
             <div class="flex items-center justify-between gap-4 rounded-md bg-zinc-100 px-4 py-2 text-sm dark:bg-zinc-700">
                 <div class="truncate">
                     <span class="font-medium" x-text="{{ $binding }}.name"></span>
-                    <span class="opacity-60" x-text="' — ' + $formatBytes({{ $binding }}.size)"></span>
+                    <span class="opacity-60" x-text="' · ' + $formatBytes({{ $binding }}.size)"></span>
                 </div>
                 <flux:button x-on:click="{{ $onClear }}()" icon="x-mark" size="xs" variant="ghost" />
             </div>

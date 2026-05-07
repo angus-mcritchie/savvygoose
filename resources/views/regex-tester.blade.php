@@ -15,7 +15,25 @@
 
         <div class="grid gap-6">
             <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
-                <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">1. Pattern</flux:heading>
+                <div class="mb-6 flex items-center justify-between gap-2 border-b border-black/10 pb-4 dark:border-white/10">
+                    <flux:heading size="xl">1. Pattern</flux:heading>
+                    <flux:dropdown position="bottom" align="end">
+                        <flux:button icon="information-circle" variant="ghost" size="sm" aria-label="Regex flags cheat sheet" />
+                        <flux:popover class="max-w-sm">
+                            <flux:heading size="sm">JavaScript regex flags</flux:heading>
+                            <ul class="mt-2 space-y-1 text-sm">
+                                <li><code class="font-mono">g</code>: global; find all matches, not just the first.</li>
+                                <li><code class="font-mono">i</code>: case-insensitive.</li>
+                                <li><code class="font-mono">m</code>: multiline; <code class="font-mono">^</code> and <code class="font-mono">$</code> match each line.</li>
+                                <li><code class="font-mono">s</code>: dotall; <code class="font-mono">.</code> also matches newlines.</li>
+                                <li><code class="font-mono">u</code>: unicode; full Unicode &amp; <code class="font-mono">\u{…}</code> escapes.</li>
+                                <li><code class="font-mono">y</code>: sticky; match must start at <code class="font-mono">lastIndex</code>.</li>
+                            </ul>
+                            <flux:separator class="my-3" />
+                            <p class="text-sm">In Replace, <code class="font-mono">$1</code>, <code class="font-mono">$2</code>… reference capture groups; <code class="font-mono">$&amp;</code> is the whole match.</p>
+                        </flux:popover>
+                    </flux:dropdown>
+                </div>
 
                 <flux:field>
                     <flux:label>Regular expression</flux:label>

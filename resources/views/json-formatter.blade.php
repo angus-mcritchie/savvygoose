@@ -16,10 +16,23 @@
         <div class="grid gap-6">
             <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
                 <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
-                    <flux:radio.group x-model="mode" variant="segmented" size="sm">
-                        <flux:radio value="pretty" label="Pretty" />
-                        <flux:radio value="minified" label="Minified" />
-                    </flux:radio.group>
+                    <div class="flex items-center gap-1">
+                        <flux:radio.group x-model="mode" variant="segmented" size="sm">
+                            <flux:radio value="pretty" label="Pretty" />
+                            <flux:radio value="minified" label="Minified" />
+                        </flux:radio.group>
+                        <flux:dropdown position="bottom" align="start">
+                            <flux:button icon="information-circle" variant="ghost" size="sm" aria-label="Pretty vs minified" />
+                            <flux:popover class="max-w-sm">
+                                <flux:heading size="sm">Pretty vs minified</flux:heading>
+                                <p class="mt-2 text-sm"><strong>Pretty</strong>: adds indentation &amp; newlines so a human can read it. Use for debugging, configs, or commit-friendly fixtures.</p>
+                                <flux:separator class="my-3" />
+                                <p class="text-sm"><strong>Minified</strong>: strips every byte of whitespace. Use over the wire; it's smaller, gzips well, and parses identically.</p>
+                                <flux:separator class="my-3" />
+                                <p class="text-sm">Both forms are byte-for-byte equivalent to a JSON parser.</p>
+                            </flux:popover>
+                        </flux:dropdown>
+                    </div>
 
                     <div class="flex flex-wrap items-center gap-2">
                         <flux:select x-model="indent" size="sm" x-bind:disabled="mode === 'minified'">
@@ -109,7 +122,7 @@
             <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
                 <flux:heading class="mb-2" size="xl">Share</flux:heading>
                 <flux:subheading class="mb-4">
-                    The URL below carries your JSON and settings — anyone who opens it sees the same input.
+                    The URL below carries your JSON and settings. Anyone who opens it sees the same input.
                 </flux:subheading>
                 <p x-show="urlTooLong" x-cloak class="mb-4 text-sm text-amber-600 dark:text-amber-400">
                     Input is too long to include in the URL. Copy the formatted output to share instead.

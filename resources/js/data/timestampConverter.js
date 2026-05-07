@@ -105,23 +105,39 @@ export default () => ({
     nowTimer: null,
     url: window.location.href,
     copied: '',
+    selectedDate: '',
+    selectedTime: '',
+    syncingPickers: false,
 
     init() {
         this.initFromUrl();
         this.rawInput = this.formatUnixSeconds(this.unixMs);
+        this.syncPickersFromUnixMs();
         this.refreshHint();
         this.updateUrl();
 
         this.nowTimer = setInterval(() => { this.nowMs = Date.now(); }, 1000);
 
         this.$watch('tz', () => {
+            this.syncPickersFromUnixMs();
             this.refreshHint();
             this.updateUrl();
         });
 
         this.$watch('unixMs', () => {
+            this.syncPickersFromUnixMs();
             this.refreshHint();
             this.updateUrl();
+        });
+
+        this.$watch('selectedDate', (v) => {
+            if (this.syncingPickers) return;
+            this.setFromDateAndTime(v, this.timeInputValue());
+        });
+
+        this.$watch('selectedTime', (v) => {
+            if (this.syncingPickers) return;
+            this.setFromDateAndTime(this.selectedDate, v);
         });
     },
 
@@ -229,6 +245,19 @@ export default () => ({
         const p = partsInZone(this.unixMs, this.tz);
         const pad = (n) => String(n).padStart(2, '0');
         return `${pad(p.hour)}:${pad(p.minute)}:${pad(p.second)}`;
+    },
+
+    timePickerValue() {
+        const p = partsInZone(this.unixMs, this.tz);
+        const pad = (n) => String(n).padStart(2, '0');
+        return `${pad(p.hour)}:${pad(p.minute)}`;
+    },
+
+    syncPickersFromUnixMs() {
+        this.syncingPickers = true;
+        this.selectedDate = this.dateInputValue();
+        this.selectedTime = this.timePickerValue();
+        this.$nextTick(() => { this.syncingPickers = false; });
     },
 
     async copy(key, value) {

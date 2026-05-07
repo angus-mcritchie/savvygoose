@@ -95,7 +95,26 @@
 
             <div class="rounded-lg border border-black/10 p-6 sm:p-8 dark:border-white/10">
                 <div class="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-black/10 pb-4 dark:border-white/10">
-                    <flux:heading size="xl">Contrast</flux:heading>
+                    <div class="flex items-center gap-1">
+                        <flux:heading size="xl">Contrast</flux:heading>
+                        <flux:dropdown position="bottom" align="start">
+                            <flux:button icon="information-circle" variant="ghost" size="sm" aria-label="How contrast ratios work" />
+                            <flux:popover class="max-w-sm">
+                                <flux:heading size="sm">WCAG contrast ratios</flux:heading>
+                                <p class="mt-2 text-sm">Compares relative luminance of two colors. Higher is more legible.</p>
+                                <p class="mt-2 font-mono text-sm">ratio = (L1 + 0.05) ÷ (L2 + 0.05)</p>
+                                <flux:separator class="my-3" />
+                                <ul class="space-y-1 text-sm">
+                                    <li><strong>AA · Normal</strong>: at least 4.5:1.</li>
+                                    <li><strong>AA · Large</strong>: at least 3:1 (≥ 18px bold or 24px regular).</li>
+                                    <li><strong>AAA · Normal</strong>: at least 7:1.</li>
+                                    <li><strong>AAA · Large</strong>: at least 4.5:1.</li>
+                                </ul>
+                                <flux:separator class="my-3" />
+                                <p class="text-sm">Pure white on pure black is 21:1, the maximum.</p>
+                            </flux:popover>
+                        </flux:dropdown>
+                    </div>
                     <flux:button type="button" size="sm" icon="arrows-right-left" x-on:click="swap()">
                         Swap
                     </flux:button>
@@ -106,8 +125,8 @@
                         class="flex h-44 flex-col items-center justify-center gap-2 rounded-lg border border-black/10 p-6 dark:border-white/10"
                         :style="{ backgroundColor: bg, color: fg }"
                     >
-                        <span class="text-sm">Sample small text — 14px regular</span>
-                        <span class="text-xl font-semibold">Sample large text — 20px bold</span>
+                        <span class="text-sm">Sample small text, 14px regular</span>
+                        <span class="text-xl font-semibold">Sample large text, 20px bold</span>
                     </div>
 
                     <div class="grid gap-3">

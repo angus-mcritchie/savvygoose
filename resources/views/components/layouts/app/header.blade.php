@@ -43,6 +43,15 @@
             </flux:navbar>
             <flux:button
                 class="ml-auto"
+                href="https://buymeacoffee.com/angus_mcritchie"
+                target="_blank"
+                rel="noopener"
+                icon="heart"
+                variant="subtle"
+            >
+                {{ __('Buy me a coffee') }}
+            </flux:button>
+            <flux:button
                 x-data
                 x-on:click="$flux.dark = ! $flux.dark"
                 icon="moon"
@@ -73,6 +82,14 @@
                         </flux:navlist.group>
                     @endif
                 @endforeach
+            </flux:navlist>
+
+            <flux:spacer />
+
+            <flux:navlist>
+                <flux:navlist.item href="https://buymeacoffee.com/angus_mcritchie" target="_blank" rel="noopener" icon="heart">
+                    {{ __('Buy me a coffee') }}
+                </flux:navlist.item>
             </flux:navlist>
         </flux:sidebar>
 

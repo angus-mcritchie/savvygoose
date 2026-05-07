@@ -13,7 +13,7 @@ const DEFAULTS = {
 const EC_LEVELS = ['L', 'M', 'Q', 'H'];
 const MAX_LOGO_BYTES = 2 * 1024 * 1024;
 
-// Heroicons solid 24x24 — recolored at use-time via {color} placeholder.
+// Heroicons solid 24x24, recolored at use-time via {color} placeholder.
 const PRESET_ICONS = {
     url: {
         label: 'URL',
