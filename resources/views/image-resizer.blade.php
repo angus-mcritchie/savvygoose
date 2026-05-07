@@ -197,7 +197,7 @@
                                         <ul class="mt-2 space-y-2 text-sm">
                                             <li><strong>PNG</strong>: lossless, supports transparency. Best for logos, icons, screenshots.</li>
                                             <li><strong>JPEG</strong>: lossy, no transparency. Best for photos.</li>
-                                            <li><strong>WebP</strong>: modern; smaller than both at similar quality. Universally supported in modern browsers.</li>
+                                            <li><strong>WebP</strong>: smaller files at the same quality. Works in every modern browser.</li>
                                         </ul>
                                     </flux:popover>
                                 </flux:dropdown>

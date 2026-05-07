@@ -8,7 +8,7 @@
                 <flux:icon.tag class="size-20 text-zinc-700 dark:text-zinc-200" />
                 <div>
                     <flux:heading class="mb-1" level="1" size="xl">Barcode Generator</flux:heading>
-                    <flux:heading class="font-normal opacity-70" level="2">Generate and print code 128 barcodes in seconds.</flux:heading>
+                    <flux:heading class="font-normal opacity-70" level="2">Generate Code 128 barcodes and print them straight from your browser.</flux:heading>
                 </div>
             </div>
         </div>

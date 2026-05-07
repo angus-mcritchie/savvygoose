@@ -15,7 +15,7 @@
             </flux:heading>
 
             <flux:subheading class="max-w-xl !text-base sm:!text-lg" level="2">
-                A small, growing kit of utilities for everyday tasks — fast, private, and built to stay out of your way.
+                A small, growing collection of utilities. They run in your browser, ask for nothing, and never see your data.
             </flux:subheading>
         </div>
 

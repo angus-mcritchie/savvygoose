@@ -30,10 +30,10 @@
                             <flux:button icon="information-circle" variant="ghost" size="xs" aria-label="What is a slug?" />
                             <flux:popover class="max-w-sm">
                                 <flux:heading size="sm">What's a slug?</flux:heading>
-                                <p class="mt-2 text-sm">The human-readable, URL-safe portion of a URL, usually derived from a title.</p>
+                                <p class="mt-2 text-sm">The human-readable, URL-safe part of a URL, usually derived from a title.</p>
                                 <p class="mt-2 font-mono text-xs break-all">example.com/blog/<strong>my-awesome-post</strong></p>
                                 <flux:separator class="my-3" />
-                                <p class="text-sm">Slugs lowercase, transliterate accents, drop punctuation, and join words with a separator. They survive being copy-pasted, shared in chat, and indexed by search engines.</p>
+                                <p class="text-sm">A slug lowercases the title, strips accents and punctuation, and joins the remaining words with a separator — so it doesn't get mangled when someone pastes it into a chat or the address bar.</p>
                             </flux:popover>
                         </flux:dropdown>
                     </div>

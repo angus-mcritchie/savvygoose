@@ -131,7 +131,7 @@
             <div class="rounded-lg border border-black/10 p-8 lg:col-span-2 dark:border-white/10">
                 <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">4. Logo</flux:heading>
                 <flux:subheading class="mb-6">
-                    Drop a logo into the centre. We recommend error correction <strong>H</strong> when using a logo so scanners can still recover the code.
+                    Drop a logo into the centre. Bump error correction up to <strong>H</strong> if you do — scanners need the extra redundancy to read past whatever the logo covers.
                 </flux:subheading>
 
                 <div class="mb-6">

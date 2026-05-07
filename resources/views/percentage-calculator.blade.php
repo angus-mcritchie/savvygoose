@@ -12,7 +12,7 @@
                 <div>
                     <flux:heading class="mb-1" level="1" size="xl">Percentage Calculator</flux:heading>
                     <flux:heading class="font-normal opacity-70" level="2">
-                        Calculate percentages, percentage differences, and more.
+                        The five percentage questions you actually run into.
                     </flux:heading>
                 </div>
             </div>
