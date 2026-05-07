@@ -1,11 +1,13 @@
 const DEFAULTS = {
-    width: 256,
-    height: 256,
-    fit: 'contain',
+    canvasWidth: 512,
+    canvasHeight: 512,
+    imageWidth: 512,
+    imageHeight: 512,
     format: 'image/png',
     quality: 92,
     bg: '#ffffff',
-    locked: false,
+    transparent: true,
+    locked: true,
 };
 
 const SIZE_PRESETS = [
@@ -35,40 +37,15 @@ const FORMATS = {
 
 const MAX_FILE_BYTES = 20 * 1024 * 1024;
 
-const computeRect = (srcW, srcH, dstW, dstH, fit) => {
-    if (fit === 'stretch') {
-        return { x: 0, y: 0, w: dstW, h: dstH };
-    }
-    const srcRatio = srcW / srcH;
-    const dstRatio = dstW / dstH;
-    if (fit === 'cover') {
-        if (srcRatio > dstRatio) {
-            const h = dstH;
-            const w = h * srcRatio;
-            return { x: (dstW - w) / 2, y: 0, w, h };
-        }
-        const w = dstW;
-        const h = w / srcRatio;
-        return { x: 0, y: (dstH - h) / 2, w, h };
-    }
-    // contain
-    if (srcRatio > dstRatio) {
-        const w = dstW;
-        const h = w / srcRatio;
-        return { x: 0, y: (dstH - h) / 2, w, h };
-    }
-    const h = dstH;
-    const w = h * srcRatio;
-    return { x: (dstW - w) / 2, y: 0, w, h };
-};
-
 export default () => ({
-    width: DEFAULTS.width,
-    height: DEFAULTS.height,
-    fit: DEFAULTS.fit,
+    canvasWidth: DEFAULTS.canvasWidth,
+    canvasHeight: DEFAULTS.canvasHeight,
+    imageWidth: DEFAULTS.imageWidth,
+    imageHeight: DEFAULTS.imageHeight,
     format: DEFAULTS.format,
     quality: DEFAULTS.quality,
     bg: DEFAULTS.bg,
+    transparent: DEFAULTS.transparent,
     locked: DEFAULTS.locked,
     source: null,
     sourceName: '',
@@ -90,24 +67,32 @@ export default () => ({
     init() {
         this.initFromUrl();
 
-        ['width', 'height', 'fit', 'format', 'quality', 'bg'].forEach((prop) => {
+        ['canvasWidth', 'canvasHeight', 'imageWidth', 'imageHeight', 'format', 'quality', 'bg', 'transparent'].forEach((prop) => {
             this.$watch(prop, () => {
                 this.updateUrl();
                 this.renderPreview();
             });
         });
 
-        this.$watch('width', (val) => {
+        this.$watch('imageWidth', (val) => {
+            if (this.sourceWidth && val > this.sourceWidth) {
+                this.imageWidth = this.sourceWidth;
+                return;
+            }
             if (!this.locked || this._ratioGuard || !this.sourceRatio) return;
             this._ratioGuard = true;
-            this.height = Math.max(1, Math.round(val / this.sourceRatio));
+            this.imageHeight = Math.max(1, Math.round(val / this.sourceRatio));
             this.$nextTick(() => (this._ratioGuard = false));
         });
 
-        this.$watch('height', (val) => {
+        this.$watch('imageHeight', (val) => {
+            if (this.sourceHeight && val > this.sourceHeight) {
+                this.imageHeight = this.sourceHeight;
+                return;
+            }
             if (!this.locked || this._ratioGuard || !this.sourceRatio) return;
             this._ratioGuard = true;
-            this.width = Math.max(1, Math.round(val * this.sourceRatio));
+            this.imageWidth = Math.max(1, Math.round(val * this.sourceRatio));
             this.$nextTick(() => (this._ratioGuard = false));
         });
 
@@ -120,6 +105,10 @@ export default () => ({
 
     get supportsTransparency() {
         return this.format === 'image/png' || this.format === 'image/webp';
+    },
+
+    get isCanvasTransparent() {
+        return this.transparent && this.supportsTransparency;
     },
 
     get baseName() {
@@ -165,12 +154,25 @@ export default () => ({
             const img = await this.loadImage(url);
             URL.revokeObjectURL(url);
 
+            const isFirstLoad = !this.source;
+            const canvasWasDefault = this.canvasWidth === DEFAULTS.canvasWidth
+                && this.canvasHeight === DEFAULTS.canvasHeight;
+
             this.source = img;
             this.sourceName = file.name;
             this.sourceBytes = file.size;
             this.sourceWidth = img.naturalWidth;
             this.sourceHeight = img.naturalHeight;
             this.sourceRatio = img.naturalWidth / img.naturalHeight;
+
+            this._ratioGuard = true;
+            this.imageWidth = this.sourceWidth;
+            this.imageHeight = this.sourceHeight;
+            if (isFirstLoad && canvasWasDefault) {
+                this.canvasWidth = this.sourceWidth;
+                this.canvasHeight = this.sourceHeight;
+            }
+            this.$nextTick(() => (this._ratioGuard = false));
 
             this.renderPreview();
         } catch {
@@ -199,23 +201,21 @@ export default () => ({
         this.error = null;
     },
 
-    drawTo(canvas, w, h) {
-        canvas.width = w;
-        canvas.height = h;
+    drawTo(canvas, cw, ch, iw, ih) {
+        canvas.width = cw;
+        canvas.height = ch;
         const ctx = canvas.getContext('2d');
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
 
-        // Fill background whenever the image won't fully cover the canvas
-        // (contain may letterbox) or the format can't carry transparency.
-        const willCoverCanvas = this.fit === 'cover' || this.fit === 'stretch';
-        if (!this.supportsTransparency || !willCoverCanvas) {
+        if (!this.isCanvasTransparent) {
             ctx.fillStyle = this.bg;
-            ctx.fillRect(0, 0, w, h);
+            ctx.fillRect(0, 0, cw, ch);
         }
 
-        const rect = computeRect(this.sourceWidth, this.sourceHeight, w, h, this.fit);
-        ctx.drawImage(this.source, rect.x, rect.y, rect.w, rect.h);
+        const x = (cw - iw) / 2;
+        const y = (ch - ih) / 2;
+        ctx.drawImage(this.source, x, y, iw, ih);
     },
 
     async renderPreview() {
@@ -225,12 +225,14 @@ export default () => ({
             return;
         }
 
-        const w = Math.max(1, Math.min(4096, parseInt(this.width, 10) || 1));
-        const h = Math.max(1, Math.min(4096, parseInt(this.height, 10) || 1));
+        const cw = Math.max(1, Math.min(4096, parseInt(this.canvasWidth, 10) || 1));
+        const ch = Math.max(1, Math.min(4096, parseInt(this.canvasHeight, 10) || 1));
+        const iw = Math.max(1, parseInt(this.imageWidth, 10) || 1);
+        const ih = Math.max(1, parseInt(this.imageHeight, 10) || 1);
         const token = ++this._previewToken;
 
         const canvas = document.createElement('canvas');
-        this.drawTo(canvas, w, h);
+        this.drawTo(canvas, cw, ch, iw, ih);
 
         const blob = await this.canvasBlob(canvas);
         if (token !== this._previewToken) return;
@@ -250,13 +252,15 @@ export default () => ({
 
     async download() {
         if (!this.source) return;
-        const w = Math.max(1, parseInt(this.width, 10));
-        const h = Math.max(1, parseInt(this.height, 10));
+        const cw = Math.max(1, parseInt(this.canvasWidth, 10));
+        const ch = Math.max(1, parseInt(this.canvasHeight, 10));
+        const iw = Math.max(1, parseInt(this.imageWidth, 10));
+        const ih = Math.max(1, parseInt(this.imageHeight, 10));
         const canvas = document.createElement('canvas');
-        this.drawTo(canvas, w, h);
+        this.drawTo(canvas, cw, ch, iw, ih);
         const blob = await this.canvasBlob(canvas);
         const ext = FORMATS[this.format].ext;
-        this.triggerDownload(blob, `${this.baseName}-${w}x${h}.${ext}`);
+        this.triggerDownload(blob, `${this.baseName}-${cw}x${ch}.${ext}`);
     },
 
     triggerDownload(blob, filename) {
@@ -274,7 +278,7 @@ export default () => ({
         this.locked = !this.locked;
         if (this.locked && this.source) {
             this._ratioGuard = true;
-            this.height = Math.max(1, Math.round(this.width / this.sourceRatio));
+            this.imageHeight = Math.max(1, Math.round(this.imageWidth / this.sourceRatio));
             this.$nextTick(() => (this._ratioGuard = false));
         }
     },
@@ -282,23 +286,38 @@ export default () => ({
     matchSource() {
         if (!this.source) return;
         this._ratioGuard = true;
-        this.width = this.sourceWidth;
-        this.height = this.sourceHeight;
+        this.imageWidth = this.sourceWidth;
+        this.imageHeight = this.sourceHeight;
         this.$nextTick(() => (this._ratioGuard = false));
     },
 
-    applySize(w, h) {
+    fitImageToCanvas() {
+        if (!this.source) return;
+        const scale = Math.min(
+            this.canvasWidth / this.sourceWidth,
+            this.canvasHeight / this.sourceHeight,
+            1,
+        );
         this._ratioGuard = true;
-        this.width = w;
-        this.height = h;
+        this.imageWidth = Math.max(1, Math.round(this.sourceWidth * scale));
+        this.imageHeight = Math.max(1, Math.round(this.sourceHeight * scale));
         this.$nextTick(() => (this._ratioGuard = false));
     },
 
-    applyRatio(rw, rh) {
-        this._ratioGuard = true;
-        const w = Math.max(1, parseInt(this.width, 10) || rw);
-        this.height = Math.max(1, Math.round((w * rh) / rw));
-        this.$nextTick(() => (this._ratioGuard = false));
+    canvasMatchSource() {
+        if (!this.source) return;
+        this.canvasWidth = this.sourceWidth;
+        this.canvasHeight = this.sourceHeight;
+    },
+
+    applyCanvasSize(w, h) {
+        this.canvasWidth = w;
+        this.canvasHeight = h;
+    },
+
+    applyCanvasRatio(rw, rh) {
+        const w = Math.max(1, parseInt(this.canvasWidth, 10) || rw);
+        this.canvasHeight = Math.max(1, Math.min(4096, Math.round((w * rh) / rw)));
     },
 
     formatBytes(n) {
@@ -333,14 +352,11 @@ export default () => ({
             if (Number.isFinite(n) && n >= min && n <= max) this[prop] = n;
         };
 
-        intParam('w', 'width', 1, 4096);
-        intParam('h', 'height', 1, 4096);
+        intParam('cw', 'canvasWidth', 1, 4096);
+        intParam('ch', 'canvasHeight', 1, 4096);
+        intParam('iw', 'imageWidth', 1, 4096);
+        intParam('ih', 'imageHeight', 1, 4096);
         intParam('q', 'quality', 1, 100);
-
-        if (params.has('fit')) {
-            const v = params.get('fit');
-            if (['contain', 'cover', 'stretch'].includes(v)) this.fit = v;
-        }
 
         if (params.has('fmt')) {
             const v = 'image/' + params.get('fmt').toLowerCase().replace('jpg', 'jpeg');
@@ -350,6 +366,8 @@ export default () => ({
         if (params.has('bg') && /^#?[0-9a-fA-F]{6}$/.test(params.get('bg'))) {
             this.bg = '#' + params.get('bg').replace('#', '');
         }
+
+        if (params.get('fill') === '1') this.transparent = false;
     },
 
     updateUrl() {
@@ -360,9 +378,10 @@ export default () => ({
             else params.set(key, val);
         };
 
-        setOrDelete('w', parseInt(this.width, 10), DEFAULTS.width);
-        setOrDelete('h', parseInt(this.height, 10), DEFAULTS.height);
-        setOrDelete('fit', this.fit, DEFAULTS.fit);
+        setOrDelete('cw', parseInt(this.canvasWidth, 10), DEFAULTS.canvasWidth);
+        setOrDelete('ch', parseInt(this.canvasHeight, 10), DEFAULTS.canvasHeight);
+        setOrDelete('iw', parseInt(this.imageWidth, 10), DEFAULTS.imageWidth);
+        setOrDelete('ih', parseInt(this.imageHeight, 10), DEFAULTS.imageHeight);
 
         const fmtShort = this.format.replace('image/', '').replace('jpeg', 'jpg');
         const defShort = DEFAULTS.format.replace('image/', '').replace('jpeg', 'jpg');
@@ -379,6 +398,9 @@ export default () => ({
         } else {
             params.delete('bg');
         }
+
+        if (!this.transparent) params.set('fill', '1');
+        else params.delete('fill');
 
         const qs = params.toString();
         const newUrl = `${window.location.origin}${window.location.pathname}${qs ? '?' + qs : ''}`;

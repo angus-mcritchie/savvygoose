@@ -73,8 +73,54 @@
                 <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
                     <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">2. Resize</flux:heading>
 
-                    <div class="mb-6 grid grid-cols-[1fr_auto_1fr] items-end gap-2">
-                        <flux:input type="number" min="1" max="4096" step="1" x-model.number="width" label="Width (px)" />
+                    <flux:label class="mb-2">Canvas size</flux:label>
+                    <flux:subheading class="mb-3 text-xs">The output frame. Free to be any dimensions.</flux:subheading>
+                    <div class="mb-4 grid grid-cols-2 gap-2">
+                        <flux:input type="number" min="1" max="4096" step="1" x-model.number="canvasWidth" label="Width (px)" />
+                        <flux:input type="number" min="1" max="4096" step="1" x-model.number="canvasHeight" label="Height (px)" />
+                    </div>
+
+                    <div class="mb-6 grid gap-3">
+                        <flux:label>Quick sizes</flux:label>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="preset in sizePresets" :key="preset.label">
+                                <button
+                                    type="button"
+                                    x-on:click="applyCanvasSize(preset.w, preset.h)"
+                                    :class="canvasWidth === preset.w && canvasHeight === preset.h
+                                        ? 'border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-zinc-900'
+                                        : 'border-black/15 hover:border-black/40 dark:border-white/15 dark:hover:border-white/40'"
+                                    class="rounded-md border px-3 py-1.5 font-mono text-xs transition"
+                                    x-text="preset.label"
+                                ></button>
+                            </template>
+                            <flux:button size="sm" variant="subtle" x-on:click="canvasMatchSource">Match source</flux:button>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 grid gap-3">
+                        <flux:label>Aspect ratio</flux:label>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="ratio in ratioPresets" :key="ratio.label">
+                                <button
+                                    type="button"
+                                    x-on:click="applyCanvasRatio(ratio.w, ratio.h)"
+                                    class="rounded-md border border-black/15 px-3 py-1.5 font-mono text-xs transition hover:border-black/40 dark:border-white/15 dark:hover:border-white/40"
+                                    x-text="ratio.label"
+                                ></button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <flux:separator class="my-6" />
+
+                    <flux:label class="mb-2">Image size</flux:label>
+                    <flux:subheading class="mb-3 text-xs">
+                        How large the source is drawn on the canvas. Capped at the source's natural size
+                        (<span class="font-mono tabular-nums" x-text="sourceWidth"></span>×<span class="font-mono tabular-nums" x-text="sourceHeight"></span>).
+                    </flux:subheading>
+                    <div class="mb-4 grid grid-cols-[1fr_auto_1fr] items-end gap-2">
+                        <flux:input type="number" min="1" x-bind:max="sourceWidth || 4096" step="1" x-model.number="imageWidth" label="Width (px)" />
                         <button
                             type="button"
                             x-on:click="toggleLock"
@@ -88,49 +134,15 @@
                             <flux:icon :name="'link'" class="size-4" x-show="locked" />
                             <flux:icon :name="'link-slash'" class="size-4" x-show="!locked" />
                         </button>
-                        <flux:input type="number" min="1" max="4096" step="1" x-model.number="height" label="Height (px)" />
+                        <flux:input type="number" min="1" x-bind:max="sourceHeight || 4096" step="1" x-model.number="imageHeight" label="Height (px)" />
                     </div>
 
-                    <div class="mb-6 grid gap-3">
-                        <flux:label>Quick sizes</flux:label>
-                        <div class="flex flex-wrap gap-2">
-                            <template x-for="preset in sizePresets" :key="preset.label">
-                                <button
-                                    type="button"
-                                    x-on:click="applySize(preset.w, preset.h)"
-                                    :class="width === preset.w && height === preset.h
-                                        ? 'border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-zinc-900'
-                                        : 'border-black/15 hover:border-black/40 dark:border-white/15 dark:hover:border-white/40'"
-                                    class="rounded-md border px-3 py-1.5 font-mono text-xs transition"
-                                    x-text="preset.label"
-                                ></button>
-                            </template>
-                            <flux:button size="sm" variant="subtle" x-on:click="matchSource">Source</flux:button>
-                        </div>
+                    <div class="mb-6 flex flex-wrap gap-2">
+                        <flux:button size="sm" variant="subtle" x-on:click="matchSource">Match source</flux:button>
+                        <flux:button size="sm" variant="subtle" x-on:click="fitImageToCanvas">Fit to canvas</flux:button>
                     </div>
 
-                    <div class="mb-6 grid gap-3">
-                        <flux:label>Aspect ratio</flux:label>
-                        <div class="flex flex-wrap gap-2">
-                            <template x-for="ratio in ratioPresets" :key="ratio.label">
-                                <button
-                                    type="button"
-                                    x-on:click="applyRatio(ratio.w, ratio.h)"
-                                    class="rounded-md border border-black/15 px-3 py-1.5 font-mono text-xs transition hover:border-black/40 dark:border-white/15 dark:hover:border-white/40"
-                                    x-text="ratio.label"
-                                ></button>
-                            </template>
-                        </div>
-                    </div>
-
-                    <div class="mb-6 grid gap-3">
-                        <flux:label>Fit</flux:label>
-                        <flux:radio.group x-model="fit">
-                            <flux:radio value="contain" label="Contain" description="Fit inside, pad with background." />
-                            <flux:radio value="cover" label="Cover" description="Fill the frame, crop overflow." />
-                            <flux:radio value="stretch" label="Stretch" description="Squash to exact dimensions." />
-                        </flux:radio.group>
-                    </div>
+                    <flux:separator class="my-6" />
 
                     <div class="grid gap-6 sm:grid-cols-2">
                         <flux:field>
@@ -145,8 +157,6 @@
                                             <li><strong>JPEG</strong>: lossy, no transparency. Best for photos.</li>
                                             <li><strong>WebP</strong>: modern; smaller than both at similar quality. Universally supported in modern browsers.</li>
                                         </ul>
-                                        <flux:separator class="my-3" />
-                                        <p class="text-sm">For opaque output formats (JPEG), the background colour fills any transparency in the source.</p>
                                     </flux:popover>
                                 </flux:dropdown>
                             </div>
@@ -166,7 +176,16 @@
                     </div>
 
                     <div class="mt-6">
-                        <flux:color-picker x-model="bg" label="Background (used for Contain & opaque formats)" copyable />
+                        <flux:label class="mb-2">Background</flux:label>
+                        <flux:checkbox
+                            x-model="transparent"
+                            x-bind:disabled="!supportsTransparency"
+                            label="Transparent"
+                            description="Leave the canvas around the image transparent. JPEG always fills."
+                        />
+                        <div class="mt-3" x-show="!transparent || !supportsTransparency" x-cloak>
+                            <flux:color-picker x-model="bg" copyable />
+                        </div>
                     </div>
                 </div>
 
@@ -184,9 +203,12 @@
 
                     <div class="mb-6 grid grid-cols-2 gap-4 text-sm">
                         <div class="rounded-md border border-black/10 px-3 py-2 dark:border-white/10">
-                            <div class="opacity-60">Output</div>
+                            <div class="opacity-60">Canvas</div>
                             <div class="font-mono tabular-nums">
-                                <span x-text="width"></span>×<span x-text="height"></span>
+                                <span x-text="canvasWidth"></span>×<span x-text="canvasHeight"></span>
+                            </div>
+                            <div class="font-mono text-xs tabular-nums opacity-60">
+                                Image <span x-text="imageWidth"></span>×<span x-text="imageHeight"></span>
                             </div>
                         </div>
                         <div class="rounded-md border border-black/10 px-3 py-2 dark:border-white/10">

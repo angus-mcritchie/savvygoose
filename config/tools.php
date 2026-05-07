@@ -130,6 +130,13 @@ return [
             'icon' => ['type' => 'flux', 'name' => 'magnifying-glass'],
         ],
         [
+            'slug' => 'browser-info',
+            'name' => 'Browser Info',
+            'tagline' => 'Viewport, screen size, DPR, browser & OS.',
+            'category' => 'data',
+            'icon' => ['type' => 'flux', 'name' => 'computer-desktop'],
+        ],
+        [
             'slug' => 'password-generator',
             'name' => 'Password Generator',
             'tagline' => 'Strong, random passwords with a strength meter.',

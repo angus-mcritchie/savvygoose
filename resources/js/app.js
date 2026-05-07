@@ -1,6 +1,7 @@
 import { Livewire, Alpine } from '../../vendor/livewire/livewire/dist/livewire.esm';
 import barcode from './data/barcode';
 import base64Encoder from './data/base64Encoder';
+import browserInfo from './data/browserInfo';
 import caseConverter from './data/caseConverter';
 import characterCounter from './data/characterCounter';
 import colorConverter from './data/colorConverter';
@@ -29,6 +30,7 @@ import mask from '@alpinejs/mask';
 
 Alpine.data('barcode', barcode);
 Alpine.data('base64Encoder', base64Encoder);
+Alpine.data('browserInfo', browserInfo);
 Alpine.data('caseConverter', caseConverter);
 Alpine.data('characterCounter', characterCounter);
 Alpine.data('colorConverter', colorConverter);

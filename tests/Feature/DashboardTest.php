@@ -92,6 +92,10 @@ test('the regex tester renders', function () {
     $this->get('/regex-tester')->assertOk();
 });
 
+test('the browser info tool renders', function () {
+    $this->get('/browser-info')->assertOk();
+});
+
 test('the time between dates tool renders', function () {
     $this->get('/time-between-dates')->assertOk();
 });

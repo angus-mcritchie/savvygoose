@@ -8,11 +8,13 @@
     <div class="mx-auto max-w-[1200px]">
 
         <div class="mb-12">
-            <flux:heading class="mb-2" level="1" size="xl">
-                {{ $label }}
-            </flux:heading>
-            <flux:heading class="font-normal opacity-70" level="2">
-                {{ $tools->count() }} {{ \Illuminate\Support\Str::plural('tool', $tools->count()) }} in this category.
+            <p class="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-violet-500 dark:text-violet-300">
+                {{ $tools->count() }} {{ \Illuminate\Support\Str::plural('tool', $tools->count()) }} &middot; free forever
+            </p>
+            <flux:heading class="!text-3xl !font-semibold tracking-tight sm:!text-4xl" level="1">
+                <span class="bg-gradient-to-r from-rose-400 via-violet-500 to-teal-400 bg-clip-text text-transparent dark:from-rose-300 dark:via-violet-400 dark:to-teal-300">
+                    {{ $label }}
+                </span>
             </flux:heading>
         </div>
 
