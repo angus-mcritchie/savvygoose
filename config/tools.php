@@ -60,6 +60,13 @@ return [
             'icon' => ['type' => 'flux', 'name' => 'clock'],
         ],
         [
+            'slug' => 'time-between-dates',
+            'name' => 'Time Between Dates',
+            'tagline' => 'Calendar days, business days & holidays between two dates.',
+            'category' => 'numbers',
+            'icon' => ['type' => 'flux', 'name' => 'calendar-days'],
+        ],
+        [
             'slug' => 'barcode-generator',
             'name' => 'Barcode Generator',
             'tagline' => 'Generate & print Code 128 barcodes.',

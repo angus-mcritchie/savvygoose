@@ -91,3 +91,27 @@ test('the lorem ipsum generator renders', function () {
 test('the regex tester renders', function () {
     $this->get('/regex-tester')->assertOk();
 });
+
+test('the time between dates tool renders', function () {
+    $this->get('/time-between-dates')->assertOk();
+});
+
+test('the holidays api returns holidays for a country and range', function () {
+    $response = $this->getJson('/api/holidays?country=us&from=2026-01-01&to=2026-12-31');
+
+    $response->assertOk()
+        ->assertJsonPath('country', 'us')
+        ->assertJsonStructure(['country', 'from', 'to', 'holidays' => [['date', 'name', 'type']]]);
+
+    expect($response->json('holidays'))->not->toBeEmpty();
+});
+
+test('the holidays api rejects an unsupported country', function () {
+    $this->getJson('/api/holidays?country=zz&from=2026-01-01&to=2026-12-31')
+        ->assertStatus(422);
+});
+
+test('the holidays api rejects an invalid date range', function () {
+    $this->getJson('/api/holidays?country=us&from=2026-12-31&to=2026-01-01')
+        ->assertStatus(422);
+});

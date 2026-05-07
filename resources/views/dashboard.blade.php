@@ -2,18 +2,21 @@
 
     <div class="mx-auto max-w-[1200px]">
 
-        <div class="mb-12 flex justify-center">
-            <div class="grid grid-cols-[auto_1fr] items-center gap-4">
-                <img class="mx-auto w-[128px]" src="{{ asset('image/window-cloud.png') }}" width="128" height="128">
-                <div>
-                    <flux:heading class="mb-1" level="1" size="xl">
-                        Helpful Tools, Free Forever
-                    </flux:heading>
-                    <flux:heading class="font-normal opacity-70" level="2">
-                        A collection of free tools to help you with your daily tasks.
-                    </flux:heading>
-                </div>
-            </div>
+        <div class="mb-16 flex flex-col items-center text-center">
+            <p class="mb-5 text-xs font-medium uppercase tracking-[0.2em] text-violet-500 dark:text-violet-300">
+                {{ count(config('tools.tools')) }} tools &middot; no sign-up
+            </p>
+
+            <flux:heading class="mb-4 max-w-2xl !text-4xl !font-semibold !leading-tight tracking-tight sm:!text-5xl" level="1">
+                Helpful tools,
+                <span class="bg-gradient-to-r from-rose-400 via-violet-500 to-teal-400 bg-clip-text text-transparent dark:from-rose-300 dark:via-violet-400 dark:to-teal-300">
+                    free forever.
+                </span>
+            </flux:heading>
+
+            <flux:subheading class="max-w-xl !text-base sm:!text-lg" level="2">
+                A small, growing kit of utilities for everyday tasks — fast, private, and built to stay out of your way.
+            </flux:subheading>
         </div>
 
         @php
