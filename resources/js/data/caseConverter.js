@@ -1,4 +1,4 @@
-const MAX_URL_INPUT = 3000;
+import { withUrlState } from '../lib/urlState';
 
 function tokenize(text) {
     return text
@@ -81,55 +81,19 @@ export const CONVERTERS = [
     },
 ];
 
-export default () => ({
-    text: '',
-    copiedKey: null,
-    converters: CONVERTERS,
-    url: window.location.href,
-    urlTooLong: false,
+const schema = {
+    text: { type: 'string', maxLength: 3000 },
+};
 
-    init() {
-        this.initFromUrl();
-        this.$watch('text', () => this.updateUrl());
-        this.updateUrl();
-    },
+export default withUrlState(schema, () => ({
+    converters: CONVERTERS,
 
     convert(key) {
         const c = CONVERTERS.find((c) => c.key === key);
         return c ? c.convert(this.text) : '';
     },
 
-    async copy(key) {
-        const value = this.convert(key);
-        if (!value) return;
-        await navigator.clipboard.writeText(value);
-        this.copiedKey = key;
-        setTimeout(() => {
-            if (this.copiedKey === key) this.copiedKey = null;
-        }, 1500);
-    },
-
     clear() {
         this.text = '';
     },
-
-    initFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-        if (params.has('text')) this.text = params.get('text');
-    },
-
-    updateUrl() {
-        const params = new URLSearchParams(window.location.search);
-        if (this.text && this.text.length <= MAX_URL_INPUT) {
-            params.set('text', this.text);
-            this.urlTooLong = false;
-        } else {
-            params.delete('text');
-            this.urlTooLong = this.text.length > MAX_URL_INPUT;
-        }
-        const qs = params.toString();
-        const newUrl = `${window.location.origin}${window.location.pathname}${qs ? '?' + qs : ''}`;
-        this.url = newUrl;
-        window.history.replaceState({}, '', newUrl);
-    },
-});
+}));

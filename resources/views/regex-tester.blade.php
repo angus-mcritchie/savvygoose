@@ -155,7 +155,27 @@
                         />
 
                         <div>
-                            <flux:label>Result</flux:label>
+                            <div class="flex items-center justify-between">
+                                <flux:label>Result</flux:label>
+                                <div class="flex gap-2">
+                                    <x-copy-button
+                                        value="replaceResult"
+                                        flash="'regex-result'"
+                                        icon="document-duplicate"
+                                        size="xs"
+                                        x-bind:disabled="!replaceResult"
+                                    />
+                                    <flux:button
+                                        x-on:click="$download(replaceResult, 'replaced.txt')"
+                                        x-bind:disabled="!replaceResult"
+                                        icon="arrow-down-tray"
+                                        size="xs"
+                                        variant="ghost"
+                                    >
+                                        .txt
+                                    </flux:button>
+                                </div>
+                            </div>
                             <div class="mt-2 min-h-[5rem] whitespace-pre-wrap rounded-md border border-black/10 bg-zinc-50 p-4 font-mono text-sm dark:border-white/10 dark:bg-zinc-900"
                                 x-text="replaceResult || '(empty)'"></div>
                         </div>
@@ -166,16 +186,12 @@
                 </template>
             </div>
 
-            <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
-                <flux:heading class="mb-2" size="xl">Share</flux:heading>
-                <flux:subheading class="mb-4">
-                    The URL below carries your pattern, flags, and test string.
-                </flux:subheading>
-                <p x-show="urlTooLong" x-cloak class="mb-4 text-sm text-amber-600 dark:text-amber-400">
-                    Test string is too long to include in the URL.
-                </p>
-                <flux:input type="url" x-model="url" readonly copyable label="Share URL" />
-            </div>
+            <x-share-field
+                class="rounded-lg border border-black/10 p-8 dark:border-white/10"
+                subheading="The URL below carries your pattern, flags, and test string."
+                tooLongMessage="Test string is too long to include in the URL."
+            />
         </div>
     </div>
+    <x-tool-content />
 </x-layouts.app>

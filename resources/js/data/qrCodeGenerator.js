@@ -1,4 +1,5 @@
 import QRCode from 'qrcode';
+import { withUrlState } from '../lib/urlState';
 
 const DEFAULTS = {
     size: 256,
@@ -41,13 +42,24 @@ const PRESET_ICONS = {
     },
 };
 
-export default () => ({
-    text: '',
-    size: DEFAULTS.size,
-    ec: DEFAULTS.ec,
-    fg: DEFAULTS.fg,
-    bg: DEFAULTS.bg,
-    margin: DEFAULTS.margin,
+const schema = {
+    text: { type: 'string' },
+    size: { type: 'integer', default: DEFAULTS.size, min: 64, max: 2048 },
+    ec: {
+        type: 'enum',
+        values: EC_LEVELS,
+        default: DEFAULTS.ec,
+        parse: (raw) => {
+            const v = raw.toUpperCase();
+            return EC_LEVELS.includes(v) ? v : undefined;
+        },
+    },
+    fg: { type: 'color', default: DEFAULTS.fg },
+    bg: { type: 'color', default: DEFAULTS.bg },
+    margin: { type: 'integer', default: DEFAULTS.margin, min: 0, max: 16 },
+};
+
+export default withUrlState(schema, () => ({
     logo: null,
     logoSize: DEFAULTS.logoSize,
     logoPadding: DEFAULTS.logoPadding,
@@ -55,17 +67,11 @@ export default () => ({
     activePreset: null,
     presets: PRESET_ICONS,
     renderToken: 0,
-    url: window.location.href,
     contrastWarning: false,
 
     init() {
-        this.initFromUrl();
-
         ['text', 'size', 'ec', 'fg', 'bg', 'margin'].forEach((prop) => {
-            this.$watch(prop, () => {
-                this.updateUrl();
-                this.render();
-            });
+            this.$watch(prop, () => this.render());
         });
 
         ['logo', 'logoSize', 'logoPadding'].forEach((prop) => {
@@ -76,7 +82,6 @@ export default () => ({
             if (this.activePreset) this.applyPreset(this.activePreset);
         });
 
-        this.updateUrl();
         this.$nextTick(() => this.render());
     },
 
@@ -153,88 +158,6 @@ export default () => ({
         }
 
         ctx.drawImage(img, cx, cy, drawW, drawH);
-    },
-
-    initFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-
-        if (params.has('text')) {
-            this.text = params.get('text');
-        }
-
-        if (params.has('size')) {
-            const parsed = parseInt(params.get('size'), 10);
-            if (Number.isFinite(parsed) && parsed >= 64 && parsed <= 2048) {
-                this.size = parsed;
-            }
-        }
-
-        if (params.has('ec')) {
-            const ec = params.get('ec').toUpperCase();
-            if (EC_LEVELS.includes(ec)) {
-                this.ec = ec;
-            }
-        }
-
-        if (params.has('fg') && /^#?[0-9a-fA-F]{6}$/.test(params.get('fg'))) {
-            this.fg = '#' + params.get('fg').replace('#', '');
-        }
-
-        if (params.has('bg') && /^#?[0-9a-fA-F]{6}$/.test(params.get('bg'))) {
-            this.bg = '#' + params.get('bg').replace('#', '');
-        }
-
-        if (params.has('margin')) {
-            const parsed = parseInt(params.get('margin'), 10);
-            if (Number.isFinite(parsed) && parsed >= 0 && parsed <= 16) {
-                this.margin = parsed;
-            }
-        }
-    },
-
-    updateUrl() {
-        const params = new URLSearchParams(window.location.search);
-
-        if (this.text) {
-            params.set('text', this.text);
-        } else {
-            params.delete('text');
-        }
-
-        if (this.size !== DEFAULTS.size) {
-            params.set('size', this.size);
-        } else {
-            params.delete('size');
-        }
-
-        if (this.ec !== DEFAULTS.ec) {
-            params.set('ec', this.ec);
-        } else {
-            params.delete('ec');
-        }
-
-        if (this.fg.toLowerCase() !== DEFAULTS.fg) {
-            params.set('fg', this.fg.replace('#', ''));
-        } else {
-            params.delete('fg');
-        }
-
-        if (this.bg.toLowerCase() !== DEFAULTS.bg) {
-            params.set('bg', this.bg.replace('#', ''));
-        } else {
-            params.delete('bg');
-        }
-
-        if (parseInt(this.margin, 10) !== DEFAULTS.margin) {
-            params.set('margin', this.margin);
-        } else {
-            params.delete('margin');
-        }
-
-        const qs = params.toString();
-        const newUrl = `${window.location.origin}${window.location.pathname}${qs ? '?' + qs : ''}`;
-        this.url = newUrl;
-        window.history.replaceState({}, '', newUrl);
     },
 
     options() {
@@ -342,4 +265,4 @@ export default () => ({
         const [light, dark] = l1 > l2 ? [l1, l2] : [l2, l1];
         return (light + 0.05) / (dark + 0.05);
     },
-});
+}));

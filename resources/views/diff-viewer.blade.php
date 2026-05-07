@@ -170,16 +170,12 @@
                 </template>
             </div>
 
-            <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
-                <flux:heading class="mb-2" size="xl">Share</flux:heading>
-                <flux:subheading class="mb-4">
-                    The URL below carries both inputs and the view mode.
-                </flux:subheading>
-                <p x-show="urlTooLong" x-cloak class="mb-4 text-sm text-amber-600 dark:text-amber-400">
-                    Inputs are too long to include in the URL.
-                </p>
-                <flux:input type="url" x-model="url" readonly copyable label="Share URL" />
-            </div>
+            <x-share-field
+                class="rounded-lg border border-black/10 p-8 dark:border-white/10"
+                subheading="The URL below carries both inputs and the view mode."
+                tooLongMessage="Inputs are too long to include in the URL."
+            />
         </div>
     </div>
+    <x-tool-content />
 </x-layouts.app>

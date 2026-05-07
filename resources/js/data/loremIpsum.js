@@ -1,8 +1,4 @@
-const DEFAULTS = {
-    type: 'paragraphs',
-    count: 3,
-    classic: true,
-};
+import { withUrlState } from '../lib/urlState';
 
 const WORDS = [
     'lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit',
@@ -111,19 +107,15 @@ function freshSeed() {
     return Math.floor(Math.random() * 1_000_000_000).toString(36);
 }
 
-export default () => ({
-    type: DEFAULTS.type,
-    count: DEFAULTS.count,
-    classic: DEFAULTS.classic,
-    seed: freshSeed(),
-    copied: false,
-    url: window.location.href,
+const schema = {
+    type: { type: 'enum', values: ['paragraphs', 'sentences', 'words'], default: 'paragraphs' },
+    count: { type: 'integer', default: 3, min: 1, max: 100 },
+    classic: { type: 'boolean', default: true },
+    seed: { type: 'string', default: '' },
+};
 
-    init() {
-        this.initFromUrl();
-        ['type', 'count', 'classic', 'seed'].forEach((p) => this.$watch(p, () => this.updateUrl()));
-        this.updateUrl();
-    },
+export default withUrlState(schema, () => ({
+    seed: freshSeed(),
 
     get output() {
         const rng = makeRng(this.seed + ':' + this.type + ':' + this.count + ':' + this.classic);
@@ -136,45 +128,4 @@ export default () => ({
     regenerate() {
         this.seed = freshSeed();
     },
-
-    async copy() {
-        if (!this.output) return;
-        await navigator.clipboard.writeText(this.output);
-        this.copied = true;
-        setTimeout(() => (this.copied = false), 1500);
-    },
-
-    initFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-        if (params.has('type') && ['paragraphs', 'sentences', 'words'].includes(params.get('type'))) {
-            this.type = params.get('type');
-        }
-        if (params.has('count')) {
-            const n = parseInt(params.get('count'), 10);
-            if (Number.isFinite(n) && n >= 1 && n <= 100) this.count = n;
-        }
-        if (params.has('classic')) this.classic = params.get('classic') === '1';
-        if (params.has('seed')) this.seed = params.get('seed');
-    },
-
-    updateUrl() {
-        const params = new URLSearchParams(window.location.search);
-
-        if (this.type !== DEFAULTS.type) params.set('type', this.type);
-        else params.delete('type');
-
-        const count = parseInt(this.count, 10) || DEFAULTS.count;
-        if (count !== DEFAULTS.count) params.set('count', String(count));
-        else params.delete('count');
-
-        if (this.classic !== DEFAULTS.classic) params.set('classic', this.classic ? '1' : '0');
-        else params.delete('classic');
-
-        params.set('seed', this.seed);
-
-        const qs = params.toString();
-        const newUrl = `${window.location.origin}${window.location.pathname}${qs ? '?' + qs : ''}`;
-        this.url = newUrl;
-        window.history.replaceState({}, '', newUrl);
-    },
-});
+}));

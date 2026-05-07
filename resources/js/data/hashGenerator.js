@@ -1,7 +1,9 @@
 import SparkMD5 from 'spark-md5';
+import { withUrlState } from '../lib/urlState';
 
 const MAX_FILE_BYTES = 100 * 1024 * 1024;
 const FILE_CHUNK = 2 * 1024 * 1024;
+const MAX_URL_INPUT = 5000;
 const ALGOS = [
     { key: 'md5', label: 'MD5' },
     { key: 'sha1', label: 'SHA-1' },
@@ -72,27 +74,31 @@ async function hashFile(file, onProgress) {
     return { md5: md5.end(), sha1, sha256, sha512 };
 }
 
-export default () => ({
-    mode: 'text',
-    text: '',
+const schema = {
+    mode: { type: 'enum', values: ['text', 'file'], default: 'text' },
+    text: {
+        type: 'string',
+        maxLength: MAX_URL_INPUT,
+        serialize: (value, state) => {
+            if (state.mode !== 'text') return { skip: true };
+            if (!value) return { skip: true };
+            if (value.length > MAX_URL_INPUT) return { skip: true, tooLong: true };
+            return { value };
+        },
+    },
+};
+
+export default withUrlState(schema, () => ({
     file: null,
     fileError: '',
     progress: 0,
     busy: false,
     hashes: { md5: '', sha1: '', sha256: '', sha512: '' },
-    copied: '',
     algos: ALGOS,
     textBusyToken: 0,
 
     init() {
-        this.initFromUrl();
-
-        this.$watch('text', () => {
-            this.updateUrl();
-            this.scheduleTextHash();
-        });
-        this.$watch('mode', () => this.updateUrl());
-
+        this.$watch('text', () => this.scheduleTextHash());
         if (this.text) this.scheduleTextHash();
     },
 
@@ -148,39 +154,4 @@ export default () => ({
     clearText() {
         this.text = '';
     },
-
-    async copy(algo) {
-        const value = this.hashes[algo];
-        if (!value) return;
-        await navigator.clipboard.writeText(value);
-        this.copied = algo;
-        setTimeout(() => {
-            if (this.copied === algo) this.copied = '';
-        }, 1500);
-    },
-
-    initFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-        if (params.has('mode') && ['text', 'file'].includes(params.get('mode'))) {
-            this.mode = params.get('mode');
-        }
-        if (params.has('text')) {
-            this.text = params.get('text');
-        }
-    },
-
-    updateUrl() {
-        const params = new URLSearchParams(window.location.search);
-
-        if (this.mode !== 'text') params.set('mode', this.mode); else params.delete('mode');
-        if (this.mode === 'text' && this.text) {
-            params.set('text', this.text);
-        } else {
-            params.delete('text');
-        }
-
-        const qs = params.toString();
-        const newUrl = `${window.location.origin}${window.location.pathname}${qs ? '?' + qs : ''}`;
-        window.history.replaceState({}, '', newUrl);
-    },
-});
+}));

@@ -113,37 +113,27 @@
                     <div class="{{ $rowClass }}">
                         <span class="{{ $labelClass }}">Unix seconds</span>
                         <span class="{{ $valClass }}" x-text="unixSeconds()"></span>
-                        <flux:button type="button" size="xs" variant="ghost" icon="document-duplicate" x-on:click="copy('s', unixSeconds())">
-                            <span x-text="copied === 's' ? 'Copied!' : 'Copy'">Copy</span>
-                        </flux:button>
+                        <x-copy-button value="unixSeconds()" flash="'ts-s'" icon="document-duplicate" size="xs" />
                     </div>
                     <div class="{{ $rowClass }}">
                         <span class="{{ $labelClass }}">Unix milliseconds</span>
                         <span class="{{ $valClass }}" x-text="unixMilliseconds()"></span>
-                        <flux:button type="button" size="xs" variant="ghost" icon="document-duplicate" x-on:click="copy('ms', unixMilliseconds())">
-                            <span x-text="copied === 'ms' ? 'Copied!' : 'Copy'">Copy</span>
-                        </flux:button>
+                        <x-copy-button value="unixMilliseconds()" flash="'ts-ms'" icon="document-duplicate" size="xs" />
                     </div>
                     <div class="{{ $rowClass }}">
                         <span class="{{ $labelClass }}">ISO 8601 (UTC)</span>
                         <span class="{{ $valClass }}" x-text="isoUtc()"></span>
-                        <flux:button type="button" size="xs" variant="ghost" icon="document-duplicate" x-on:click="copy('utc', isoUtc())">
-                            <span x-text="copied === 'utc' ? 'Copied!' : 'Copy'">Copy</span>
-                        </flux:button>
+                        <x-copy-button value="isoUtc()" flash="'ts-utc'" icon="document-duplicate" size="xs" />
                     </div>
                     <div class="{{ $rowClass }}">
                         <span class="{{ $labelClass }}">ISO 8601 (zoned)</span>
                         <span class="{{ $valClass }}" x-text="isoZoned()"></span>
-                        <flux:button type="button" size="xs" variant="ghost" icon="document-duplicate" x-on:click="copy('zoned', isoZoned())">
-                            <span x-text="copied === 'zoned' ? 'Copied!' : 'Copy'">Copy</span>
-                        </flux:button>
+                        <x-copy-button value="isoZoned()" flash="'ts-zoned'" icon="document-duplicate" size="xs" />
                     </div>
                     <div class="{{ $rowClass }}">
                         <span class="{{ $labelClass }}">Human</span>
                         <span class="{{ $valClass }} !font-sans" x-text="humanLong()"></span>
-                        <flux:button type="button" size="xs" variant="ghost" icon="document-duplicate" x-on:click="copy('human', humanLong())">
-                            <span x-text="copied === 'human' ? 'Copied!' : 'Copy'">Copy</span>
-                        </flux:button>
+                        <x-copy-button value="humanLong()" flash="'ts-human'" icon="document-duplicate" size="xs" />
                     </div>
                     <div class="{{ $rowClass }}">
                         <span class="{{ $labelClass }}">Relative to now</span>
@@ -153,15 +143,12 @@
                 </div>
             </div>
 
-            <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
-                <flux:input
-                    type="url"
-                    x-model="url"
-                    readonly
-                    copyable
-                    label="Share URL"
-                />
-            </div>
+            <x-share-field
+                class="rounded-lg border border-black/10 p-8 dark:border-white/10"
+                :heading="false"
+                subheading="The URL below carries the timestamp and timezone."
+            />
         </div>
     </div>
+    <x-tool-content />
 </x-layouts.app>

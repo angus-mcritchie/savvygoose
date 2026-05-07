@@ -1,3 +1,5 @@
+import { withUrlState } from '../lib/urlState';
+
 const STANDARD_CLAIMS = {
     iss: 'Issuer',
     sub: 'Subject',
@@ -9,6 +11,7 @@ const STANDARD_CLAIMS = {
 };
 
 const TIME_CLAIMS = ['exp', 'nbf', 'iat'];
+const MAX_URL_INPUT = 4000;
 
 function base64UrlDecode(segment) {
     let s = segment.replace(/-/g, '+').replace(/_/g, '/');
@@ -50,16 +53,12 @@ function formatTimestamp(seconds) {
     }
 }
 
-export default () => ({
-    token: '',
-    error: '',
-    copiedHeader: false,
-    copiedPayload: false,
+const schema = {
+    token: { type: 'string', maxLength: MAX_URL_INPUT },
+};
 
-    init() {
-        this.initFromUrl();
-        this.$watch('token', () => this.updateUrl());
-    },
+export default withUrlState(schema, () => ({
+    error: '',
 
     get parts() {
         return this.token.trim().split('.');
@@ -165,36 +164,4 @@ export default () => ({
     clear() {
         this.token = '';
     },
-
-    async copy(target) {
-        const text = target === 'header' ? this.prettyHeader : this.prettyPayload;
-        if (!text) return;
-        await navigator.clipboard.writeText(text);
-        if (target === 'header') {
-            this.copiedHeader = true;
-            setTimeout(() => (this.copiedHeader = false), 1500);
-        } else {
-            this.copiedPayload = true;
-            setTimeout(() => (this.copiedPayload = false), 1500);
-        }
-    },
-
-    initFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-        if (params.has('token')) {
-            this.token = params.get('token');
-        }
-    },
-
-    updateUrl() {
-        const params = new URLSearchParams(window.location.search);
-        if (this.token.trim()) {
-            params.set('token', this.token.trim());
-        } else {
-            params.delete('token');
-        }
-        const qs = params.toString();
-        const newUrl = `${window.location.origin}${window.location.pathname}${qs ? '?' + qs : ''}`;
-        window.history.replaceState({}, '', newUrl);
-    },
-});
+}));

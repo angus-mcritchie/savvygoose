@@ -20,9 +20,13 @@
                 </div>
 
                 <div class="mb-8 flex gap-2">
-                    <flux:button x-on:click="copy()" x-bind:disabled="!text" icon="document-duplicate" size="sm">
-                        <span x-text="copied ? 'Copied!' : 'Copy'">Copy</span>
-                    </flux:button>
+                    <x-copy-button
+                        value="text"
+                        flash="'cc-text'"
+                        icon="document-duplicate"
+                        size="sm"
+                        x-bind:disabled="!text"
+                    />
                     <flux:button x-on:click="clear()" x-bind:disabled="!text" icon="trash" size="sm" variant="filled">
                         Clear
                     </flux:button>
@@ -55,6 +59,13 @@
                     </flux:dropdown>
                 </div>
             </div>
+
+            <x-share-field
+                class="rounded-lg border border-black/10 p-8 dark:border-white/10"
+                subheading="The URL below carries your text."
+                tooLongMessage="Text is too long to include in the URL."
+            />
         </div>
     </div>
+    <x-tool-content />
 </x-layouts.app>

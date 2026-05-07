@@ -1,9 +1,4 @@
-const DEFAULTS = {
-    separator: '-',
-    maxLength: 0,
-    lowercase: true,
-    stripStopWords: false,
-};
+import { withUrlState } from '../lib/urlState';
 
 const MAX_URL_INPUT = 3000;
 
@@ -45,24 +40,15 @@ function slugify(text, opts) {
     return result;
 }
 
-export default () => ({
-    text: '',
-    separator: DEFAULTS.separator,
-    maxLength: DEFAULTS.maxLength,
-    lowercase: DEFAULTS.lowercase,
-    stripStopWords: DEFAULTS.stripStopWords,
-    copied: false,
-    url: window.location.href,
-    urlTooLong: false,
+const schema = {
+    text: { type: 'string', maxLength: MAX_URL_INPUT },
+    separator: { type: 'enum', values: ['-', '_', '.'], default: '-', alias: 'sep' },
+    maxLength: { type: 'integer', default: 0, min: 0, max: 200, alias: 'max' },
+    lowercase: { type: 'boolean', default: true, alias: 'lc' },
+    stripStopWords: { type: 'boolean', default: false, alias: 'sw' },
+};
 
-    init() {
-        this.initFromUrl();
-        ['text', 'separator', 'maxLength', 'lowercase', 'stripStopWords'].forEach((p) =>
-            this.$watch(p, () => this.updateUrl()),
-        );
-        this.updateUrl();
-    },
-
+export default withUrlState(schema, () => ({
     get slug() {
         return slugify(this.text, {
             separator: this.separator || '-',
@@ -72,59 +58,7 @@ export default () => ({
         });
     },
 
-    async copy() {
-        if (!this.slug) return;
-        await navigator.clipboard.writeText(this.slug);
-        this.copied = true;
-        setTimeout(() => (this.copied = false), 1500);
-    },
-
     clear() {
         this.text = '';
     },
-
-    initFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-        if (params.has('text')) this.text = params.get('text');
-        if (params.has('sep')) {
-            const s = params.get('sep');
-            if (['-', '_', '.'].includes(s)) this.separator = s;
-        }
-        if (params.has('max')) {
-            const n = parseInt(params.get('max'), 10);
-            if (Number.isFinite(n) && n >= 0 && n <= 200) this.maxLength = n;
-        }
-        if (params.has('lc')) this.lowercase = params.get('lc') === '1';
-        if (params.has('sw')) this.stripStopWords = params.get('sw') === '1';
-    },
-
-    updateUrl() {
-        const params = new URLSearchParams(window.location.search);
-
-        if (this.text && this.text.length <= MAX_URL_INPUT) {
-            params.set('text', this.text);
-            this.urlTooLong = false;
-        } else {
-            params.delete('text');
-            this.urlTooLong = this.text.length > MAX_URL_INPUT;
-        }
-
-        if (this.separator !== DEFAULTS.separator) params.set('sep', this.separator);
-        else params.delete('sep');
-
-        const max = parseInt(this.maxLength, 10) || 0;
-        if (max !== DEFAULTS.maxLength) params.set('max', String(max));
-        else params.delete('max');
-
-        if (this.lowercase !== DEFAULTS.lowercase) params.set('lc', this.lowercase ? '1' : '0');
-        else params.delete('lc');
-
-        if (this.stripStopWords !== DEFAULTS.stripStopWords) params.set('sw', this.stripStopWords ? '1' : '0');
-        else params.delete('sw');
-
-        const qs = params.toString();
-        const newUrl = `${window.location.origin}${window.location.pathname}${qs ? '?' + qs : ''}`;
-        this.url = newUrl;
-        window.history.replaceState({}, '', newUrl);
-    },
-});
+}));

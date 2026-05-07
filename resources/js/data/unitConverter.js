@@ -1,3 +1,5 @@
+import { withUrlState } from '../lib/urlState';
+
 const UNITS = {
     length: {
         label: 'Length',
@@ -34,6 +36,25 @@ const UNITS = {
             k: { label: 'Kelvin', symbol: 'K' },
         },
     },
+    volume: {
+        label: 'Volume',
+        units: {
+            ml: { label: 'Milliliter', symbol: 'mL', factor: 1 },
+            l: { label: 'Liter', symbol: 'L', factor: 1000 },
+            cm3: { label: 'Cubic centimeter', symbol: 'cm³', factor: 1 },
+            m3: { label: 'Cubic meter', symbol: 'm³', factor: 1_000_000 },
+            in3: { label: 'Cubic inch', symbol: 'in³', factor: 16.387064 },
+            ft3: { label: 'Cubic foot', symbol: 'ft³', factor: 28316.846592 },
+            tsp: { label: 'Teaspoon (US)', symbol: 'tsp', factor: 4.92892159375 },
+            tbsp: { label: 'Tablespoon (US)', symbol: 'tbsp', factor: 14.78676478125 },
+            floz: { label: 'Fluid ounce (US)', symbol: 'fl oz', factor: 29.5735295625 },
+            cup: { label: 'Cup (US)', symbol: 'cup', factor: 236.5882365 },
+            pt: { label: 'Pint (US)', symbol: 'pt', factor: 473.176473 },
+            qt: { label: 'Quart (US)', symbol: 'qt', factor: 946.352946 },
+            gal: { label: 'Gallon (US)', symbol: 'gal', factor: 3785.411784 },
+            gal_uk: { label: 'Gallon (UK)', symbol: 'gal', factor: 4546.09 },
+        },
+    },
     data: {
         label: 'Data',
         units: {
@@ -57,6 +78,7 @@ const DEFAULTS = {
     length: { from: 'm', to: 'ft', value: '1' },
     weight: { from: 'kg', to: 'lb', value: '1' },
     temperature: { from: 'c', to: 'f', value: '20' },
+    volume: { from: 'l', to: 'gal', value: '1' },
     data: { from: 'MB', to: 'MiB', value: '1' },
 };
 
@@ -92,7 +114,37 @@ function format(n) {
     return parseFloat(n.toPrecision(10)).toString();
 }
 
-export default () => ({
+const schema = {
+    cat: { type: 'enum', values: Object.keys(UNITS), default: 'length' },
+    from: {
+        type: 'string',
+        parse: (raw, state) => UNITS[state.cat]?.units[raw] ? raw : undefined,
+        serialize: (value, state) => {
+            const def = DEFAULTS[state.cat];
+            if (value === def?.from) return { skip: true };
+            return { value };
+        },
+    },
+    to: {
+        type: 'string',
+        parse: (raw, state) => UNITS[state.cat]?.units[raw] ? raw : undefined,
+        serialize: (value, state) => {
+            const def = DEFAULTS[state.cat];
+            if (value === def?.to) return { skip: true };
+            return { value };
+        },
+    },
+    value: {
+        type: 'string',
+        serialize: (value, state) => {
+            const def = DEFAULTS[state.cat];
+            if (!value || value === def?.value) return { skip: true };
+            return { value };
+        },
+    },
+};
+
+export default withUrlState(schema, () => ({
     units: UNITS,
     cat: DEFAULTS.cat,
     from: DEFAULTS.length.from,
@@ -101,47 +153,47 @@ export default () => ({
     result: '',
     source: 'left',
     lock: false,
-    url: window.location.href,
 
     init() {
-        this.initFromUrl();
+        // After URL-state parsing, if from/to don't match the (possibly-changed) category,
+        // fall back to the category's defaults. Same for value.
+        const def = DEFAULTS[this.cat];
+        if (!UNITS[this.cat]?.units[this.from]) this.from = def.from;
+        if (!UNITS[this.cat]?.units[this.to]) this.to = def.to;
+        if (!this.value) this.value = def.value;
+
         this.recompute();
-        this.updateUrl();
 
         this.$watch('cat', (next, prev) => {
             if (next === prev) return;
-            const def = DEFAULTS[next];
+            const newDef = DEFAULTS[next];
             this.lock = true;
-            this.from = def.from;
-            this.to = def.to;
-            this.value = def.value;
+            this.from = newDef.from;
+            this.to = newDef.to;
+            this.value = newDef.value;
             this.result = '';
             this.source = 'left';
             this.$nextTick(() => {
                 this.lock = false;
                 this.recompute();
-                this.updateUrl();
             });
         });
 
         ['from', 'to'].forEach((p) => this.$watch(p, () => {
             if (this.lock) return;
             this.recompute();
-            this.updateUrl();
         }));
 
         this.$watch('value', () => {
             if (this.lock) return;
             this.source = 'left';
             this.recompute();
-            this.updateUrl();
         });
 
         this.$watch('result', () => {
             if (this.lock) return;
             this.source = 'right';
             this.recompute();
-            this.updateUrl();
         });
     },
 
@@ -169,7 +221,6 @@ export default () => ({
         this.$nextTick(() => {
             this.lock = false;
             this.recompute();
-            this.updateUrl();
         });
     },
 
@@ -187,40 +238,4 @@ export default () => ({
         if (!Number.isFinite(r)) return '';
         return `${format(v)} ${fromU.symbol} = ${format(r)} ${toU.symbol}`;
     },
-
-    initFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-
-        if (params.has('cat') && this.units[params.get('cat')]) {
-            this.cat = params.get('cat');
-        }
-
-        const def = DEFAULTS[this.cat];
-        this.from = def.from;
-        this.to = def.to;
-        this.value = def.value;
-
-        if (params.has('from') && this.units[this.cat].units[params.get('from')]) {
-            this.from = params.get('from');
-        }
-        if (params.has('to') && this.units[this.cat].units[params.get('to')]) {
-            this.to = params.get('to');
-        }
-        if (params.has('value')) {
-            this.value = params.get('value');
-        }
-    },
-
-    updateUrl() {
-        const params = new URLSearchParams();
-        const def = DEFAULTS[this.cat];
-        if (this.cat !== DEFAULTS.cat) params.set('cat', this.cat);
-        if (this.from !== def.from) params.set('from', this.from);
-        if (this.to !== def.to) params.set('to', this.to);
-        if (this.value !== '' && this.value !== def.value) params.set('value', this.value);
-        const qs = params.toString();
-        const newUrl = `${window.location.origin}${window.location.pathname}${qs ? '?' + qs : ''}`;
-        this.url = newUrl;
-        window.history.replaceState({}, '', newUrl);
-    },
-});
+}));

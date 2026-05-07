@@ -1,7 +1,4 @@
-const DEFAULTS = {
-    fg: '#2563eb',
-    bg: '#ffffff',
-};
+import { withUrlState } from '../lib/urlState';
 
 const HEX_RE = /^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 
@@ -96,20 +93,16 @@ function contrastRatio(hexA, hexB) {
     return (light + 0.05) / (dark + 0.05);
 }
 
-export default () => ({
-    fg: DEFAULTS.fg,
-    bg: DEFAULTS.bg,
-    copied: '',
-    url: window.location.href,
+const schema = {
+    fg: { type: 'color', default: '#2563eb', alias: 'c' },
+    bg: { type: 'color', default: '#ffffff' },
+};
 
+export default withUrlState(schema, () => ({
     init() {
-        this.initFromUrl();
-        this.updateUrl();
-
         ['fg', 'bg'].forEach((p) => this.$watch(p, () => {
             const norm = normalizeHex(this[p]);
             if (norm && norm !== this[p]) this[p] = norm;
-            this.updateUrl();
         }));
     },
 
@@ -172,34 +165,4 @@ export default () => ({
         if (level === 'AAA' && size === 'large') return ratio >= 4.5;
         return false;
     },
-
-    async copy(key, value) {
-        try {
-            await navigator.clipboard.writeText(value);
-            this.copied = key;
-            setTimeout(() => { if (this.copied === key) this.copied = ''; }, 1200);
-        } catch (_) {}
-    },
-
-    initFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-        if (params.has('c')) {
-            const norm = normalizeHex(params.get('c'));
-            if (norm) this.fg = norm;
-        }
-        if (params.has('bg')) {
-            const norm = normalizeHex(params.get('bg'));
-            if (norm) this.bg = norm;
-        }
-    },
-
-    updateUrl() {
-        const params = new URLSearchParams();
-        if (this.fg !== DEFAULTS.fg) params.set('c', this.fg.replace('#', ''));
-        if (this.bg !== DEFAULTS.bg) params.set('bg', this.bg.replace('#', ''));
-        const qs = params.toString();
-        const newUrl = `${window.location.origin}${window.location.pathname}${qs ? '?' + qs : ''}`;
-        this.url = newUrl;
-        window.history.replaceState({}, '', newUrl);
-    },
-});
+}));

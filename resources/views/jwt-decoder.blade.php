@@ -91,9 +91,13 @@
                 <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
                     <div class="mb-4 flex items-center justify-between border-b border-black/10 pb-4 dark:border-white/10">
                         <flux:heading size="lg">Header</flux:heading>
-                        <flux:button x-on:click="copy('header')" x-bind:disabled="!prettyHeader" icon="document-duplicate" size="xs" variant="ghost">
-                            <span x-text="copiedHeader ? 'Copied!' : 'Copy'">Copy</span>
-                        </flux:button>
+                        <x-copy-button
+                            value="prettyHeader"
+                            flash="'jwt-header'"
+                            icon="document-duplicate"
+                            size="xs"
+                            x-bind:disabled="!prettyHeader"
+                        />
                     </div>
                     <template x-if="prettyHeader">
                         <pre class="overflow-x-auto rounded-md bg-zinc-100 p-4 text-sm dark:bg-zinc-700"><code x-text="prettyHeader"></code></pre>
@@ -106,9 +110,13 @@
                 <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
                     <div class="mb-4 flex items-center justify-between border-b border-black/10 pb-4 dark:border-white/10">
                         <flux:heading size="lg">Payload</flux:heading>
-                        <flux:button x-on:click="copy('payload')" x-bind:disabled="!prettyPayload" icon="document-duplicate" size="xs" variant="ghost">
-                            <span x-text="copiedPayload ? 'Copied!' : 'Copy'">Copy</span>
-                        </flux:button>
+                        <x-copy-button
+                            value="prettyPayload"
+                            flash="'jwt-payload'"
+                            icon="document-duplicate"
+                            size="xs"
+                            x-bind:disabled="!prettyPayload"
+                        />
                     </div>
                     <template x-if="prettyPayload">
                         <pre class="overflow-x-auto rounded-md bg-zinc-100 p-4 text-sm dark:bg-zinc-700"><code x-text="prettyPayload"></code></pre>
@@ -163,6 +171,13 @@
                 <flux:subheading>Signature</flux:subheading>
                 <p class="mt-2 break-all font-mono text-xs opacity-70" x-text="signature || '(none)'"></p>
             </div>
+
+            <x-share-field
+                class="rounded-lg border border-black/10 p-8 dark:border-white/10"
+                subheading="The URL below carries the token. Be careful — anyone with the URL sees the token."
+                tooLongMessage="Token is too long to include in the URL."
+            />
         </div>
     </div>
+    <x-tool-content />
 </x-layouts.app>

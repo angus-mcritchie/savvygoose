@@ -54,9 +54,13 @@
                     <div class="grid gap-2">
                         <div class="flex items-center justify-between">
                             <flux:label x-text="inputLabel">Input</flux:label>
-                            <flux:button x-on:click="copyInput()" x-bind:disabled="!input" icon="document-duplicate" size="xs" variant="ghost">
-                                <span x-text="copiedInput ? 'Copied!' : 'Copy'">Copy</span>
-                            </flux:button>
+                            <x-copy-button
+                                value="input"
+                                flash="'md-input'"
+                                icon="document-duplicate"
+                                size="xs"
+                                x-bind:disabled="!input"
+                            />
                         </div>
                         <flux:textarea
                             name="input"
@@ -70,9 +74,24 @@
                     <div class="grid gap-2">
                         <div class="flex items-center justify-between">
                             <flux:label x-text="outputLabel">Output</flux:label>
-                            <flux:button x-on:click="copyOutput()" x-bind:disabled="!output" icon="document-duplicate" size="xs" variant="ghost">
-                                <span x-text="copiedOutput ? 'Copied!' : 'Copy'">Copy</span>
-                            </flux:button>
+                            <div class="flex gap-2">
+                                <flux:button
+                                    x-on:click="$download(output, direction === 'md-to-html' ? 'output.html' : 'output.md', direction === 'md-to-html' ? 'text/html' : 'text/markdown')"
+                                    x-bind:disabled="!output"
+                                    icon="arrow-down-tray"
+                                    size="xs"
+                                    variant="ghost"
+                                >
+                                    Download
+                                </flux:button>
+                                <x-copy-button
+                                    value="output"
+                                    flash="'md-output'"
+                                    icon="document-duplicate"
+                                    size="xs"
+                                    x-bind:disabled="!output"
+                                />
+                            </div>
                         </div>
                         <flux:textarea
                             name="output"
@@ -84,6 +103,12 @@
                     </div>
                 </div>
             </div>
+
+            <x-share-field
+                class="rounded-lg border border-black/10 p-8 dark:border-white/10"
+                subheading="The URL below carries the conversion direction and your input."
+                tooLongMessage="Input is too long to include in the URL."
+            />
 
             <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
                 <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">Preview</flux:heading>
@@ -122,4 +147,5 @@
             </div>
         </flux:modal>
     </div>
+    <x-tool-content />
 </x-layouts.app>

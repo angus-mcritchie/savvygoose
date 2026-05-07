@@ -2,6 +2,7 @@ import { marked } from 'marked';
 import { markedHighlight } from 'marked-highlight';
 import hljs from 'highlight.js/lib/common';
 import TurndownService from 'turndown';
+import { withUrlState } from '../lib/urlState';
 
 marked.use(
     markedHighlight({
@@ -22,12 +23,12 @@ const turndown = new TurndownService({
     emDelimiter: '_',
 });
 
-export default () => ({
-    direction: 'md-to-html',
-    input: '',
-    copiedInput: false,
-    copiedOutput: false,
+const schema = {
+    direction: { type: 'enum', values: ['md-to-html', 'html-to-md'], default: 'md-to-html', alias: 'dir' },
+    input: { type: 'string', maxLength: 3000 },
+};
 
+export default withUrlState(schema, () => ({
     get output() {
         if (!this.input) return '';
         try {
@@ -71,17 +72,4 @@ export default () => ({
     clear() {
         this.input = '';
     },
-
-    async copyInput() {
-        if (!this.input) return;
-        await navigator.clipboard.writeText(this.input);
-        this.copiedInput = true;
-        setTimeout(() => (this.copiedInput = false), 1500);
-    },
-    async copyOutput() {
-        if (!this.output) return;
-        await navigator.clipboard.writeText(this.output);
-        this.copiedOutput = true;
-        setTimeout(() => (this.copiedOutput = false), 1500);
-    },
-});
+}));

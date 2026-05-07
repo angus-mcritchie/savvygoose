@@ -1,10 +1,4 @@
-const DEFAULTS = {
-    version: 'v4',
-    count: 5,
-    uppercase: false,
-    hyphens: true,
-    braces: false,
-};
+import { withUrlState } from '../lib/urlState';
 
 const MAX_COUNT = 1000;
 
@@ -36,32 +30,21 @@ const uuidV7 = () => {
     return formatHex(toHex(bytes));
 };
 
-export default () => ({
-    version: DEFAULTS.version,
-    count: DEFAULTS.count,
-    uppercase: DEFAULTS.uppercase,
-    hyphens: DEFAULTS.hyphens,
-    braces: DEFAULTS.braces,
+const schema = {
+    version: { type: 'enum', values: ['v4', 'v7'], default: 'v4', alias: 'v' },
+    count: { type: 'integer', default: 5, min: 1, max: MAX_COUNT },
+    uppercase: { type: 'boolean', default: false, alias: 'upper' },
+    hyphens: { type: 'boolean', default: true },
+    braces: { type: 'boolean', default: false },
+};
+
+export default withUrlState(schema, () => ({
     uuids: [],
-    copied: false,
-    copiedIndex: null,
-    url: window.location.href,
 
     init() {
-        this.initFromUrl();
-
         ['version', 'count'].forEach((prop) => {
-            this.$watch(prop, () => {
-                this.updateUrl();
-                this.generate();
-            });
+            this.$watch(prop, () => this.generate());
         });
-
-        ['uppercase', 'hyphens', 'braces'].forEach((prop) => {
-            this.$watch(prop, () => this.updateUrl());
-        });
-
-        this.updateUrl();
         this.generate();
     },
 
@@ -69,8 +52,6 @@ export default () => ({
         const n = Math.max(1, Math.min(MAX_COUNT, parseInt(this.count, 10) || 1));
         const fn = this.version === 'v7' ? uuidV7 : uuidV4;
         this.uuids = Array.from({ length: n }, fn);
-        this.copied = false;
-        this.copiedIndex = null;
     },
 
     format(uuid) {
@@ -83,83 +64,4 @@ export default () => ({
     get formattedAll() {
         return this.uuids.map((u) => this.format(u)).join('\n');
     },
-
-    async copyOne(index) {
-        const u = this.uuids[index];
-        if (!u) return;
-        await navigator.clipboard.writeText(this.format(u));
-        this.copiedIndex = index;
-        setTimeout(() => {
-            if (this.copiedIndex === index) this.copiedIndex = null;
-        }, 1500);
-    },
-
-    async copyAll() {
-        if (!this.uuids.length) return;
-        await navigator.clipboard.writeText(this.formattedAll);
-        this.copied = true;
-        setTimeout(() => (this.copied = false), 1500);
-    },
-
-    download() {
-        if (!this.uuids.length) return;
-        const blob = new Blob([this.formattedAll + '\n'], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `uuids-${this.version}-${this.uuids.length}.txt`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    },
-
-    initFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-
-        if (params.has('v')) {
-            const v = params.get('v').toLowerCase();
-            if (v === 'v4' || v === 'v7') this.version = v;
-        }
-
-        if (params.has('count')) {
-            const n = parseInt(params.get('count'), 10);
-            if (Number.isFinite(n) && n >= 1 && n <= MAX_COUNT) this.count = n;
-        }
-
-        const flag = (key, prop) => {
-            if (!params.has(key)) return;
-            const v = params.get(key);
-            if (v === '1') this[prop] = true;
-            if (v === '0') this[prop] = false;
-        };
-
-        flag('upper', 'uppercase');
-        flag('hyphens', 'hyphens');
-        flag('braces', 'braces');
-    },
-
-    updateUrl() {
-        const params = new URLSearchParams(window.location.search);
-
-        if (this.version !== DEFAULTS.version) params.set('v', this.version);
-        else params.delete('v');
-
-        if (parseInt(this.count, 10) !== DEFAULTS.count) params.set('count', this.count);
-        else params.delete('count');
-
-        const setFlag = (key, val, def) => {
-            if (val === def) params.delete(key);
-            else params.set(key, val ? '1' : '0');
-        };
-
-        setFlag('upper', this.uppercase, DEFAULTS.uppercase);
-        setFlag('hyphens', this.hyphens, DEFAULTS.hyphens);
-        setFlag('braces', this.braces, DEFAULTS.braces);
-
-        const qs = params.toString();
-        const newUrl = `${window.location.origin}${window.location.pathname}${qs ? '?' + qs : ''}`;
-        this.url = newUrl;
-        window.history.replaceState({}, '', newUrl);
-    },
-});
+}));

@@ -1,10 +1,4 @@
-const DEFAULTS = {
-    pattern: '',
-    flags: 'g',
-    test: '',
-    replacement: '',
-    replaceMode: false,
-};
+import { withUrlState } from '../lib/urlState';
 
 const ALL_FLAGS = ['g', 'i', 'm', 's', 'u', 'y'];
 const MAX_URL_INPUT = 2000;
@@ -42,15 +36,48 @@ function findMatches(text, regex) {
     return out;
 }
 
-export default () => ({
-    pattern: DEFAULTS.pattern,
-    flags: DEFAULTS.flags,
-    test: DEFAULTS.test,
-    replacement: DEFAULTS.replacement,
-    replaceMode: DEFAULTS.replaceMode,
+const totalInputTooLong = (state) => {
+    const total = (state.pattern?.length || 0)
+        + (state.test?.length || 0)
+        + (state.replacement?.length || 0);
+    return total > MAX_URL_INPUT;
+};
+
+const schema = {
+    pattern: {
+        type: 'string',
+        alias: 'p',
+        serialize: (value) => (value ? { value } : { skip: true }),
+    },
+    flags: {
+        type: 'string',
+        default: 'g',
+        alias: 'f',
+        parse: (raw) => raw.split('').filter((c) => ALL_FLAGS.includes(c)).join(''),
+    },
+    test: {
+        type: 'string',
+        alias: 't',
+        serialize: (value, state) => {
+            if (!value) return { skip: true };
+            if (totalInputTooLong(state)) return { skip: true, tooLong: true };
+            return { value };
+        },
+    },
+    replacement: {
+        type: 'string',
+        alias: 'r',
+        serialize: (value, state) => {
+            if (!value || !state.replaceMode) return { skip: true };
+            if (totalInputTooLong(state)) return { skip: true, tooLong: true };
+            return { value };
+        },
+    },
+    replaceMode: { type: 'boolean', default: false, alias: 'rm' },
+};
+
+export default withUrlState(schema, () => ({
     error: null,
-    url: window.location.href,
-    urlTooLong: false,
     allFlags: ALL_FLAGS,
     flagDescriptions: {
         g: 'global, match all occurrences',
@@ -61,12 +88,8 @@ export default () => ({
         y: 'sticky (match at lastIndex only)',
     },
 
-    init() {
-        this.initFromUrl();
-        ['pattern', 'flags', 'test', 'replacement', 'replaceMode'].forEach((p) =>
-            this.$watch(p, () => this.updateUrl()),
-        );
-        this.updateUrl();
+    initFromUrl() {
+        if (this.replacement) this.replaceMode = true;
     },
 
     get regex() {
@@ -136,51 +159,4 @@ export default () => ({
         this.test = '';
         this.replacement = '';
     },
-
-    initFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-        if (params.has('p')) this.pattern = params.get('p');
-        if (params.has('f')) {
-            const f = params.get('f').split('').filter((c) => ALL_FLAGS.includes(c)).join('');
-            this.flags = f;
-        }
-        if (params.has('t')) this.test = params.get('t');
-        if (params.has('r')) {
-            this.replacement = params.get('r');
-            this.replaceMode = true;
-        }
-        if (params.has('rm')) this.replaceMode = params.get('rm') === '1';
-    },
-
-    updateUrl() {
-        const params = new URLSearchParams(window.location.search);
-
-        const totalLen = (this.pattern?.length || 0) + (this.test?.length || 0) + (this.replacement?.length || 0);
-
-        if (this.pattern) params.set('p', this.pattern);
-        else params.delete('p');
-
-        if (this.flags !== DEFAULTS.flags) params.set('f', this.flags);
-        else params.delete('f');
-
-        if (totalLen <= MAX_URL_INPUT) {
-            if (this.test) params.set('t', this.test);
-            else params.delete('t');
-            if (this.replaceMode && this.replacement) params.set('r', this.replacement);
-            else params.delete('r');
-            this.urlTooLong = false;
-        } else {
-            params.delete('t');
-            params.delete('r');
-            this.urlTooLong = true;
-        }
-
-        if (this.replaceMode !== DEFAULTS.replaceMode) params.set('rm', this.replaceMode ? '1' : '0');
-        else params.delete('rm');
-
-        const qs = params.toString();
-        const newUrl = `${window.location.origin}${window.location.pathname}${qs ? '?' + qs : ''}`;
-        this.url = newUrl;
-        window.history.replaceState({}, '', newUrl);
-    },
-});
+}));

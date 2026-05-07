@@ -1,6 +1,11 @@
 <x-layouts.app>
 
-    <div class="mx-auto max-w-[1100px]" x-data="uuidGenerator">
+    <div
+        class="mx-auto max-w-[1100px]"
+        x-data="uuidGenerator"
+        x-on:keydown.window.cmd.enter.prevent="generate()"
+        x-on:keydown.window.ctrl.enter.prevent="generate()"
+    >
 
         <div class="mb-8 flex justify-center">
             <div class="grid grid-cols-[auto_1fr] items-center gap-4">
@@ -69,17 +74,18 @@
                     </flux:heading>
                     <div class="flex gap-2">
                         <flux:button x-on:click="generate" icon="arrow-path" size="sm">Regenerate</flux:button>
-                        <flux:button
-                            x-on:click="copyAll"
+                        <x-copy-button
+                            value="formattedAll"
+                            flash="'uuids'"
+                            label="Copy all"
+                            copiedLabel="Copied!"
                             icon="document-duplicate"
                             size="sm"
                             variant="primary"
                             x-bind:disabled="!uuids.length"
-                        >
-                            <span x-text="copied ? 'Copied!' : 'Copy all'">Copy all</span>
-                        </flux:button>
+                        />
                         <flux:button
-                            x-on:click="download"
+                            x-on:click="$download(formattedAll + '\n', `uuids-${version}-${uuids.length}.txt`)"
                             icon="arrow-down-tray"
                             size="sm"
                             x-bind:disabled="!uuids.length"
@@ -97,8 +103,8 @@
                                 <button
                                     type="button"
                                     class="rounded px-2 py-1 text-xs opacity-60 hover:bg-black/5 hover:opacity-100 dark:hover:bg-white/10"
-                                    x-on:click="copyOne(i)"
-                                    x-text="copiedIndex === i ? 'Copied' : 'Copy'"
+                                    x-on:click="$copy(format(u), 'uuid-' + i)"
+                                    x-text="$store.copy.is('uuid-' + i) ? 'Copied' : 'Copy'"
                                 >Copy</button>
                             </li>
                         </template>
@@ -108,11 +114,12 @@
 
             <div class="rounded-lg border border-black/10 p-8 lg:col-span-2 dark:border-white/10">
                 <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">Share</flux:heading>
-                <flux:subheading class="mb-4">
-                    The URL below carries every option. Open it to generate fresh UUIDs with the same settings.
-                </flux:subheading>
-                <flux:input type="url" x-model="url" readonly copyable label="Share URL" />
+                <x-share-field
+                    :heading="false"
+                    subheading="The URL below carries every option. Open it to generate fresh UUIDs with the same settings."
+                />
             </div>
         </div>
     </div>
+    <x-tool-content />
 </x-layouts.app>

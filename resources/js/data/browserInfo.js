@@ -57,7 +57,6 @@ export default () => ({
     online: true,
     colorScheme: 'Light',
     reducedMotion: false,
-    copied: false,
     abort: null,
 
     init() {
@@ -178,13 +177,4 @@ export default () => ({
         return `UTC${sign}${hh}:${mm}`;
     },
 
-    async copyUa() {
-        try {
-            await navigator.clipboard.writeText(this.ua);
-            this.copied = true;
-            setTimeout(() => (this.copied = false), 1500);
-        } catch (e) {
-            // ignore
-        }
-    },
 });

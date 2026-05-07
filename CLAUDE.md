@@ -27,18 +27,138 @@ Tests bind `Tests\TestCase` via Pest (`tests/Pest.php`) — **no `RefreshDatabas
 
 ### Adding a tool
 
-The tool list is driven by `config/tools.php` — routes, the dashboard, and both nav locations all iterate over it. Adding a tool is:
+The tool list is driven by `config/tools.php` — routes, the dashboard, and both nav locations all iterate over it. Routes are registered automatically from the registry, so you never need to touch `routes/web.php`.
 
-1. Append an entry to `config/tools.php` (`slug`, `name`, `tagline`, `category`, `icon`). Use an existing category key from the `categories` array, or add a new category.
-2. Add the Blade view at `resources/views/{slug}.blade.php` wrapped in `<x-layouts.app>`. The route is registered automatically from the registry.
-3. Add an Alpine data file at `resources/js/data/{slug}.js` (camelCased export) and register it in `resources/js/app.js` via `Alpine.data('foo', foo)`.
-4. Add a smoke test in `tests/Feature/DashboardTest.php`.
+**1. Register the tool** — append to `config/tools.php` `tools` array:
 
-Icons in the registry are a tagged union: `['type' => 'image', 'src' => 'image/foo.png']` for PNGs in `public/image/`, or `['type' => 'flux', 'name' => 'code-bracket-square']` for a Flux icon. The `<x-tool-icon>` component handles both.
+```php
+[
+    'slug' => 'word-counter',
+    'name' => 'Word Counter',
+    'tagline' => 'Count words, sentences, and paragraphs.',
+    'category' => 'text', // existing key from `categories`, or add a new one
+    'icon' => ['type' => 'flux', 'name' => 'hashtag'],
+],
+```
 
-### URL-as-state convention
+Icons are a tagged union: `['type' => 'image', 'src' => 'image/foo.png']` for PNGs in `public/image/`, or `['type' => 'flux', 'name' => 'code-bracket-square']` for a Flux icon. `<x-tool-icon>` handles both.
 
-The barcode generator (`resources/js/data/barcode.js`) treats the URL query string as canonical state: `init()` reads params from the URL, `$watch` hooks push state changes back via `updateUrl()`, and the share-URL field surfaces this. The `?print=true` param triggers `printBarcode()` on load. Preserve this pattern when extending tools.
+**2. Create the Alpine data file** at `resources/js/data/{slug-camelCased}.js`. Wrap your factory in `withUrlState` so anything shareable lands in the URL automatically:
+
+```js
+import { withUrlState } from '../lib/urlState';
+
+const schema = {
+    text: { type: 'string', maxLength: 3000 },
+    mode: { type: 'enum', values: ['lower', 'upper'], default: 'lower' },
+};
+
+export default withUrlState(schema, () => ({
+    // Local state (not in URL) goes here.
+    error: '',
+
+    // Optional: extra init runs AFTER schema parsing + watchers are wired.
+    init() {
+        this.$watch('text', () => this.compute());
+        this.compute();
+    },
+
+    get output() { /* ... */ },
+    clear() { this.text = ''; },
+}));
+```
+
+`withUrlState` adds `url`, `urlTooLong`, `initFromUrl()`, and `updateUrl()` to the component, and watches every schema key. **Don't write your own `initFromUrl`/`updateUrl` — extend the schema instead.**
+
+Schema entry options: `type` (`string` | `number` | `integer` | `boolean` | `enum` | `color`), `default`, `alias` (URL key if it differs from the JS key), `min`/`max` (numeric), `maxLength` (string), `values` (enum), and custom `parse(raw, state)` / `serialize(value, state)` for cross-field rules. See `resources/js/data/barcode.js` and `resources/js/data/regexTester.js` for patterns.
+
+**3. Register the Alpine component** in `resources/js/app.js`:
+
+```js
+import wordCounter from './data/wordCounter';
+// ...
+Alpine.data('wordCounter', wordCounter);
+```
+
+**4. Create the Blade view** at `resources/views/{slug}.blade.php`. Use this skeleton:
+
+```blade
+<x-layouts.app>
+    <div
+        class="mx-auto max-w-[1200px]"
+        x-data="wordCounter"
+        x-on:keydown.window.escape="clear()"  {{-- optional shortcuts --}}
+    >
+        {{-- Header --}}
+        <div class="mb-8 flex justify-center">
+            <div class="grid grid-cols-[auto_1fr] items-center gap-4">
+                <flux:icon.hashtag class="size-20 text-zinc-700 dark:text-zinc-200" />
+                <div>
+                    <flux:heading class="mb-1" level="1" size="xl">Word Counter</flux:heading>
+                    <flux:heading class="font-normal opacity-70" level="2">
+                        Count words, sentences, and paragraphs.
+                    </flux:heading>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid gap-6">
+            {{-- Tool body --}}
+            <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
+                <flux:textarea x-model="text" label="Text" rows="6" />
+
+                <div class="mt-4 flex gap-2">
+                    <x-copy-button
+                        value="output"
+                        flash="'wc-output'"
+                        size="sm"
+                        x-bind:disabled="!output"
+                    />
+                    <flux:button
+                        x-on:click="$download(output, 'output.txt')"
+                        x-bind:disabled="!output"
+                        icon="arrow-down-tray"
+                        size="sm"
+                    >
+                        .txt
+                    </flux:button>
+                </div>
+            </div>
+
+            {{-- Share field — drop in as the last card --}}
+            <x-share-field
+                class="rounded-lg border border-black/10 p-8 dark:border-white/10"
+                subheading="The URL below carries your input and settings."
+                tooLongMessage="Input is too long to include in the URL."
+            />
+        </div>
+    </div>
+    <x-tool-content />
+</x-layouts.app>
+```
+
+`<x-tool-content />` renders the howto and FAQ sections sourced from `config/tools.php` — keep it at the end of every tool view so the SEO content lands on the page.
+
+**5. Add a smoke test** in `tests/Feature/DashboardTest.php`:
+
+```php
+test('the word counter renders', function () {
+    $this->get('/word-counter')->assertOk()->assertSee('Word Counter');
+});
+```
+
+### Shared primitives reference
+
+- **`withUrlState(schema, factory)`** in `resources/js/lib/urlState.js` — URL ↔ state binding, used by every tool with shareable settings.
+- **`$copy(text, key)` magic + `$store.copy.is(key)`** — `resources/js/lib/clipboard.js`. The `<x-copy-button value="..." flash="'unique-key'" />` component wraps both; pass `flash` as an Alpine expression (e.g. `'static-key'` or `c.key` inside an `x-for`).
+- **`$download(blobOrText, filename, mime?)`** magic — `resources/js/lib/download.js`. Accepts `Blob`, `ArrayBuffer`, `Uint8Array`, or string.
+- **`<x-share-field />`** — drop-in Share section. Props: `subheading`, `tooLongMessage`, `heading` (pass `false` to suppress and use your own).
+
+A few existing tools have non-trivial schemas worth mirroring:
+- `resources/js/data/regexTester.js` — cross-field `serialize` (skip `test`/`replacement` if total exceeds budget).
+- `resources/js/data/imageResizer.js` — conditional serialize (`quality` only included when format supports it), custom format short-codes.
+- `resources/js/data/unitConverter.js` — schema defaults that depend on another field (`from`/`to` defaults change with `cat`).
+- `resources/js/data/timeBetweenDates.js` — dynamic per-instance defaults (computed via `detectCountry`); user `init()` fills in if URL didn't.
 
 ### Layouts and Flux
 

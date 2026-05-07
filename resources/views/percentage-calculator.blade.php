@@ -174,4 +174,5 @@
             </div>
         </div>
     </div>
+    <x-tool-content />
 </x-layouts.app>

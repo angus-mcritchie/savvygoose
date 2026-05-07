@@ -85,9 +85,13 @@
                                         >
                                             Download as file
                                         </flux:button>
-                                        <flux:button x-on:click="copy()" x-bind:disabled="!output" icon="document-duplicate" size="xs" variant="ghost">
-                                            <span x-text="copied ? 'Copied!' : 'Copy'">Copy</span>
-                                        </flux:button>
+                                        <x-copy-button
+                                            value="output"
+                                            flash="'b64-output'"
+                                            icon="document-duplicate"
+                                            size="xs"
+                                            x-bind:disabled="!output"
+                                        />
                                     </div>
                                 </div>
                                 <flux:textarea
@@ -122,9 +126,13 @@
                             <div class="grid gap-2">
                                 <div class="flex items-center justify-between">
                                     <flux:label>Base64</flux:label>
-                                    <flux:button x-on:click="copyFileResult()" x-bind:disabled="!fileResult" icon="document-duplicate" size="xs" variant="ghost">
-                                        <span x-text="copied ? 'Copied!' : 'Copy'">Copy</span>
-                                    </flux:button>
+                                    <x-copy-button
+                                        value="fileResult"
+                                        flash="'b64-file'"
+                                        icon="document-duplicate"
+                                        size="xs"
+                                        x-bind:disabled="!fileResult"
+                                    />
                                 </div>
                                 <flux:textarea
                                     x-bind:value="fileBusy ? 'Encoding…' : fileResult"
@@ -137,6 +145,15 @@
                     </div>
                 </template>
             </div>
+
+            <template x-if="mode === 'text'">
+                <x-share-field
+                    class="rounded-lg border border-black/10 p-8 dark:border-white/10"
+                    subheading="The URL below carries the direction, URL-safe flag, and your input. File mode does not share."
+                    tooLongMessage="Input is too long to include in the URL."
+                />
+            </template>
         </div>
     </div>
+    <x-tool-content />
 </x-layouts.app>

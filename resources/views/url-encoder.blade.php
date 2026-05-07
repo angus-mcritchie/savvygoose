@@ -70,9 +70,13 @@
                     <div class="grid gap-2">
                         <div class="flex items-center justify-between">
                             <flux:label x-text="outputLabel">Output</flux:label>
-                            <flux:button x-on:click="copy()" x-bind:disabled="!output" icon="document-duplicate" size="xs" variant="ghost">
-                                <span x-text="copied ? 'Copied!' : 'Copy'">Copy</span>
-                            </flux:button>
+                            <x-copy-button
+                                value="output"
+                                flash="'urlenc'"
+                                icon="document-duplicate"
+                                size="xs"
+                                x-bind:disabled="!output"
+                            />
                         </div>
                         <flux:textarea
                             name="output"
@@ -90,6 +94,13 @@
                     </div>
                 </div>
             </div>
+
+            <x-share-field
+                class="rounded-lg border border-black/10 p-8 dark:border-white/10"
+                subheading="The URL below carries the direction, variant, and your input."
+                tooLongMessage="Input is too long to include in the URL."
+            />
         </div>
     </div>
+    <x-tool-content />
 </x-layouts.app>

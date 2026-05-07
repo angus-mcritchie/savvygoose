@@ -1,3 +1,5 @@
+import { withUrlState } from '../lib/urlState';
+
 const DAY_MS = 86400000;
 const FALLBACK_COUNTRY = 'au';
 
@@ -5,12 +7,10 @@ function detectCountry(supported) {
     const set = new Set(supported);
     const candidates = [navigator.language, ...(navigator.languages || [])].filter(Boolean);
     for (const tag of candidates) {
-        // Pull a region out of "en-AU", "pt-BR", "en-GB", etc.
         const match = /[-_]([A-Za-z]{2,3})\b/.exec(tag);
         if (!match) continue;
         const code = match[1].toLowerCase();
         if (set.has(code)) return code;
-        // Map a few common UK variants to the per-nation codes Spatie exposes.
         if (code === 'gb' || code === 'uk') {
             for (const fallback of ['gb-eng', 'gb-sct', 'gb-cym', 'gb-nir']) {
                 if (set.has(fallback)) return fallback;
@@ -46,7 +46,6 @@ function diffDays(a, b) {
 }
 
 function weekendDaysBetween(from, to) {
-    // Counts Sat/Sun in [from, to] inclusive.
     const total = diffDays(from, to) + 1;
     if (total <= 0) return 0;
 
@@ -54,7 +53,7 @@ function weekendDaysBetween(from, to) {
     let weekends = fullWeeks * 2;
 
     const remainder = total - fullWeeks * 7;
-    const fromDow = from.getUTCDay(); // 0 Sun .. 6 Sat
+    const fromDow = from.getUTCDay();
     for (let i = 0; i < remainder; i++) {
         const dow = (fromDow + i) % 7;
         if (dow === 0 || dow === 6) weekends++;
@@ -63,7 +62,6 @@ function weekendDaysBetween(from, to) {
 }
 
 function calendarBreakdown(from, to) {
-    // Returns "Ny Md Wd Dd" style — years/months/days.
     if (diffDays(from, to) < 0) return '0 years, 0 days';
     let years = to.getUTCFullYear() - from.getUTCFullYear();
     let months = to.getUTCMonth() - from.getUTCMonth();
@@ -86,33 +84,47 @@ function calendarBreakdown(from, to) {
     return parts.join(', ');
 }
 
-export default ({ supported = [] } = {}) => ({
+const schema = {
+    start: {
+        type: 'string',
+        default: '',
+        parse: (raw) => (parseIso(raw) ? raw : undefined),
+    },
+    end: {
+        type: 'string',
+        default: '',
+        parse: (raw) => (parseIso(raw) ? raw : undefined),
+    },
+    country: {
+        type: 'string',
+        default: '',
+        parse: (raw) => raw.toLowerCase(),
+        serialize: (value, state) => {
+            if (!value || value === state.defaultCountry) return { skip: true };
+            return { value };
+        },
+    },
+    inclusive: { type: 'boolean', default: true },
+};
+
+export default ({ supported = [] } = {}) => withUrlState(schema, () => ({
     supported,
     defaultCountry: detectCountry(supported),
     start: todayIso(),
     end: todayIso(),
-    country: '',
-    inclusive: true,
     holidays: [],
     holidaysLoading: false,
     holidaysError: '',
     fetchToken: 0,
-    url: window.location.href,
 
     init() {
-        this.country = this.defaultCountry;
-        this.initFromUrl();
-
-        ['start', 'end', 'country', 'inclusive'].forEach((prop) => {
-            this.$watch(prop, () => this.updateUrl());
-        });
+        if (!this.country) this.country = this.defaultCountry;
 
         ['start', 'end', 'country'].forEach((prop) => {
             this.$watch(prop, () => this.fetchHolidays());
         });
 
         this.fetchHolidays();
-        this.updateUrl();
     },
 
     get sortedRange() {
@@ -144,8 +156,6 @@ export default ({ supported = [] } = {}) => ({
         const totalDays = diffDays(range.from, range.to) + (inclusive ? 1 : 0);
         if (totalDays <= 0) return empty;
 
-        // For exclusive (nights) counts, we measure the half-open range [from, to).
-        // weekendDaysBetween is inclusive of both ends, so cap the upper bound at to-1 day.
         const weekendUpper = inclusive ? range.to : addDays(range.to, -1);
         const weekendDays = weekendDaysBetween(range.from, weekendUpper);
         const weekdays = totalDays - weekendDays;
@@ -272,24 +282,4 @@ export default ({ supported = [] } = {}) => ({
             if (token === this.fetchToken) this.holidaysLoading = false;
         }
     },
-
-    initFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-        if (params.has('start') && parseIso(params.get('start'))) this.start = params.get('start');
-        if (params.has('end') && parseIso(params.get('end'))) this.end = params.get('end');
-        if (params.has('country')) this.country = params.get('country').toLowerCase();
-        if (params.has('inclusive')) this.inclusive = params.get('inclusive') !== '0';
-    },
-
-    updateUrl() {
-        const params = new URLSearchParams();
-        params.set('start', this.start);
-        params.set('end', this.end);
-        if (this.country !== this.defaultCountry) params.set('country', this.country);
-        if (!this.inclusive) params.set('inclusive', '0');
-        const qs = params.toString();
-        const newUrl = `${window.location.origin}${window.location.pathname}${qs ? '?' + qs : ''}`;
-        this.url = newUrl;
-        window.history.replaceState({}, '', newUrl);
-    },
-});
+}))();

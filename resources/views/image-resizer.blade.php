@@ -334,11 +334,12 @@
 
             <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
                 <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">Share</flux:heading>
-                <flux:subheading class="mb-4">
-                    The URL below carries your resize settings. Image data stays on your device, so drop your own image after opening the link.
-                </flux:subheading>
-                <flux:input type="url" x-model="url" readonly copyable label="Share URL" />
+                <x-share-field
+                    :heading="false"
+                    subheading="The URL below carries your resize settings. Image data stays on your device, so drop your own image after opening the link."
+                />
             </div>
         </div>
     </div>
+    <x-tool-content />
 </x-layouts.app>

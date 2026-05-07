@@ -165,11 +165,15 @@
         <div class="mt-6 rounded-lg border border-black/10 p-6 dark:border-white/10 sm:p-8">
             <div class="mb-3 flex items-center justify-between">
                 <flux:heading size="lg">User agent</flux:heading>
-                <flux:button x-on:click="copyUa()" icon="document-duplicate" size="xs" variant="ghost">
-                    <span x-text="copied ? 'Copied!' : 'Copy'">Copy</span>
-                </flux:button>
+                <x-copy-button
+                    value="ua"
+                    flash="'ua'"
+                    icon="document-duplicate"
+                    size="xs"
+                />
             </div>
             <pre class="overflow-x-auto rounded-md bg-zinc-100 p-4 text-xs dark:bg-zinc-700"><code x-text="ua"></code></pre>
         </div>
     </div>
+    <x-tool-content />
 </x-layouts.app>

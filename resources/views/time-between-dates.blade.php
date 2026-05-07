@@ -157,15 +157,12 @@
                 </ul>
             </div>
 
-            <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
-                <flux:input
-                    type="url"
-                    x-model="url"
-                    readonly
-                    copyable
-                    label="Share URL"
-                />
-            </div>
+            <x-share-field
+                class="rounded-lg border border-black/10 p-8 dark:border-white/10"
+                :heading="false"
+                subheading="The URL below carries the date range, country, and inclusive flag."
+            />
         </div>
     </div>
+    <x-tool-content />
 </x-layouts.app>

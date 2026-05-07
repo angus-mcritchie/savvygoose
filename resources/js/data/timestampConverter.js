@@ -1,3 +1,5 @@
+import { withUrlState } from '../lib/urlState';
+
 function browserTimezone() {
     try {
         return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
@@ -91,43 +93,59 @@ function relative(ms, nowMs) {
     return 'just now';
 }
 
-const DEFAULTS = {
-    tz: browserTimezone(),
+const DEFAULT_TZ = browserTimezone();
+
+const schema = {
+    tz: {
+        type: 'string',
+        default: DEFAULT_TZ,
+        parse: (raw) => {
+            try {
+                new Intl.DateTimeFormat('en-US', { timeZone: raw });
+                return raw;
+            } catch (_) {
+                return undefined;
+            }
+        },
+    },
+    unixMs: {
+        type: 'integer',
+        alias: 'ts',
+        default: 0,
+        parse: (raw) => {
+            const parsed = smartParse(raw);
+            return parsed ? parsed.ms : undefined;
+        },
+        serialize: (value) => ({ value: Math.floor(value / 1000).toString() }),
+    },
 };
 
-export default () => ({
-    tz: DEFAULTS.tz,
+export default withUrlState(schema, () => ({
     unixMs: Date.now(),
     rawInput: '',
     parseError: '',
     parseHint: '',
     nowMs: Date.now(),
     nowTimer: null,
-    url: window.location.href,
-    copied: '',
     selectedDate: '',
     selectedTime: '',
     syncingPickers: false,
 
     init() {
-        this.initFromUrl();
         this.rawInput = this.formatUnixSeconds(this.unixMs);
         this.syncPickersFromUnixMs();
         this.refreshHint();
-        this.updateUrl();
 
         this.nowTimer = setInterval(() => { this.nowMs = Date.now(); }, 1000);
 
         this.$watch('tz', () => {
             this.syncPickersFromUnixMs();
             this.refreshHint();
-            this.updateUrl();
         });
 
         this.$watch('unixMs', () => {
             this.syncPickersFromUnixMs();
             this.refreshHint();
-            this.updateUrl();
         });
 
         this.$watch('selectedDate', (v) => {
@@ -259,40 +277,4 @@ export default () => ({
         this.selectedTime = this.timePickerValue();
         this.$nextTick(() => { this.syncingPickers = false; });
     },
-
-    async copy(key, value) {
-        try {
-            await navigator.clipboard.writeText(value);
-            this.copied = key;
-            setTimeout(() => { if (this.copied === key) this.copied = ''; }, 1200);
-        } catch (_) {}
-    },
-
-    initFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-
-        if (params.has('tz')) {
-            const tz = params.get('tz');
-            try {
-                new Intl.DateTimeFormat('en-US', { timeZone: tz });
-                this.tz = tz;
-            } catch (_) {}
-        }
-
-        if (params.has('ts')) {
-            const raw = params.get('ts');
-            const parsed = smartParse(raw);
-            if (parsed) this.unixMs = parsed.ms;
-        }
-    },
-
-    updateUrl() {
-        const params = new URLSearchParams();
-        params.set('ts', this.unixSeconds());
-        if (this.tz !== DEFAULTS.tz) params.set('tz', this.tz);
-        const qs = params.toString();
-        const newUrl = `${window.location.origin}${window.location.pathname}${qs ? '?' + qs : ''}`;
-        this.url = newUrl;
-        window.history.replaceState({}, '', newUrl);
-    },
-});
+}));

@@ -27,6 +27,11 @@ import xPercentageOfY from './data/xPercentageOfY';
 import xPlusOrMinusYPercent from './data/xPlusOrMinusYPercent';
 import yIsXPercentOfWhat from './data/yIsXPercentOfWhat';
 import mask from '@alpinejs/mask';
+import { registerClipboard } from './lib/clipboard';
+import { registerDownload } from './lib/download';
+
+registerClipboard(Alpine);
+registerDownload(Alpine);
 
 Alpine.data('barcode', barcode);
 Alpine.data('base64Encoder', base64Encoder);

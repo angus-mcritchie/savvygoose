@@ -1,6 +1,11 @@
 <x-layouts.app>
 
-    <div class="mx-auto max-w-[1000px]" x-data="passwordGenerator">
+    <div
+        class="mx-auto max-w-[1000px]"
+        x-data="passwordGenerator"
+        x-on:keydown.window.cmd.enter.prevent="generate()"
+        x-on:keydown.window.ctrl.enter.prevent="generate()"
+    >
 
         <div class="mb-8 flex justify-center">
             <div class="grid grid-cols-[auto_1fr] items-center gap-4">
@@ -33,15 +38,16 @@
                     </flux:button>
                 </div>
 
-                <flux:button
+                <x-copy-button
                     class="mb-6"
                     variant="primary"
-                    x-on:click="copy"
+                    value="password"
+                    flash="'pwd'"
+                    label="Copy password"
+                    copiedLabel="Copied!"
                     icon="document-duplicate"
                     x-bind:disabled="!password"
-                >
-                    <span x-text="copied ? 'Copied!' : 'Copy password'">Copy password</span>
-                </flux:button>
+                />
 
                 <div x-show="hasCharset" x-cloak>
                     <div class="mb-2 flex items-baseline justify-between">
@@ -131,11 +137,12 @@
 
             <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
                 <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">Share</flux:heading>
-                <flux:subheading class="mb-4">
-                    The URL below carries your settings, not your password. Open it anywhere to generate a fresh password with the same options.
-                </flux:subheading>
-                <flux:input type="url" x-model="url" readonly copyable label="Share URL" />
+                <x-share-field
+                    :heading="false"
+                    subheading="The URL below carries your settings, not your password. Open it anywhere to generate a fresh password with the same options."
+                />
             </div>
         </div>
     </div>
+    <x-tool-content />
 </x-layouts.app>

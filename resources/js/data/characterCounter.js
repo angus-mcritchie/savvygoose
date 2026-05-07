@@ -1,9 +1,12 @@
+import { withUrlState } from '../lib/urlState';
+
 const WORDS_PER_MINUTE = 200;
 
-export default () => ({
-    text: '',
-    copied: false,
+const schema = {
+    text: { type: 'string', maxLength: 3000 },
+};
 
+export default withUrlState(schema, () => ({
     get characterCount() {
         return this.text.length;
     },
@@ -37,10 +40,4 @@ export default () => ({
     clear() {
         this.text = '';
     },
-    async copy() {
-        if (!this.text) return;
-        await navigator.clipboard.writeText(this.text);
-        this.copied = true;
-        setTimeout(() => (this.copied = false), 1500);
-    },
-});
+}));

@@ -1,17 +1,15 @@
-export default () => ({
-    direction: 'encode',
-    variant: 'component',
-    input: '',
+import { withUrlState } from '../lib/urlState';
+
+const MAX_URL_INPUT = 3000;
+
+const schema = {
+    direction: { type: 'enum', values: ['encode', 'decode'], default: 'encode', alias: 'dir' },
+    variant: { type: 'enum', values: ['component', 'uri'], default: 'component' },
+    input: { type: 'string', alias: 'text', maxLength: MAX_URL_INPUT },
+};
+
+export default withUrlState(schema, () => ({
     error: '',
-    copied: false,
-
-    init() {
-        this.initFromUrl();
-
-        ['direction', 'variant', 'input'].forEach((prop) => {
-            this.$watch(prop, () => this.updateUrl());
-        });
-    },
 
     get output() {
         this.error = '';
@@ -53,36 +51,4 @@ export default () => ({
     clear() {
         this.input = '';
     },
-
-    async copy() {
-        if (!this.output) return;
-        await navigator.clipboard.writeText(this.output);
-        this.copied = true;
-        setTimeout(() => (this.copied = false), 1500);
-    },
-
-    initFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-        if (params.has('dir') && ['encode', 'decode'].includes(params.get('dir'))) {
-            this.direction = params.get('dir');
-        }
-        if (params.has('variant') && ['component', 'uri'].includes(params.get('variant'))) {
-            this.variant = params.get('variant');
-        }
-        if (params.has('text')) {
-            this.input = params.get('text');
-        }
-    },
-
-    updateUrl() {
-        const params = new URLSearchParams(window.location.search);
-
-        if (this.direction !== 'encode') params.set('dir', this.direction); else params.delete('dir');
-        if (this.variant !== 'component') params.set('variant', this.variant); else params.delete('variant');
-        if (this.input) params.set('text', this.input); else params.delete('text');
-
-        const qs = params.toString();
-        const newUrl = `${window.location.origin}${window.location.pathname}${qs ? '?' + qs : ''}`;
-        window.history.replaceState({}, '', newUrl);
-    },
-});
+}));

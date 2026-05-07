@@ -1,6 +1,10 @@
 <x-layouts.app>
 
-    <div class="mx-auto max-w-[1200px]" x-data="caseConverter">
+    <div
+        class="mx-auto max-w-[1200px]"
+        x-data="caseConverter"
+        x-on:keydown.window.escape="clear()"
+    >
         <div class="mb-8 flex justify-center">
             <div class="grid grid-cols-[auto_1fr] items-center gap-4">
                 <flux:icon.language class="size-20 text-zinc-700 dark:text-zinc-200" />
@@ -60,15 +64,13 @@
                                 <flux:heading class="!font-bold" size="lg" x-text="c.label"></flux:heading>
                                 <flux:subheading size="sm" x-text="c.description"></flux:subheading>
                             </div>
-                            <flux:button
-                                x-on:click="copy(c.key)"
-                                x-bind:disabled="!text"
+                            <x-copy-button
+                                value="convert(c.key)"
+                                flash="c.key"
                                 icon="document-duplicate"
                                 size="xs"
-                                variant="ghost"
-                            >
-                                <span x-text="copiedKey === c.key ? 'Copied!' : 'Copy'">Copy</span>
-                            </flux:button>
+                                x-bind:disabled="!text"
+                            />
                         </div>
                         <div
                             class="break-all rounded-md bg-zinc-100 p-3 font-mono text-sm dark:bg-zinc-900"
@@ -78,16 +80,12 @@
                 </template>
             </div>
 
-            <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
-                <flux:heading class="mb-2" size="xl">Share</flux:heading>
-                <flux:subheading class="mb-4">
-                    The URL below carries your input. Anyone who opens it sees the same conversions.
-                </flux:subheading>
-                <p x-show="urlTooLong" x-cloak class="mb-4 text-sm text-amber-600 dark:text-amber-400">
-                    Input is too long to include in the URL.
-                </p>
-                <flux:input type="url" x-model="url" readonly copyable label="Share URL" />
-            </div>
+            <x-share-field
+                class="rounded-lg border border-black/10 p-8 dark:border-white/10"
+                subheading="The URL below carries your input. Anyone who opens it sees the same conversions."
+                tooLongMessage="Input is too long to include in the URL."
+            />
         </div>
     </div>
+    <x-tool-content />
 </x-layouts.app>

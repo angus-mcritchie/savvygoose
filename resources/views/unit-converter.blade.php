@@ -13,6 +13,15 @@
             'temperature' => [
                 'c' => 'Celsius (°C)', 'f' => 'Fahrenheit (°F)', 'k' => 'Kelvin (K)',
             ],
+            'volume' => [
+                'ml' => 'Milliliter (mL)', 'l' => 'Liter (L)',
+                'cm3' => 'Cubic centimeter (cm³)', 'm3' => 'Cubic meter (m³)',
+                'in3' => 'Cubic inch (in³)', 'ft3' => 'Cubic foot (ft³)',
+                'tsp' => 'Teaspoon, US (tsp)', 'tbsp' => 'Tablespoon, US (tbsp)',
+                'floz' => 'Fluid ounce, US (fl oz)', 'cup' => 'Cup, US (cup)',
+                'pt' => 'Pint, US (pt)', 'qt' => 'Quart, US (qt)',
+                'gal' => 'Gallon, US (gal)', 'gal_uk' => 'Gallon, UK (gal)',
+            ],
             'data' => [
                 'B' => 'Byte (B)', 'KB' => 'Kilobyte (KB)', 'MB' => 'Megabyte (MB)',
                 'GB' => 'Gigabyte (GB)', 'TB' => 'Terabyte (TB)', 'PB' => 'Petabyte (PB)',
@@ -42,6 +51,7 @@
                         <flux:radio value="length" label="Length" />
                         <flux:radio value="weight" label="Weight" />
                         <flux:radio value="temperature" label="Temperature" />
+                        <flux:radio value="volume" label="Volume" />
                         <flux:radio value="data" label="Data" />
                     </flux:radio.group>
                     <flux:dropdown position="bottom" align="end" x-show="cat === 'data'" x-cloak>
@@ -121,15 +131,12 @@
                 ></p>
             </div>
 
-            <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
-                <flux:input
-                    type="url"
-                    x-model="url"
-                    readonly
-                    copyable
-                    label="Share URL"
-                />
-            </div>
+            <x-share-field
+                class="rounded-lg border border-black/10 p-8 dark:border-white/10"
+                :heading="false"
+                subheading="The URL below carries the category, units, and value."
+            />
         </div>
     </div>
+    <x-tool-content />
 </x-layouts.app>

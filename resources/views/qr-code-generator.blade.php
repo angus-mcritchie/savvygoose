@@ -225,21 +225,16 @@
 
             <div class="rounded-lg border border-black/10 p-8 lg:col-span-2 dark:border-white/10">
                 <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">5. Share</flux:heading>
-                <flux:subheading class="mb-2">
-                    The URL below carries every setting. Anyone who opens it sees the same QR code.
-                </flux:subheading>
-                <p class="mb-4 text-sm opacity-60" x-show="logo" x-cloak>
-                    Logos aren't included in the share URL. Download the PNG or SVG to share the QR with the logo embedded.
-                </p>
-
-                <flux:input
-                    type="url"
-                    x-model="url"
-                    readonly
-                    copyable
-                    label="Share URL"
-                />
+                <x-share-field
+                    :heading="false"
+                    subheading="The URL below carries every setting. Anyone who opens it sees the same QR code."
+                >
+                    <p class="mt-3 text-sm opacity-60" x-show="logo" x-cloak>
+                        Logos aren't included in the share URL. Download the PNG or SVG to share the QR with the logo embedded.
+                    </p>
+                </x-share-field>
             </div>
         </div>
     </div>
+    <x-tool-content />
 </x-layouts.app>

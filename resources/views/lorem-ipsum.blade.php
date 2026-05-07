@@ -1,6 +1,11 @@
 <x-layouts.app>
 
-    <div class="mx-auto max-w-[1000px]" x-data="loremIpsum">
+    <div
+        class="mx-auto max-w-[1000px]"
+        x-data="loremIpsum"
+        x-on:keydown.window.cmd.enter.prevent="regenerate()"
+        x-on:keydown.window.ctrl.enter.prevent="regenerate()"
+    >
         <div class="mb-8 flex justify-center">
             <div class="grid grid-cols-[auto_1fr] items-center gap-4">
                 <flux:icon.document-text class="size-20 text-zinc-700 dark:text-zinc-200" />
@@ -62,9 +67,22 @@
                         <flux:button x-on:click="regenerate()" icon="arrow-path" size="sm">
                             Regenerate
                         </flux:button>
-                        <flux:button x-on:click="copy()" x-bind:disabled="!output" icon="document-duplicate" size="sm" variant="primary">
-                            <span x-text="copied ? 'Copied!' : 'Copy'">Copy</span>
+                        <flux:button
+                            x-on:click="$download(output, `lorem-${type}-${count}.txt`)"
+                            x-bind:disabled="!output"
+                            icon="arrow-down-tray"
+                            size="sm"
+                        >
+                            .txt
                         </flux:button>
+                        <x-copy-button
+                            value="output"
+                            flash="'lorem'"
+                            icon="document-duplicate"
+                            size="sm"
+                            variant="primary"
+                            x-bind:disabled="!output"
+                        />
                     </div>
                 </div>
 
@@ -74,13 +92,11 @@
                 ></div>
             </div>
 
-            <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
-                <flux:heading class="mb-2" size="xl">Share</flux:heading>
-                <flux:subheading class="mb-4">
-                    The URL below carries the type, count, and seed. It always reproduces the same text.
-                </flux:subheading>
-                <flux:input type="url" x-model="url" readonly copyable label="Share URL" />
-            </div>
+            <x-share-field
+                class="rounded-lg border border-black/10 p-8 dark:border-white/10"
+                subheading="The URL below carries the type, count, and seed. It always reproduces the same text."
+            />
         </div>
     </div>
+    <x-tool-content />
 </x-layouts.app>

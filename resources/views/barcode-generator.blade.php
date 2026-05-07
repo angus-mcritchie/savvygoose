@@ -1,7 +1,13 @@
 <x-layouts.app>
 
 
-    <form class="mx-auto max-w-[1200px]" x-data="barcode" x-on:submit.prevent="printBarcode">
+    <form
+        class="mx-auto max-w-[1200px]"
+        x-data="barcode"
+        x-on:submit.prevent="printBarcode"
+        x-on:keydown.window.cmd.enter.prevent="printBarcode()"
+        x-on:keydown.window.ctrl.enter.prevent="printBarcode()"
+    >
 
         <div class="mb-8 flex justify-center">
             <div class="grid grid-cols-[auto_1fr] items-center gap-4">
@@ -109,22 +115,14 @@
             </div>
             <div class="rounded-lg border border-black/10 p-8 lg:col-span-2 dark:border-white/10">
                 <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">4. Share</flux:heading>
-                <flux:subheading class="mb-2">
-                    You can link to this page with url parameters.
-                </flux:subheading>
-
-                <div class="grid gap-4">
-                    <flux:input
-                        type="url"
-                        x-model="url"
-                        readonly
-                        x-model="url"
-                        copyable
-                        label="Share URL"
-                    />
-                    <flux:checkbox x-model="print" label="Print when open link" />
-                </div>
+                <x-share-field
+                    :heading="false"
+                    subheading="You can link to this page with url parameters."
+                >
+                    <flux:checkbox class="mt-4" x-model="print" label="Print when opening link" />
+                </x-share-field>
             </div>
         </div>
     </form>
+    <x-tool-content />
 </x-layouts.app>

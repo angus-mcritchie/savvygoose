@@ -1,9 +1,5 @@
 import { diffLines, diffWordsWithSpace } from 'diff';
-
-const DEFAULTS = {
-    mode: 'side-by-side',
-    ignoreWhitespace: false,
-};
+import { withUrlState } from '../lib/urlState';
 
 const MAX_URL_INPUT = 2500;
 
@@ -103,22 +99,21 @@ function buildWordDiff(original, modified) {
     }));
 }
 
-export default () => ({
-    original: '',
-    modified: '',
-    mode: DEFAULTS.mode,
-    ignoreWhitespace: DEFAULTS.ignoreWhitespace,
-    url: window.location.href,
-    urlTooLong: false,
+const serializeIfShortEnough = (value, state) => {
+    if (!value) return { skip: true };
+    const total = (state.original?.length || 0) + (state.modified?.length || 0);
+    if (total > MAX_URL_INPUT) return { skip: true, tooLong: true };
+    return { value };
+};
 
-    init() {
-        this.initFromUrl();
-        ['original', 'modified', 'mode', 'ignoreWhitespace'].forEach((prop) => {
-            this.$watch(prop, () => this.updateUrl());
-        });
-        this.updateUrl();
-    },
+const schema = {
+    original: { type: 'string', alias: 'a', serialize: serializeIfShortEnough },
+    modified: { type: 'string', alias: 'b', serialize: serializeIfShortEnough },
+    mode: { type: 'enum', values: ['side-by-side', 'unified', 'word'], default: 'side-by-side' },
+    ignoreWhitespace: { type: 'boolean', default: false, alias: 'iw' },
+};
 
+export default withUrlState(schema, () => ({
     get parts() {
         if (!this.original && !this.modified) return [];
         return diffLines(this.original, this.modified, {
@@ -170,42 +165,4 @@ export default () => ({
         this.original = '';
         this.modified = '';
     },
-
-    initFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-        if (params.has('a')) this.original = params.get('a');
-        if (params.has('b')) this.modified = params.get('b');
-        if (params.has('mode') && ['side-by-side', 'unified', 'word'].includes(params.get('mode'))) {
-            this.mode = params.get('mode');
-        }
-        if (params.has('iw')) this.ignoreWhitespace = params.get('iw') === '1';
-    },
-
-    updateUrl() {
-        const params = new URLSearchParams(window.location.search);
-        const totalLength = (this.original?.length || 0) + (this.modified?.length || 0);
-
-        if (totalLength <= MAX_URL_INPUT && totalLength > 0) {
-            if (this.original) params.set('a', this.original);
-            else params.delete('a');
-            if (this.modified) params.set('b', this.modified);
-            else params.delete('b');
-            this.urlTooLong = false;
-        } else {
-            params.delete('a');
-            params.delete('b');
-            this.urlTooLong = totalLength > MAX_URL_INPUT;
-        }
-
-        if (this.mode !== DEFAULTS.mode) params.set('mode', this.mode);
-        else params.delete('mode');
-
-        if (this.ignoreWhitespace) params.set('iw', '1');
-        else params.delete('iw');
-
-        const qs = params.toString();
-        const newUrl = `${window.location.origin}${window.location.pathname}${qs ? '?' + qs : ''}`;
-        this.url = newUrl;
-        window.history.replaceState({}, '', newUrl);
-    },
-});
+}));

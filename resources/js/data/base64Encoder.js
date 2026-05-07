@@ -1,4 +1,7 @@
+import { withUrlState } from '../lib/urlState';
+
 const MAX_FILE_BYTES = 25 * 1024 * 1024;
+const MAX_URL_INPUT = 3000;
 
 function bytesToBase64(bytes) {
     let binary = '';
@@ -32,25 +35,29 @@ function decodeText(b64) {
     return new TextDecoder().decode(bytes);
 }
 
-export default () => ({
-    mode: 'text',
-    direction: 'encode',
-    urlSafe: false,
-    input: '',
+const schema = {
+    mode: { type: 'enum', values: ['text', 'file'], default: 'text' },
+    direction: { type: 'enum', values: ['encode', 'decode'], default: 'encode', alias: 'dir' },
+    urlSafe: { type: 'boolean', default: false, alias: 'urlsafe' },
+    input: {
+        type: 'string',
+        alias: 'text',
+        maxLength: MAX_URL_INPUT,
+        serialize: (value, state) => {
+            if (state.mode !== 'text') return { skip: true };
+            if (value == null || value === '') return { skip: true };
+            if (value.length > MAX_URL_INPUT) return { skip: true, tooLong: true };
+            return { value };
+        },
+    },
+};
+
+export default withUrlState(schema, () => ({
     error: '',
-    copied: false,
     file: null,
     fileResult: '',
     fileError: '',
     fileBusy: false,
-
-    init() {
-        this.initFromUrl();
-
-        ['direction', 'input', 'urlSafe', 'mode'].forEach((prop) => {
-            this.$watch(prop, () => this.updateUrl());
-        });
-    },
 
     get output() {
         this.error = '';
@@ -88,13 +95,6 @@ export default () => ({
 
     clear() {
         this.input = '';
-    },
-
-    async copy() {
-        if (!this.output) return;
-        await navigator.clipboard.writeText(this.output);
-        this.copied = true;
-        setTimeout(() => (this.copied = false), 1500);
     },
 
     onFileSelected(event) {
@@ -137,13 +137,6 @@ export default () => ({
         if (this.$refs.fileInput) this.$refs.fileInput.value = '';
     },
 
-    async copyFileResult() {
-        if (!this.fileResult) return;
-        await navigator.clipboard.writeText(this.fileResult);
-        this.copied = true;
-        setTimeout(() => (this.copied = false), 1500);
-    },
-
     downloadDecoded() {
         if (this.direction !== 'decode' || !this.output) return;
         try {
@@ -164,37 +157,4 @@ export default () => ({
             this.error = 'Input is not valid Base64.';
         }
     },
-
-    initFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-        if (params.has('mode') && ['text', 'file'].includes(params.get('mode'))) {
-            this.mode = params.get('mode');
-        }
-        if (params.has('dir') && ['encode', 'decode'].includes(params.get('dir'))) {
-            this.direction = params.get('dir');
-        }
-        if (params.get('urlsafe') === '1') {
-            this.urlSafe = true;
-        }
-        if (params.has('text')) {
-            this.input = params.get('text');
-        }
-    },
-
-    updateUrl() {
-        const params = new URLSearchParams(window.location.search);
-
-        if (this.mode !== 'text') params.set('mode', this.mode); else params.delete('mode');
-        if (this.direction !== 'encode') params.set('dir', this.direction); else params.delete('dir');
-        if (this.urlSafe) params.set('urlsafe', '1'); else params.delete('urlsafe');
-        if (this.mode === 'text' && this.input) {
-            params.set('text', this.input);
-        } else {
-            params.delete('text');
-        }
-
-        const qs = params.toString();
-        const newUrl = `${window.location.origin}${window.location.pathname}${qs ? '?' + qs : ''}`;
-        window.history.replaceState({}, '', newUrl);
-    },
-});
+}));

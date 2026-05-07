@@ -77,7 +77,17 @@
             <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
                 <div class="mb-6 flex items-center justify-between gap-2 border-b border-black/10 pb-4 dark:border-white/10">
                     <flux:heading size="lg">Hashes</flux:heading>
-                    <flux:dropdown position="bottom" align="end">
+                    <div class="flex items-center gap-2">
+                        <flux:button
+                            x-on:click="$download(algos.map(a => `${a.label}: ${hashes[a.key]}`).join('\n') + '\n', 'hashes.txt')"
+                            x-bind:disabled="!hashes.md5"
+                            icon="arrow-down-tray"
+                            size="sm"
+                            variant="ghost"
+                        >
+                            .txt
+                        </flux:button>
+                        <flux:dropdown position="bottom" align="end">
                         <flux:button icon="information-circle" variant="ghost" size="sm" aria-label="Which hash should I use?" />
                         <flux:popover class="max-w-sm">
                             <flux:heading size="sm">Which one should I use?</flux:heading>
@@ -91,21 +101,20 @@
                             <p class="text-sm">For passwords, use bcrypt/argon2. These are too fast to be safe alone.</p>
                         </flux:popover>
                     </flux:dropdown>
+                    </div>
                 </div>
                 <div class="grid gap-4">
                     <template x-for="algo in algos" :key="algo.key">
                         <div class="grid gap-2">
                             <div class="flex items-center justify-between">
                                 <flux:label x-text="algo.label">Hash</flux:label>
-                                <flux:button
-                                    x-on:click="copy(algo.key)"
-                                    x-bind:disabled="!hashes[algo.key]"
+                                <x-copy-button
+                                    value="hashes[algo.key]"
+                                    flash="'hash-' + algo.key"
                                     icon="document-duplicate"
                                     size="xs"
-                                    variant="ghost"
-                                >
-                                    <span x-text="copied === algo.key ? 'Copied!' : 'Copy'">Copy</span>
-                                </flux:button>
+                                    x-bind:disabled="!hashes[algo.key]"
+                                />
                             </div>
                             <flux:input
                                 x-bind:value="hashes[algo.key]"
@@ -120,6 +129,15 @@
                     MD5 and SHA-1 are broken for collision resistance. Use SHA-256 or SHA-512 for security-sensitive checks.
                 </p>
             </div>
+
+            <template x-if="mode === 'text'">
+                <x-share-field
+                    class="rounded-lg border border-black/10 p-8 dark:border-white/10"
+                    subheading="The URL below carries your input. File mode does not share."
+                    tooLongMessage="Input is too long to include in the URL."
+                />
+            </template>
         </div>
     </div>
+    <x-tool-content />
 </x-layouts.app>

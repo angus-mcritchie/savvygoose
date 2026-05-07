@@ -1,3 +1,5 @@
+import { withUrlState } from '../lib/urlState';
+
 const DEFAULTS = {
     canvasWidth: 512,
     canvasHeight: 512,
@@ -46,7 +48,49 @@ const MIN_DIM = 1;
 const deg2rad = (d) => (d * Math.PI) / 180;
 const normalizeAngle = (a) => (((a + 180) % 360) + 360) % 360 - 180;
 
-export default () => ({
+const schema = {
+    canvasWidth: { type: 'integer', alias: 'cw', default: DEFAULTS.canvasWidth, min: MIN_DIM, max: MAX_DIM },
+    canvasHeight: { type: 'integer', alias: 'ch', default: DEFAULTS.canvasHeight, min: MIN_DIM, max: MAX_DIM },
+    imageWidth: { type: 'integer', alias: 'iw', default: DEFAULTS.imageWidth, min: MIN_DIM, max: MAX_DIM },
+    imageHeight: { type: 'integer', alias: 'ih', default: DEFAULTS.imageHeight, min: MIN_DIM, max: MAX_DIM },
+    imageX: { type: 'integer', alias: 'x', default: DEFAULTS.imageX, min: -MAX_DIM, max: MAX_DIM },
+    imageY: { type: 'integer', alias: 'y', default: DEFAULTS.imageY, min: -MAX_DIM, max: MAX_DIM },
+    imageRotation: {
+        type: 'number',
+        alias: 'r',
+        default: DEFAULTS.imageRotation,
+        parse: (raw) => {
+            const n = parseFloat(raw);
+            return Number.isFinite(n) ? normalizeAngle(n) : undefined;
+        },
+    },
+    format: {
+        type: 'string',
+        alias: 'fmt',
+        default: DEFAULTS.format,
+        parse: (raw) => {
+            const v = 'image/' + raw.toLowerCase().replace('jpg', 'jpeg');
+            return FORMATS[v] ? v : undefined;
+        },
+        serialize: (value) => ({ value: value.replace('image/', '').replace('jpeg', 'jpg') }),
+    },
+    quality: {
+        type: 'integer',
+        alias: 'q',
+        default: DEFAULTS.quality,
+        min: 1,
+        max: 100,
+        serialize: (value, state) => {
+            if (!FORMATS[state.format]?.supportsQuality) return { skip: true };
+            return { value: String(value) };
+        },
+    },
+    bg: { type: 'color', default: DEFAULTS.bg },
+    transparent: { type: 'boolean', alias: 'tr', default: DEFAULTS.transparent },
+    allowExceedCanvas: { type: 'boolean', alias: 'over', default: DEFAULTS.allowExceedCanvas },
+};
+
+export default withUrlState(schema, () => ({
     canvasWidth: DEFAULTS.canvasWidth,
     canvasHeight: DEFAULTS.canvasHeight,
     imageWidth: DEFAULTS.imageWidth,
@@ -74,15 +118,12 @@ export default () => ({
     formats: FORMATS,
     sizePresets: SIZE_PRESETS,
     ratioPresets: RATIO_PRESETS,
-    url: window.location.href,
     _previewToken: 0,
     _ratioGuard: false,
     _drag: null,
     _resizeObserver: null,
 
     init() {
-        this.initFromUrl();
-
         const renderProps = [
             'canvasWidth', 'canvasHeight',
             'imageWidth', 'imageHeight',
@@ -91,10 +132,7 @@ export default () => ({
             'allowExceedCanvas',
         ];
         renderProps.forEach((prop) => {
-            this.$watch(prop, () => {
-                this.updateUrl();
-                this.renderPreview();
-            });
+            this.$watch(prop, () => this.renderPreview());
         });
 
         this.$watch('imageWidth', (val) => {
@@ -140,8 +178,6 @@ export default () => ({
             this.recomputeDisplayScale();
             this.renderPreview();
         });
-
-        this.updateUrl();
     },
 
     get supportsQuality() {
@@ -669,87 +705,4 @@ export default () => ({
         };
     },
 
-    initFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-
-        const intParam = (key, prop, min, max) => {
-            if (!params.has(key)) return;
-            const n = parseInt(params.get(key), 10);
-            if (Number.isFinite(n) && n >= min && n <= max) this[prop] = n;
-        };
-
-        intParam('cw', 'canvasWidth', MIN_DIM, MAX_DIM);
-        intParam('ch', 'canvasHeight', MIN_DIM, MAX_DIM);
-        intParam('iw', 'imageWidth', MIN_DIM, MAX_DIM);
-        intParam('ih', 'imageHeight', MIN_DIM, MAX_DIM);
-        intParam('x', 'imageX', -MAX_DIM, MAX_DIM);
-        intParam('y', 'imageY', -MAX_DIM, MAX_DIM);
-        intParam('q', 'quality', 1, 100);
-
-        if (params.has('r')) {
-            const n = parseFloat(params.get('r'));
-            if (Number.isFinite(n)) this.imageRotation = normalizeAngle(n);
-        }
-
-        if (params.has('fmt')) {
-            const v = 'image/' + params.get('fmt').toLowerCase().replace('jpg', 'jpeg');
-            if (FORMATS[v]) this.format = v;
-        }
-
-        if (params.has('bg') && /^#?[0-9a-fA-F]{6}$/.test(params.get('bg'))) {
-            this.bg = '#' + params.get('bg').replace('#', '');
-        }
-
-        if (params.get('tr') === '1') this.transparent = true;
-        if (params.get('over') === '1') this.allowExceedCanvas = true;
-    },
-
-    updateUrl() {
-        const params = new URLSearchParams(window.location.search);
-
-        const setOrDelete = (key, val, def) => {
-            if (val === def) params.delete(key);
-            else params.set(key, val);
-        };
-
-        setOrDelete('cw', parseInt(this.canvasWidth, 10), DEFAULTS.canvasWidth);
-        setOrDelete('ch', parseInt(this.canvasHeight, 10), DEFAULTS.canvasHeight);
-        setOrDelete('iw', parseInt(this.imageWidth, 10), DEFAULTS.imageWidth);
-        setOrDelete('ih', parseInt(this.imageHeight, 10), DEFAULTS.imageHeight);
-        setOrDelete('x', parseInt(this.imageX, 10), DEFAULTS.imageX);
-        setOrDelete('y', parseInt(this.imageY, 10), DEFAULTS.imageY);
-
-        if (this.imageRotation !== DEFAULTS.imageRotation) {
-            params.set('r', String(this.imageRotation));
-        } else {
-            params.delete('r');
-        }
-
-        const fmtShort = this.format.replace('image/', '').replace('jpeg', 'jpg');
-        const defShort = DEFAULTS.format.replace('image/', '').replace('jpeg', 'jpg');
-        setOrDelete('fmt', fmtShort, defShort);
-
-        if (this.supportsQuality) {
-            setOrDelete('q', parseInt(this.quality, 10), DEFAULTS.quality);
-        } else {
-            params.delete('q');
-        }
-
-        if (this.bg.toLowerCase() !== DEFAULTS.bg) {
-            params.set('bg', this.bg.replace('#', ''));
-        } else {
-            params.delete('bg');
-        }
-
-        if (this.transparent) params.set('tr', '1');
-        else params.delete('tr');
-
-        if (this.allowExceedCanvas) params.set('over', '1');
-        else params.delete('over');
-
-        const qs = params.toString();
-        const newUrl = `${window.location.origin}${window.location.pathname}${qs ? '?' + qs : ''}`;
-        this.url = newUrl;
-        window.history.replaceState({}, '', newUrl);
-    },
-});
+}));

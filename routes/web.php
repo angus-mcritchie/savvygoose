@@ -14,4 +14,22 @@ foreach (config('tools.tools') as $tool) {
     Route::view('/'.$tool['slug'], $tool['slug'])->name($tool['slug']);
 }
 
+Route::get('/sitemap.xml', function () {
+    $base = rtrim(config('app.url'), '/');
+
+    $urls = [['loc' => $base.'/', 'changefreq' => 'weekly', 'priority' => '1.0']];
+
+    foreach (array_keys(config('tools.categories')) as $key) {
+        $urls[] = ['loc' => $base.'/'.$key, 'changefreq' => 'weekly', 'priority' => '0.8'];
+    }
+
+    foreach (config('tools.tools') as $tool) {
+        $urls[] = ['loc' => $base.'/'.$tool['slug'], 'changefreq' => 'monthly', 'priority' => '0.7'];
+    }
+
+    return response()
+        ->view('sitemap', ['urls' => $urls])
+        ->header('Content-Type', 'application/xml');
+})->name('sitemap');
+
 Route::get('/api/holidays', HolidaysController::class)->name('api.holidays');

@@ -152,15 +152,11 @@
                 </div>
             </div>
 
-            <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
-                <flux:input
-                    type="url"
-                    x-model="url"
-                    readonly
-                    copyable
-                    label="Share URL"
-                />
-            </div>
+            <x-share-field
+                class="rounded-lg border border-black/10 p-8 dark:border-white/10"
+                subheading="The URL below carries both colors so you can link straight to this combination."
+            />
         </div>
     </div>
+    <x-tool-content />
 </x-layouts.app>

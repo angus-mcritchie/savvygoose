@@ -1,12 +1,4 @@
-const DEFAULTS = {
-    length: 20,
-    lower: true,
-    upper: true,
-    digits: true,
-    symbols: true,
-    excludeSimilar: false,
-    excludeAmbiguous: false,
-};
+import { withUrlState } from '../lib/urlState';
 
 const CHARSETS = {
     lower: 'abcdefghijklmnopqrstuvwxyz',
@@ -34,29 +26,23 @@ const randomInt = (max) => {
     return n % max;
 };
 
-export default () => ({
-    length: DEFAULTS.length,
-    lower: DEFAULTS.lower,
-    upper: DEFAULTS.upper,
-    digits: DEFAULTS.digits,
-    symbols: DEFAULTS.symbols,
-    excludeSimilar: DEFAULTS.excludeSimilar,
-    excludeAmbiguous: DEFAULTS.excludeAmbiguous,
+const schema = {
+    length: { type: 'integer', default: 20, min: 4, max: 128, alias: 'len' },
+    lower: { type: 'boolean', default: true },
+    upper: { type: 'boolean', default: true },
+    digits: { type: 'boolean', default: true },
+    symbols: { type: 'boolean', default: true },
+    excludeSimilar: { type: 'boolean', default: false, alias: 'noSim' },
+    excludeAmbiguous: { type: 'boolean', default: false, alias: 'noAmb' },
+};
+
+export default withUrlState(schema, () => ({
     password: '',
-    copied: false,
-    url: window.location.href,
 
     init() {
-        this.initFromUrl();
-
         ['length', 'lower', 'upper', 'digits', 'symbols', 'excludeSimilar', 'excludeAmbiguous'].forEach((prop) => {
-            this.$watch(prop, () => {
-                this.updateUrl();
-                this.generate();
-            });
+            this.$watch(prop, () => this.generate());
         });
-
-        this.updateUrl();
         this.generate();
     },
 
@@ -122,63 +108,5 @@ export default () => ({
         }
 
         this.password = arr.join('').slice(0, len);
-        this.copied = false;
     },
-
-    async copy() {
-        if (!this.password) return;
-        await navigator.clipboard.writeText(this.password);
-        this.copied = true;
-        setTimeout(() => (this.copied = false), 1500);
-    },
-
-    initFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-
-        if (params.has('len')) {
-            const n = parseInt(params.get('len'), 10);
-            if (Number.isFinite(n) && n >= 4 && n <= 128) this.length = n;
-        }
-
-        const flag = (key, prop) => {
-            if (!params.has(key)) return;
-            const v = params.get(key);
-            if (v === '1') this[prop] = true;
-            if (v === '0') this[prop] = false;
-        };
-
-        flag('lower', 'lower');
-        flag('upper', 'upper');
-        flag('digits', 'digits');
-        flag('symbols', 'symbols');
-        flag('noSim', 'excludeSimilar');
-        flag('noAmb', 'excludeAmbiguous');
-    },
-
-    updateUrl() {
-        const params = new URLSearchParams(window.location.search);
-
-        const setFlag = (key, val, def) => {
-            if (val === def) params.delete(key);
-            else params.set(key, val ? '1' : '0');
-        };
-
-        if (parseInt(this.length, 10) !== DEFAULTS.length) {
-            params.set('len', this.length);
-        } else {
-            params.delete('len');
-        }
-
-        setFlag('lower', this.lower, DEFAULTS.lower);
-        setFlag('upper', this.upper, DEFAULTS.upper);
-        setFlag('digits', this.digits, DEFAULTS.digits);
-        setFlag('symbols', this.symbols, DEFAULTS.symbols);
-        setFlag('noSim', this.excludeSimilar, DEFAULTS.excludeSimilar);
-        setFlag('noAmb', this.excludeAmbiguous, DEFAULTS.excludeAmbiguous);
-
-        const qs = params.toString();
-        const newUrl = `${window.location.origin}${window.location.pathname}${qs ? '?' + qs : ''}`;
-        this.url = newUrl;
-        window.history.replaceState({}, '', newUrl);
-    },
-});
+}));

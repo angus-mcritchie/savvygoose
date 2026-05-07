@@ -1,7 +1,4 @@
-const DEFAULTS = {
-    mode: 'pretty',
-    indent: '2',
-};
+import { withUrlState } from '../lib/urlState';
 
 const MAX_URL_INPUT = 3000;
 const SAMPLE = JSON.stringify(
@@ -31,26 +28,21 @@ function positionToLineCol(text, position) {
     return { line, col };
 }
 
-export default () => ({
-    input: '',
-    mode: DEFAULTS.mode,
-    indent: DEFAULTS.indent,
+const schema = {
+    input: { type: 'string', maxLength: MAX_URL_INPUT },
+    mode: { type: 'enum', values: ['pretty', 'minified'], default: 'pretty' },
+    indent: { type: 'enum', values: ['2', '4', 'tab'], default: '2' },
+};
+
+export default withUrlState(schema, () => ({
     output: '',
     error: null,
-    copied: false,
-    url: window.location.href,
-    urlTooLong: false,
 
     init() {
-        this.initFromUrl();
         ['input', 'mode', 'indent'].forEach((prop) => {
-            this.$watch(prop, () => {
-                this.compute();
-                this.updateUrl();
-            });
+            this.$watch(prop, () => this.compute());
         });
         this.compute();
-        this.updateUrl();
     },
 
     compute() {
@@ -97,13 +89,6 @@ export default () => ({
         this.input = this.output;
     },
 
-    async copyOutput() {
-        if (!this.output) return;
-        await navigator.clipboard.writeText(this.output);
-        this.copied = true;
-        setTimeout(() => (this.copied = false), 1500);
-    },
-
     get inputBytes() {
         return new Blob([this.input]).size;
     },
@@ -117,46 +102,4 @@ export default () => ({
         if (before === 0) return 0;
         return Math.round(((before - after) / before) * 100);
     },
-
-    initFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-        if (params.has('input')) {
-            this.input = params.get('input');
-        }
-        if (params.has('mode') && ['pretty', 'minified'].includes(params.get('mode'))) {
-            this.mode = params.get('mode');
-        }
-        if (params.has('indent') && ['2', '4', 'tab'].includes(params.get('indent'))) {
-            this.indent = params.get('indent');
-        }
-    },
-
-    updateUrl() {
-        const params = new URLSearchParams(window.location.search);
-
-        if (this.input && this.input.length <= MAX_URL_INPUT) {
-            params.set('input', this.input);
-            this.urlTooLong = false;
-        } else {
-            params.delete('input');
-            this.urlTooLong = this.input.length > MAX_URL_INPUT;
-        }
-
-        if (this.mode !== DEFAULTS.mode) {
-            params.set('mode', this.mode);
-        } else {
-            params.delete('mode');
-        }
-
-        if (this.indent !== DEFAULTS.indent) {
-            params.set('indent', this.indent);
-        } else {
-            params.delete('indent');
-        }
-
-        const qs = params.toString();
-        const newUrl = `${window.location.origin}${window.location.pathname}${qs ? '?' + qs : ''}`;
-        this.url = newUrl;
-        window.history.replaceState({}, '', newUrl);
-    },
-});
+}));

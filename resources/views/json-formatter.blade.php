@@ -76,8 +76,15 @@
                                         <span> · <span x-text="savings"></span>% smaller</span>
                                     </template>
                                 </flux:text>
-                                <flux:button x-on:click="copyOutput()" x-bind:disabled="!output" icon="document-duplicate" size="xs" variant="ghost">
-                                    <span x-text="copied ? 'Copied!' : 'Copy'">Copy</span>
+                                <x-copy-button
+                                    value="output"
+                                    flash="'json-output'"
+                                    icon="document-duplicate"
+                                    size="xs"
+                                    x-bind:disabled="!output"
+                                />
+                                <flux:button x-on:click="$download(output, 'data.json', 'application/json')" x-bind:disabled="!output" icon="arrow-down-tray" size="xs" variant="ghost">
+                                    Download
                                 </flux:button>
                                 <flux:button x-on:click="swapToOutput()" x-bind:disabled="!output" icon="arrow-left" size="xs" variant="ghost">
                                     Use as input
@@ -119,16 +126,12 @@
                 </div>
             </div>
 
-            <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
-                <flux:heading class="mb-2" size="xl">Share</flux:heading>
-                <flux:subheading class="mb-4">
-                    The URL below carries your JSON and settings. Anyone who opens it sees the same input.
-                </flux:subheading>
-                <p x-show="urlTooLong" x-cloak class="mb-4 text-sm text-amber-600 dark:text-amber-400">
-                    Input is too long to include in the URL. Copy the formatted output to share instead.
-                </p>
-                <flux:input type="url" x-model="url" readonly copyable label="Share URL" />
-            </div>
+            <x-share-field
+                class="rounded-lg border border-black/10 p-8 dark:border-white/10"
+                subheading="The URL below carries your JSON and settings. Anyone who opens it sees the same input."
+                tooLongMessage="Input is too long to include in the URL. Copy the formatted output to share instead."
+            />
         </div>
     </div>
+    <x-tool-content />
 </x-layouts.app>
