@@ -111,7 +111,22 @@
             />
 
             <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
-                <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">Preview</flux:heading>
+                <div class="mb-6 flex items-center justify-between gap-4 border-b border-black/10 pb-4 dark:border-white/10">
+                    <flux:heading size="xl">Preview</flux:heading>
+                    <flux:tooltip content="Copies the rendered preview as rich text so it pastes formatted into email, docs, and chat — without the prose styling.">
+                        <flux:button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            x-bind:icon="$store.copy.is('md-preview') ? 'check' : 'document-duplicate'"
+                            x-on:click.stop="copyPreview()"
+                            x-bind:disabled="!preview"
+                        >
+                            <span x-show="!$store.copy.is('md-preview')">Copy as rich text</span>
+                            <span x-show="$store.copy.is('md-preview')" x-cloak>Copied!</span>
+                        </flux:button>
+                    </flux:tooltip>
+                </div>
                 <template x-if="preview">
                     <div class="prose max-w-none dark:prose-invert" x-html="preview"></div>
                 </template>

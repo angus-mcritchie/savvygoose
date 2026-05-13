@@ -72,4 +72,41 @@ export default withUrlState(schema, () => ({
     clear() {
         this.input = '';
     },
+
+    async copyPreview() {
+        const html = this.preview;
+        if (!html) return;
+        const tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        const text = tmp.innerText || tmp.textContent || '';
+
+        try {
+            await navigator.clipboard.write([
+                new ClipboardItem({
+                    'text/html': new Blob([html], { type: 'text/html' }),
+                    'text/plain': new Blob([text], { type: 'text/plain' }),
+                }),
+            ]);
+        } catch {
+            // Fallback for browsers without ClipboardItem support: select a
+            // contenteditable node so execCommand('copy') captures rich text.
+            const div = document.createElement('div');
+            div.contentEditable = 'true';
+            div.style.position = 'fixed';
+            div.style.left = '-9999px';
+            div.style.opacity = '0';
+            div.innerHTML = html;
+            document.body.appendChild(div);
+            const range = document.createRange();
+            range.selectNodeContents(div);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+            try { document.execCommand('copy'); } catch {}
+            sel.removeAllRanges();
+            document.body.removeChild(div);
+        }
+
+        this.$store.copy.flash('md-preview');
+    },
 }));
