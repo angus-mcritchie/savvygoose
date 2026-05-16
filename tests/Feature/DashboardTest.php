@@ -60,6 +60,10 @@ test('the password generator renders', function () {
     $this->get('/password-generator')->assertOk();
 });
 
+test('the passphrase generator renders', function () {
+    $this->get('/passphrase-generator')->assertOk()->assertSee('Passphrase Generator');
+});
+
 test('the uuid generator renders', function () {
     $this->get('/uuid-generator')->assertOk();
 });

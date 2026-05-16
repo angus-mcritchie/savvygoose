@@ -442,6 +442,27 @@ return [
             ],
         ],
         [
+            'slug' => 'passphrase-generator',
+            'name' => 'Passphrase Generator',
+            'tagline' => 'Memorable, random word-based passphrases.',
+            'category' => 'generators',
+            'icon' => ['type' => 'flux', 'name' => 'key'],
+            'meta' => [
+                'title' => 'Passphrase Generator: Random, Memorable',
+                'description' => 'Generate Diceware-style passphrases from the EFF large wordlist. Easier to remember than passwords, and just as strong with enough words.',
+            ],
+            'howto' => [
+                'Pick how many words to use and a separator.',
+                'Optionally append a digit or symbol for sites that require them.',
+                'Hit Regenerate for a new passphrase, then copy.',
+            ],
+            'faqs' => [
+                ['q' => 'Where do the words come from?', 'a' => 'The EFF large wordlist (7,776 words). Each word is picked with the browser\'s cryptographic random source.'],
+                ['q' => 'How many words do I need?', 'a' => 'Three words give roughly 38 bits of entropy. Five words gets you past 64 bits, which resists offline cracking. Six or seven is comfortable for high-value accounts.'],
+                ['q' => 'Is the passphrase generated on a server?', 'a' => 'No. Word selection runs locally using window.crypto, so nothing leaves your device.'],
+            ],
+        ],
+        [
             'slug' => 'uuid-generator',
             'name' => 'UUID Generator',
             'tagline' => 'Generate v4 or v7 UUIDs in bulk.',
