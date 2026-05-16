@@ -1,5 +1,26 @@
-@import url("https://fonts.googleapis.com/css2?family=Libre+Barcode+128&family=Roboto+Mono:wght@400;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap");
+@font-face {
+    font-family: "Libre Barcode 128";
+    font-style: normal;
+    font-weight: 400;
+    font-display: block;
+    src: url("../fonts/libre-barcode-128.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Roboto Mono";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../fonts/roboto-mono-400.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Roboto Mono";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("../fonts/roboto-mono-700.ttf") format("truetype");
+}
 
 [data-barcode-canvas] {
     --barcode-width: 4cm;

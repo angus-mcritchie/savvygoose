@@ -8,6 +8,20 @@ const positiveFloat = (raw) => {
     return Number.isFinite(n) && n > 0 ? n : undefined;
 };
 
+// Walk the parent document's stylesheets and return the CSS text of the sheet
+// that defines the barcode styles. Needed because Vite serves CSS as a JS
+// module in dev, so handing Printd the link href would yield JS, not CSS.
+const collectBarcodeCss = () => {
+    for (const sheet of document.styleSheets) {
+        let rules;
+        try { rules = [...sheet.cssRules]; } catch { continue; }
+        if (rules.some((r) => r.cssText && r.cssText.includes('data-barcode'))) {
+            return rules.map((r) => r.cssText).join('\n');
+        }
+    }
+    return '';
+};
+
 const schema = {
     label: { type: 'string' },
     value: { type: 'string' },
@@ -57,6 +71,19 @@ export default withUrlState(schema, () => ({
     },
 
     printBarcode() {
-        (new Printd()).print(this.$refs.barcodeCanvas, [this.$refs.stylesheet.href]);
+        const text = this.getCode();
+        (new Printd()).print(
+            this.$refs.barcodeCanvas,
+            [collectBarcodeCss()],
+            [],
+            async ({ iframe, launchPrint }) => {
+                const idoc = iframe.contentDocument;
+                if (idoc?.fonts) {
+                    try { await idoc.fonts.load(`1em "Libre Barcode 128"`, text); } catch {}
+                    try { await idoc.fonts.ready; } catch {}
+                }
+                launchPrint();
+            },
+        );
     }
 }));
