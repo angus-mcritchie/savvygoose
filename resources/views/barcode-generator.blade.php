@@ -4,7 +4,7 @@
     <form
         class="mx-auto max-w-[1200px]"
         x-data="barcode"
-        x-on:submit.prevent="printBarcode"
+        x-on:submit.prevent="printBarcode()"
         x-on:keydown.window.cmd.enter.prevent="printBarcode()"
         x-on:keydown.window.ctrl.enter.prevent="printBarcode()"
     >

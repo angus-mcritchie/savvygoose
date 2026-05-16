@@ -1,6 +1,6 @@
 import Code128Generator from "code-128-encoder";
 import "../../css/barcode-generator.css";
-import Printd from "printd";
+import { Printd } from "printd";
 import { withUrlState } from "../lib/urlState";
 
 const positiveFloat = (raw) => {
