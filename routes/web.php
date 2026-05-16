@@ -14,6 +14,9 @@ foreach (config('tools.tools') as $tool) {
     Route::view('/'.$tool['slug'], $tool['slug'])->name($tool['slug']);
 }
 
+// Private internal pages — not in the tool registry, dashboard, nav, or sitemap.
+Route::view('/on-it-rc-header-card', 'on-it-rc-header-card')->name('on-it-rc-header-card');
+
 Route::get('/sitemap.xml', function () {
     $base = rtrim(config('app.url'), '/');
 
