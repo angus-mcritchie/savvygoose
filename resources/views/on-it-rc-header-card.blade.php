@@ -2,8 +2,8 @@
     <div
         class="mx-auto max-w-[1000px]"
         x-data="onItRcHeaderCard"
-        x-on:keydown.window.cmd.enter.prevent="print()"
-        x-on:keydown.window.ctrl.enter.prevent="print()"
+        x-on:keydown.window.cmd.enter.prevent="printSticker()"
+        x-on:keydown.window.ctrl.enter.prevent="printSticker()"
     >
         <div class="mb-8 flex justify-center">
             <div class="grid grid-cols-[auto_1fr] items-center gap-4">
@@ -47,7 +47,7 @@
                 </div>
 
                 <div class="mt-6 flex justify-center">
-                    <flux:button x-on:click="print()" variant="primary" icon="printer">Print sticker</flux:button>
+                    <flux:button x-on:click="printSticker()" variant="primary" icon="printer">Print sticker</flux:button>
                 </div>
             </div>
 

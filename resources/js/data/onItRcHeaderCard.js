@@ -72,7 +72,7 @@ export default withUrlState(schema, () => ({
         this.$watch('barcode', () => this.render());
         this.$nextTick(() => {
             this.render();
-            if (this.print) this.print();
+            if (this.print) this.printSticker();
         });
     },
 
@@ -93,7 +93,7 @@ export default withUrlState(schema, () => ({
         }
     },
 
-    print() {
+    printSticker() {
         if (this.error) return;
         (new Printd()).print(
             this.$refs.sticker,
