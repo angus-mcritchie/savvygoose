@@ -16,6 +16,7 @@ foreach (config('tools.tools') as $tool) {
 
 // Private internal pages — not in the tool registry, dashboard, nav, or sitemap.
 Route::view('/on-it-rc-header-card', 'on-it-rc-header-card')->name('on-it-rc-header-card');
+Route::view('/atrek-rc-header-card', 'atrek-rc-header-card')->name('atrek-rc-header-card');
 
 Route::get('/sitemap.xml', function () {
     $base = rtrim(config('app.url'), '/');
