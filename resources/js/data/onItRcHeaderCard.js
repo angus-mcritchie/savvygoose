@@ -57,6 +57,7 @@ const schema = {
     sku: { type: 'string', default: '1234' },
     name: { type: 'string', default: 'Example Product Title Only 2Pcs' },
     barcode: { type: 'string', default: '1234567890123' },
+    print: { type: 'boolean', default: false },
 };
 
 export default withUrlState(schema, () => ({
@@ -64,7 +65,10 @@ export default withUrlState(schema, () => ({
 
     init() {
         this.$watch('barcode', () => this.render());
-        this.$nextTick(() => this.render());
+        this.$nextTick(() => {
+            this.render();
+            if (this.print) this.print();
+        });
     },
 
     render() {
