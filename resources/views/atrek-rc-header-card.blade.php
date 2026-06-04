@@ -84,8 +84,9 @@
         .header-card-preview .sticker .left { min-width: 0; }
         .header-card-preview .sticker .left .sku { font-weight: 700; font-size: 4mm; line-height: 1; color: black; }
         .header-card-preview .sticker .left .name {
-            font-weight: 400; font-size: 2.5mm; margin-top: 0.7mm; color: black;
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            font-weight: 400; font-size: 2.5mm; line-height: 1.05; margin-top: 0.7mm; color: black;
+            display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2;
+            overflow: hidden; overflow-wrap: break-word; word-break: break-word;
         }
         .header-card-preview .sticker .right { display: flex; flex-direction: column; align-items: center; gap: 0.3mm; margin-top: 1mm; }
         .header-card-preview .sticker .right svg { display: block; height: 5mm; width: auto; }

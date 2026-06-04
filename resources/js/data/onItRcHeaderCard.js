@@ -43,10 +43,15 @@ body { width: 94mm; height: 12mm; background: white; }
 .sticker .left .name {
     font-weight: 400;
     font-size: 2.5mm;
+    line-height: 1.05;
     margin-top: 0.7mm;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 .sticker .right { display: flex; flex-direction: column; align-items: center; gap: 0.3mm; margin-top: 1mm; }
 .sticker .right svg { display: block; height: 5mm; width: auto; }
