@@ -20,7 +20,7 @@
                 <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">Fields</flux:heading>
                 <div class="grid gap-6 sm:grid-cols-2">
                     <flux:input x-model="sku" label="SKU" placeholder="1234" />
-                    <flux:input x-model="ean" label="EAN-13" placeholder="1234567890123" inputmode="numeric" maxlength="13" />
+                    <flux:input x-model="barcode" label="Barcode" placeholder="1234567890123" inputmode="numeric" maxlength="13" />
                 </div>
                 <div class="mt-6">
                     <flux:input x-model="name" label="Product name" placeholder="Example Product Title Only 2Pcs" />
@@ -40,7 +40,7 @@
                             </div>
                             <div class="right">
                                 <svg x-ref="barcodeSvg"></svg>
-                                <div class="ean" x-text="ean"></div>
+                                <div class="barcode" x-text="barcode"></div>
                             </div>
                         </div>
                     </div>
@@ -89,6 +89,6 @@
         }
         .header-card-preview .sticker .right { display: flex; flex-direction: column; align-items: center; gap: 0.3mm; margin-top: 1mm; }
         .header-card-preview .sticker .right svg { display: block; height: 5mm; width: auto; }
-        .header-card-preview .sticker .right .ean { font-size: 1.8mm; letter-spacing: 0.05em; color: black; text-align: center; }
+        .header-card-preview .sticker .right .barcode { font-size: 1.8mm; letter-spacing: 0.05em; color: black; text-align: center; }
     </style>
 </x-layouts.app>

@@ -50,20 +50,20 @@ body { width: 94mm; height: 12mm; background: white; }
 }
 .sticker .right { display: flex; flex-direction: column; align-items: center; gap: 0.3mm; margin-top: 1mm; }
 .sticker .right svg { display: block; height: 5mm; width: auto; }
-.sticker .right .ean { font-size: 1.8mm; letter-spacing: 0.05em; text-align: center; }
+.sticker .right .barcode { font-size: 1.8mm; letter-spacing: 0.05em; text-align: center; }
 `;
 
 const schema = {
     sku: { type: 'string', default: '1234' },
-    name: { type: 'string', alias: 'n', default: 'Example Product Title Only 2Pcs' },
-    ean: { type: 'string', default: '1234567890123' },
+    name: { type: 'string', default: 'Example Product Title Only 2Pcs' },
+    barcode: { type: 'string', default: '1234567890123' },
 };
 
 export default withUrlState(schema, () => ({
     error: '',
 
     init() {
-        this.$watch('ean', () => this.render());
+        this.$watch('barcode', () => this.render());
         this.$nextTick(() => this.render());
     },
 
@@ -71,7 +71,7 @@ export default withUrlState(schema, () => ({
         const svg = this.$refs.barcodeSvg;
         if (!svg) return;
         try {
-            JsBarcode(svg, this.ean, {
+            JsBarcode(svg, this.barcode, {
                 format: 'CODE128',
                 width: 2,
                 height: 40,
@@ -80,7 +80,7 @@ export default withUrlState(schema, () => ({
             });
             this.error = '';
         } catch (e) {
-            this.error = (e && e.message) || 'Invalid EAN-13';
+            this.error = (e && e.message) || 'Invalid barcode';
         }
     },
 
