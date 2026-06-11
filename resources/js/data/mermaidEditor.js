@@ -267,6 +267,10 @@ export default withUrlState(schema, () => ({
             startOnLoad: false,
             securityLevel: 'strict',
             theme: resolved,
+            // Top-level htmlLabels:false is required as well as the flowchart
+            // one: edge labels honour the top-level flag, and any remaining
+            // <foreignObject> taints the canvas during PNG export.
+            htmlLabels: false,
             flowchart: { htmlLabels: false, useMaxWidth: true },
             er: { useMaxWidth: true },
         });
