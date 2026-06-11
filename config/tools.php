@@ -14,6 +14,7 @@ return [
         'data' => 'Data & Encoding',
         'numbers' => 'Numbers & Time',
         'generators' => 'Generators',
+        'diagrams' => 'Diagrams',
     ],
 
     'category_seo' => [
@@ -32,6 +33,10 @@ return [
         'generators' => [
             'title' => 'Generators',
             'description' => 'Generators for barcodes, QR codes, passwords, UUIDs, URL slugs, and Lorem Ipsum placeholder text.',
+        ],
+        'diagrams' => [
+            'title' => 'Diagram Tools',
+            'description' => 'Turn plain text into diagrams. Write Mermaid syntax, preview it live, and export the result as SVG or PNG.',
         ],
     ],
 
@@ -538,6 +543,30 @@ return [
             ],
             'faqs' => [
                 ['q' => 'Why use Lorem Ipsum?', 'a' => 'It gives you the visual weight of real prose without pulling reviewers into reading the placeholder copy.'],
+            ],
+        ],
+        [
+            'slug' => 'mermaid-editor',
+            'name' => 'Mermaid Editor',
+            'tagline' => 'Write Mermaid, preview live, export SVG or PNG.',
+            'category' => 'diagrams',
+            'icon' => ['type' => 'flux', 'name' => 'rectangle-group'],
+            'meta' => [
+                'title' => 'Mermaid Editor: Live Diagram Preview & Export',
+                'description' => 'Write Mermaid syntax and watch the diagram render as you type. Pan, zoom, switch themes, and export to SVG or PNG. Nothing is uploaded.',
+            ],
+            'howto' => [
+                'Type or paste Mermaid syntax into the editor, or pick a starter template.',
+                'The diagram renders live beside the code. Parse errors point at what went wrong.',
+                'Drag to pan and scroll to zoom the preview.',
+                'Switch the theme, then export the result as SVG or PNG.',
+                'Copy the share URL. Opening it later restores the same diagram.',
+            ],
+            'faqs' => [
+                ['q' => 'Which diagram types are supported?', 'a' => 'Everything Mermaid renders: flowcharts, sequence diagrams, class and state diagrams, entity relationship diagrams, Gantt charts, pie charts, mindmaps, and git graphs.'],
+                ['q' => 'Can I share a diagram by link?', 'a' => 'Yes. The source is compressed into the page URL, so the link reproduces your diagram exactly. A very large diagram can outgrow the URL; export the SVG to share those.'],
+                ['q' => 'How do I export the diagram?', 'a' => 'Download SVG for crisp vector output that scales to any size, or PNG for pasting into docs and slides. Both render locally.'],
+                ['q' => 'Is my diagram sent to a server?', 'a' => 'No. Mermaid runs in your browser, so the source and the rendered diagram never leave your device.'],
             ],
         ],
     ],

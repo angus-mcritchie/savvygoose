@@ -6,7 +6,7 @@ test('the dashboard renders', function () {
 
 test('category index pages render', function (string $category) {
     $this->get('/'.$category)->assertOk();
-})->with(['text', 'data', 'numbers', 'generators']);
+})->with(['text', 'data', 'numbers', 'generators', 'diagrams']);
 
 test('the barcode generator renders', function () {
     $this->get('/barcode-generator')->assertOk();
@@ -102,6 +102,10 @@ test('the regex tester renders', function () {
 
 test('the browser info tool renders', function () {
     $this->get('/browser-info')->assertOk();
+});
+
+test('the mermaid editor renders', function () {
+    $this->get('/mermaid-editor')->assertOk()->assertSee('Mermaid Editor');
 });
 
 test('the time between dates tool renders', function () {
