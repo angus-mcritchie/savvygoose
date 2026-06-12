@@ -21,10 +21,60 @@
 
         @php
             $categories = config('tools.categories');
-            $toolsByCategory = collect(config('tools.tools'))->groupBy('category');
+            $tools = collect(config('tools.tools'));
+            $toolsByCategory = $tools->groupBy('category');
+            $popularTools = $tools
+                ->whereIn('slug', [
+                    'percentage-calculator',
+                    'markdown-converter',
+                    'mermaid-editor',
+                    'barcode-generator',
+                    'password-generator',
+                ])
+                ->sortBy(fn ($tool) => array_search($tool['slug'], [
+                    'percentage-calculator',
+                    'markdown-converter',
+                    'mermaid-editor',
+                    'barcode-generator',
+                    'password-generator',
+                ]));
         @endphp
 
         <div class="grid gap-12">
+            <section>
+                <div class="mb-4 flex items-end justify-between gap-4">
+                    <div>
+                        <flux:heading level="2" size="lg">
+                            Most popular
+                        </flux:heading>
+                        <flux:subheading>
+                            Start with the tools people reach for most often.
+                        </flux:subheading>
+                    </div>
+                </div>
+
+                <div class="grid gap-8 lg:grid-cols-5">
+                    @foreach ($popularTools as $tool)
+                        <flux:link
+                            class="!grid gap-6 rounded-lg border border-violet-500/20 bg-violet-500/[0.03] p-6 !no-underline transition duration-300 hover:-translate-y-1 hover:border-violet-500/40 hover:shadow-xl dark:border-violet-300/20 dark:bg-violet-300/[0.04] dark:hover:border-violet-300/40"
+                            href="{{ route($tool['slug']) }}"
+                            wire:navigate
+                        >
+                            <x-tool-icon :icon="$tool['icon']" />
+
+                            <div>
+                                <flux:heading class="!text-lg !font-bold">
+                                    {{ $tool['name'] }}
+                                </flux:heading>
+                                <flux:subheading>
+                                    {{ $tool['tagline'] }}
+                                </flux:subheading>
+                            </div>
+                        </flux:link>
+                    @endforeach
+                </div>
+            </section>
+
             @foreach ($categories as $key => $label)
                 @if ($toolsByCategory->has($key))
                     <section>
