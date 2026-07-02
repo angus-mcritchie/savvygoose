@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Http;
 
 test('resolve returns a github repo for an npm dependency', function () {
     Http::fake([
-        'registry.npmjs.org/laravel-mix' => Http::response([
+        'registry.npmjs.org/laravel-mix/latest' => Http::response([
             'repository' => ['type' => 'git', 'url' => 'git+https://github.com/laravel-mix/laravel-mix.git'],
         ]),
     ]);
@@ -19,6 +19,27 @@ test('resolve returns a github repo for an npm dependency', function () {
             ['name' => 'laravel-mix', 'owner' => 'laravel-mix', 'repo' => 'laravel-mix', 'resolved' => true],
         ],
     ]);
+});
+
+test('resolve url-encodes scoped npm package names', function () {
+    Http::fake([
+        'registry.npmjs.org/%40mui%2Fmaterial/latest' => Http::response([
+            'repository' => ['type' => 'git', 'url' => 'git+https://github.com/mui/material-ui.git', 'directory' => 'packages/mui-material'],
+        ]),
+    ]);
+
+    $response = $this->postJson('/api/star-dependencies/resolve', [
+        'manifest' => json_encode(['dependencies' => ['@mui/material' => '^9.0.0']]),
+        'type' => 'npm',
+    ]);
+
+    $response->assertOk()->assertJson([
+        'dependencies' => [
+            ['name' => '@mui/material', 'owner' => 'mui', 'repo' => 'material-ui', 'resolved' => true],
+        ],
+    ]);
+
+    Http::assertSent(fn ($request) => $request->url() === 'https://registry.npmjs.org/%40mui%2Fmaterial/latest');
 });
 
 test('resolve returns a github repo for a composer dependency', function () {

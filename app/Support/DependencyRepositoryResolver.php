@@ -43,9 +43,13 @@ class DependencyRepositoryResolver
 
     private function registryUrl(string $package, string $type): string
     {
+        // npm's bare package endpoint returns every published version's full
+        // metadata, which for popular packages (react, axios, @mui/material...)
+        // can run tens of megabytes and blow the memory limit decoding it.
+        // /latest returns just the current version's manifest.
         return $type === 'composer'
             ? "https://repo.packagist.org/p2/{$package}.json"
-            : 'https://registry.npmjs.org/'.rawurlencode($package);
+            : 'https://registry.npmjs.org/'.rawurlencode($package).'/latest';
     }
 
     /**
