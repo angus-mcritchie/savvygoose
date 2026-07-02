@@ -60,8 +60,8 @@ class StarDependenciesController extends Controller
 
         $validated = $request->validate([
             'repos' => ['required', 'array', 'min:1', 'max:'.self::MAX_DEPENDENCIES],
-            'repos.*.owner' => ['required', 'string'],
-            'repos.*.repo' => ['required', 'string'],
+            'repos.*.owner' => ['required', 'string', 'max:39', 'regex:/^[A-Za-z0-9-]+$/'],
+            'repos.*.repo' => ['required', 'string', 'max:100', 'regex:/^[A-Za-z0-9._-]+$/'],
         ]);
 
         $results = collect($validated['repos'])->map(function (array $repo) use ($token) {
