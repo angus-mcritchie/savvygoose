@@ -45,7 +45,7 @@ class DependencyRepositoryResolver
     {
         return $type === 'composer'
             ? "https://repo.packagist.org/p2/{$package}.json"
-            : 'https://registry.npmjs.org/'.$package;
+            : 'https://registry.npmjs.org/'.rawurlencode($package);
     }
 
     /**
