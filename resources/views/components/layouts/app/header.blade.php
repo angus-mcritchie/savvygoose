@@ -19,31 +19,38 @@
             </a>
 
             <flux:navbar class="-mb-px max-lg:hidden">
-                @foreach ($categories as $key => $label)
-                    @if ($toolsByCategory->has($key))
-                        <flux:dropdown>
-                            <flux:navbar.item icon:trailing="chevron-down" :current="request()->routeIs('category.'.$key)">
-                                {{ __($label) }}
-                            </flux:navbar.item>
+                <flux:dropdown>
+                    <flux:navbar.item icon:trailing="chevron-down" :current="request()->routeIs('category.*')">
+                        {{ __('Tools') }}
+                    </flux:navbar.item>
 
-                            <flux:menu>
-                                <flux:menu.item href="{{ route('category.'.$key) }}" icon="squares-2x2" wire:navigate>
-                                    {{ __('All :label', ['label' => $label]) }}
-                                </flux:menu.item>
-                                <flux:menu.separator />
-                                @foreach ($toolsByCategory[$key] as $tool)
-                                    <flux:menu.item
-                                        href="{{ route($tool['slug']) }}"
-                                        :icon="$tool['icon']['type'] === 'flux' ? $tool['icon']['name'] : null"
+                    <flux:popover class="columns-3 gap-8 !p-5">
+                        @foreach ($categories as $key => $label)
+                            @if ($toolsByCategory->has($key))
+                                <div class="mb-6 break-inside-avoid last:mb-0">
+                                    <a
+                                        class="mb-1 block px-2 text-xs font-medium uppercase tracking-wider text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-white"
+                                        href="{{ route('category.'.$key) }}"
                                         wire:navigate
                                     >
-                                        {{ __($tool['name']) }}
-                                    </flux:menu.item>
-                                @endforeach
-                            </flux:menu>
-                        </flux:dropdown>
-                    @endif
-                @endforeach
+                                        {{ __($label) }}
+                                    </a>
+                                    <div class="grid">
+                                        @foreach ($toolsByCategory[$key] as $tool)
+                                            <flux:navmenu.item
+                                                href="{{ route($tool['slug']) }}"
+                                                :icon="$tool['icon']['type'] === 'flux' ? $tool['icon']['name'] : null"
+                                                wire:navigate
+                                            >
+                                                {{ __($tool['name']) }}
+                                            </flux:navmenu.item>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+                        @endforeach
+                    </flux:popover>
+                </flux:dropdown>
             </flux:navbar>
             <x-command-palette />
 
