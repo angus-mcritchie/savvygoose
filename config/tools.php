@@ -591,7 +591,7 @@ return [
                 'Click Star selected. Each repo gets starred with your account, one request per repo.',
             ],
             'faqs' => [
-                ['q' => 'Does this need my GitHub password?', 'a' => 'No. It uses GitHub\'s OAuth sign-in and only asks for the "public_repo" scope, which covers starring public repos and nothing else.'],
+                ['q' => 'Does this need my GitHub password?', 'a' => 'No. It uses GitHub\'s OAuth sign-in. GitHub does not offer a narrower scope for starring, so it requests the "public_repo" scope (access to public repositories) solely to star repos.'],
                 ['q' => 'Is anything about my account stored?', 'a' => 'The access token sits in your session for the length of your visit and is never written to a database. Disconnect clears it and revokes the authorization on GitHub\'s side.'],
                 ['q' => 'What if a dependency can\'t be resolved?', 'a' => 'Some packages point at a non-GitHub host, a monorepo without a matching repository field, or nothing at all. Those are listed but can\'t be selected.'],
                 ['q' => 'Can I star a private repo this way?', 'a' => 'Only public repos. The requested scope deliberately doesn\'t extend to private repositories.'],
