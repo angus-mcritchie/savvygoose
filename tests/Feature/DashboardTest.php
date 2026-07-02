@@ -6,7 +6,7 @@ test('the dashboard renders', function () {
 
 test('category index pages render', function (string $category) {
     $this->get('/'.$category)->assertOk();
-})->with(['text', 'data', 'numbers', 'generators', 'diagrams']);
+})->with(['text', 'data', 'numbers', 'generators', 'diagrams', 'dev']);
 
 test('the barcode generator renders', function () {
     $this->get('/barcode-generator')->assertOk();
@@ -110,6 +110,10 @@ test('the mermaid editor renders', function () {
 
 test('the time between dates tool renders', function () {
     $this->get('/time-between-dates')->assertOk();
+});
+
+test('the star dependencies tool renders', function () {
+    $this->get('/star-dependencies')->assertOk()->assertSee('GitHub Dependency Starrer');
 });
 
 test('the holidays api returns holidays for a country and range', function () {
