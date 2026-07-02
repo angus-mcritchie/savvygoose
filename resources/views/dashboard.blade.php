@@ -56,17 +56,17 @@
                 <div class="grid gap-8 lg:grid-cols-5">
                     @foreach ($popularTools as $tool)
                         <flux:link
-                            class="!grid gap-6 rounded-lg border border-violet-500/20 bg-violet-500/[0.03] p-6 !no-underline transition duration-300 hover:-translate-y-1 hover:border-violet-500/40 hover:shadow-xl dark:border-violet-300/20 dark:bg-violet-300/[0.04] dark:hover:border-violet-300/40"
+                            class="!grid gap-3 rounded-lg border border-violet-500/20 bg-violet-500/[0.03] p-5 !no-underline transition duration-300 hover:-translate-y-1 hover:border-violet-500/40 hover:shadow-xl dark:border-violet-300/20 dark:bg-violet-300/[0.04] dark:hover:border-violet-300/40"
                             href="{{ route($tool['slug']) }}"
                             wire:navigate
                         >
-                            <x-tool-icon :icon="$tool['icon']" />
+                            <x-tool-icon class="size-9" :icon="$tool['icon']" />
 
                             <div>
-                                <flux:heading class="!text-lg !font-bold">
+                                <flux:heading class="!font-semibold">
                                     {{ $tool['name'] }}
                                 </flux:heading>
-                                <flux:subheading>
+                                <flux:subheading class="!text-sm">
                                     {{ $tool['tagline'] }}
                                 </flux:subheading>
                             </div>
@@ -78,23 +78,32 @@
             @foreach ($categories as $key => $label)
                 @if ($toolsByCategory->has($key))
                     <section>
-                        <flux:heading class="mb-4" level="2" size="lg">
-                            {{ $label }}
-                        </flux:heading>
-                        <div class="grid gap-8 lg:grid-cols-3">
+                        <div class="mb-4 flex items-baseline justify-between gap-4">
+                            <flux:heading level="2" size="lg">
+                                {{ $label }}
+                            </flux:heading>
+                            <flux:link
+                                class="text-sm !no-underline opacity-70 hover:opacity-100"
+                                href="{{ route('category.'.$key) }}"
+                                wire:navigate
+                            >
+                                {{ __('All :label', ['label' => $label]) }}
+                            </flux:link>
+                        </div>
+                        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             @foreach ($toolsByCategory[$key] as $tool)
                                 <flux:link
-                                    class="!grid gap-8 rounded-lg border border-black/10 p-8 px-8 py-12 !no-underline transition duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10"
+                                    class="!flex items-center gap-4 rounded-lg border border-black/10 p-4 !no-underline transition duration-300 hover:border-black/25 hover:bg-zinc-50 dark:border-white/10 dark:hover:border-white/25 dark:hover:bg-white/5"
                                     href="{{ route($tool['slug']) }}"
                                     wire:navigate
                                 >
-                                    <x-tool-icon :icon="$tool['icon']" />
+                                    <x-tool-icon class="size-9 shrink-0" :icon="$tool['icon']" />
 
-                                    <div>
-                                        <flux:heading class="!text-xl !font-bold">
+                                    <div class="min-w-0">
+                                        <flux:heading class="!font-semibold">
                                             {{ $tool['name'] }}
                                         </flux:heading>
-                                        <flux:subheading>
+                                        <flux:subheading class="!text-sm">
                                             {{ $tool['tagline'] }}
                                         </flux:subheading>
                                     </div>
