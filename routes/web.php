@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Auth\GithubAuthController;
 use App\Http\Controllers\HolidaysController;
+use App\Http\Controllers\StarDependenciesController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'dashboard')->name('dashboard');
@@ -37,3 +39,10 @@ Route::get('/sitemap.xml', function () {
 })->name('sitemap');
 
 Route::get('/api/holidays', HolidaysController::class)->name('api.holidays');
+
+Route::get('/auth/github/redirect', [GithubAuthController::class, 'redirect'])->name('auth.github.redirect');
+Route::get('/auth/github/callback', [GithubAuthController::class, 'callback'])->name('auth.github.callback');
+Route::post('/auth/github/disconnect', [GithubAuthController::class, 'disconnect'])->name('auth.github.disconnect');
+
+Route::post('/api/star-dependencies/resolve', [StarDependenciesController::class, 'resolve'])->name('api.star-dependencies.resolve');
+Route::post('/api/star-dependencies/star', [StarDependenciesController::class, 'star'])->name('api.star-dependencies.star');

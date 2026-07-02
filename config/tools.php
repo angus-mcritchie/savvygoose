@@ -15,6 +15,7 @@ return [
         'numbers' => 'Numbers & Time',
         'generators' => 'Generators',
         'diagrams' => 'Diagrams',
+        'dev' => 'Developer Tools',
     ],
 
     'category_seo' => [
@@ -37,6 +38,10 @@ return [
         'diagrams' => [
             'title' => 'Diagram Tools',
             'description' => 'Turn plain text into diagrams. Write Mermaid syntax, preview it live, and export the result as SVG or PNG.',
+        ],
+        'dev' => [
+            'title' => 'Developer Tools',
+            'description' => 'Tools built around everyday developer chores, starting with resolving and starring the GitHub repos behind your dependencies.',
         ],
     ],
 
@@ -567,6 +572,29 @@ return [
                 ['q' => 'Can I share a diagram by link?', 'a' => 'Yes. The source is compressed into the page URL, so the link reproduces your diagram exactly. A very large diagram can outgrow the URL; export the SVG to share those.'],
                 ['q' => 'How do I export the diagram?', 'a' => 'Download SVG for crisp vector output that scales to any size, or PNG for pasting into docs and slides. Both render locally.'],
                 ['q' => 'Is my diagram sent to a server?', 'a' => 'No. Mermaid runs in your browser, so the source and the rendered diagram never leave your device.'],
+            ],
+        ],
+        [
+            'slug' => 'star-dependencies',
+            'name' => 'GitHub Dependency Starrer',
+            'tagline' => "Star every GitHub repo behind your project's dependencies.",
+            'category' => 'dev',
+            'icon' => ['type' => 'flux', 'name' => 'star'],
+            'meta' => [
+                'title' => 'GitHub Dependency Starrer: Star Your package.json or composer.json Deps',
+                'description' => 'Paste a package.json or composer.json, resolve each dependency to its GitHub repo, and star the ones you pick with one click.',
+            ],
+            'howto' => [
+                'Paste or upload a package.json or composer.json.',
+                'Click Resolve dependencies. Each package is matched to a GitHub owner/repo where one exists.',
+                'Pick which repos to star, then connect your GitHub account.',
+                'Click Star selected. Each repo gets starred with your account, one request per repo.',
+            ],
+            'faqs' => [
+                ['q' => 'Does this need my GitHub password?', 'a' => 'No. It uses GitHub\'s OAuth sign-in. GitHub does not offer a narrower scope for starring, so it requests the "public_repo" scope (access to public repositories) solely to star repos.'],
+                ['q' => 'Is anything about my account stored?', 'a' => 'The access token sits in your session for the length of your visit and is never written to a database. Disconnect clears it and revokes the authorization on GitHub\'s side.'],
+                ['q' => 'What if a dependency can\'t be resolved?', 'a' => 'Some packages point at a non-GitHub host, a monorepo without a matching repository field, or nothing at all. Those are listed but can\'t be selected.'],
+                ['q' => 'Can I star a private repo this way?', 'a' => 'Only public repos. The requested scope deliberately doesn\'t extend to private repositories.'],
             ],
         ],
     ],

@@ -12,6 +12,14 @@ This app has no database connection. Sessions and cache use the `file` driver (`
 
 If a feature genuinely needs persistence later, reintroduce a real driver in `.env` and add migrations — don't quietly let SQLite get auto-created.
 
+### The one auth exception: GitHub Dependency Starrer
+
+The `star-dependencies` tool signs the visitor into GitHub via `laravel/socialite` so it can star repos on their behalf. This is a deliberate, narrow exception to "no auth," not a reversal of it:
+
+- The access token lives only in `session('github_token')` for the duration of the visit (`GithubAuthController`). There's no `User` model, no migration, nothing written past what file-driver sessions already do.
+- Disconnecting (`GithubAuthController::disconnect`) both forgets the session key and revokes the grant on GitHub's side, so nothing outlives the visit even on GitHub's end.
+- `StarDependenciesController` and `DependencyRepositoryResolver` are the first code in this app to make outbound server-side HTTP calls (npm registry, Packagist, GitHub API) via `Http::`. That pattern is fine to reuse for future tools; don't reintroduce a `User` model or DB table to do it.
+
 ## Common commands
 
 - `composer dev` — server + `pail` (logs) + Vite dev concurrently. (No `queue:listen`; queue is sync.)
