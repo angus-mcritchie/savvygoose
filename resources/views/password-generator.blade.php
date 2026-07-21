@@ -80,8 +80,8 @@
                     <div class="grid grid-cols-5 gap-1">
                         <template x-for="i in 5" :key="i">
                             <div
-                                class="h-2 rounded-full bg-black/10 dark:bg-white/10"
-                                :class="i <= strength.score ? strength.tone : ''"
+                                class="h-2 rounded-full"
+                                :class="i <= strength.score ? strength.tone : 'bg-black/10 dark:bg-white/10'"
                             ></div>
                         </template>
                     </div>
