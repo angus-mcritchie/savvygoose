@@ -1,5 +1,14 @@
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 
+// Escape a filename before dropping it into the generated <img alt="…"> so a
+// name containing quotes or angle brackets can't break the copied HTML snippet.
+const escapeAttr = (s) =>
+    String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+
 export default () => ({
     file: null,
     dataUri: '',
@@ -57,7 +66,7 @@ export default () => ({
     },
 
     get imgTag() {
-        return this.dataUri ? `<img src="${this.dataUri}" alt="${this.fileName || 'image'}">` : '';
+        return this.dataUri ? `<img src="${this.dataUri}" alt="${escapeAttr(this.fileName || 'image')}">` : '';
     },
 
     get cssBackground() {

@@ -111,6 +111,10 @@ export default () => ({
     },
 
     triggerDownload(blob, name) {
+        if (!blob) {
+            this.error = 'Could not generate the image. Try a different source image.';
+            return;
+        }
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -132,6 +136,7 @@ export default () => ({
             const images = [];
             for (const s of ICO_SIZES) {
                 const blob = await new Promise((res) => this.drawSize(s).toBlob(res, 'image/png'));
+                if (!blob) throw new Error('encode failed');
                 images.push({ size: s, data: new Uint8Array(await blob.arrayBuffer()) });
             }
             this.triggerDownload(new Blob([buildIco(images)], { type: 'image/x-icon' }), 'favicon.ico');

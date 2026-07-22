@@ -1,4 +1,8 @@
 <x-layouts.app>
+    @push('head')
+        <meta name="robots" content="noindex" />
+    @endpush
+
     @php
         $popular = collect(config('tools.tools'))
             ->whereIn('slug', ['barcode-generator', 'qr-code-generator', 'json-formatter', 'timestamp-converter', 'password-generator', 'color-converter'])
