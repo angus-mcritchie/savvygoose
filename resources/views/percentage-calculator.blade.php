@@ -1,7 +1,7 @@
 <x-layouts.app>
     @php
-        $inputClass = 'w-36 sm:w-48 rounded-lg border border-zinc-200 dark:border-white/10 bg-white dark:bg-white/10 px-3 py-3 text-center text-2xl sm:text-3xl font-semibold text-zinc-800 dark:text-zinc-100 shadow-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none';
-        $outputClass = 'min-w-36 sm:min-w-48 rounded-lg border border-blue-200 dark:border-blue-400/30 bg-blue-50 dark:bg-blue-500/10 px-3 py-3 text-center text-2xl sm:text-3xl font-semibold text-blue-700 dark:text-blue-200 tabular-nums';
+        $inputClass = 'w-36 sm:w-48 rounded-lg border border-zinc-200 dark:border-white/10 bg-white dark:bg-white/10 px-3 py-3 text-center text-2xl sm:text-3xl font-semibold text-zinc-800 dark:text-zinc-100 shadow-xs focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:border-zinc-400 dark:focus:ring-zinc-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none';
+        $outputClass = 'min-w-36 sm:min-w-48 rounded-lg border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5 px-3 py-3 text-center text-2xl sm:text-3xl font-semibold text-zinc-900 dark:text-zinc-100 tabular-nums';
         $opClass = 'text-xl sm:text-2xl font-medium text-zinc-500 dark:text-zinc-400';
     @endphp
 
@@ -42,6 +42,7 @@
                 <input type="number" inputmode="decimal" step="any" placeholder="Y" aria-label="Y" x-model.number="y" class="{{ $inputClass }}">
                 <span class="{{ $opClass }}">=</span>
                 <output x-text="getResult()" class="{{ $outputClass }}">--</output>
+                <x-copy-button value="getResult()" flash="'pct-1'" size="sm" x-bind:disabled="getResult() === '--'" />
             </div>
         </div>
 
@@ -69,6 +70,7 @@
                 <output x-text="getResult()" class="{{ $outputClass }}">--</output>
                 <span class="{{ $opClass }}">of</span>
                 <input type="number" inputmode="decimal" step="any" placeholder="Y" aria-label="Y" x-model.number="y" class="{{ $inputClass }}">
+                <x-copy-button value="getResult()" flash="'pct-2'" size="sm" x-bind:disabled="getResult() === '--'" />
             </div>
         </div>
 
@@ -100,6 +102,7 @@
                 <input type="number" inputmode="decimal" step="any" placeholder="Y" aria-label="Y" x-model.number="y" class="{{ $inputClass }}">
                 <span class="{{ $opClass }}">=</span>
                 <output x-text="getResult()" class="{{ $outputClass }}">--</output>
+                <x-copy-button value="getResult()" flash="'pct-3'" size="sm" x-bind:disabled="getResult() === '--'" />
             </div>
         </div>
 
@@ -127,6 +130,7 @@
                 <input type="number" inputmode="decimal" step="any" placeholder="X" aria-label="X" x-model.number="x" class="{{ $inputClass }}">
                 <span class="{{ $opClass }}">%&nbsp;of</span>
                 <output x-text="getResult()" class="{{ $outputClass }}">--</output>
+                <x-copy-button value="getResult()" flash="'pct-4'" size="sm" x-bind:disabled="getResult() === '--'" />
             </div>
         </div>
 
@@ -165,10 +169,12 @@
                     <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
                         <span class="{{ $opClass }}">X + Y% =</span>
                         <output x-text="getAddResult()" class="{{ $outputClass }}">--</output>
+                        <x-copy-button value="getAddResult()" flash="'pct-5a'" size="sm" x-bind:disabled="getAddResult() === '--'" />
                     </div>
                     <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
                         <span class="{{ $opClass }}">X − Y% =</span>
                         <output x-text="getSubtractResult()" class="{{ $outputClass }}">--</output>
+                        <x-copy-button value="getSubtractResult()" flash="'pct-5b'" size="sm" x-bind:disabled="getSubtractResult() === '--'" />
                     </div>
                 </div>
             </div>

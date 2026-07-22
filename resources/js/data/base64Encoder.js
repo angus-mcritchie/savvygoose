@@ -31,8 +31,23 @@ function decodeText(b64) {
     let normalised = b64.replace(/-/g, '+').replace(/_/g, '/');
     const pad = normalised.length % 4;
     if (pad) normalised += '='.repeat(4 - pad);
-    const bytes = base64ToBytes(normalised);
-    return new TextDecoder().decode(bytes);
+    let bytes;
+    try {
+        bytes = base64ToBytes(normalised);
+    } catch (e) {
+        const err = new Error('invalid-base64');
+        err.code = 'invalid-base64';
+        throw err;
+    }
+    try {
+        // fatal:true so binary data (an image/PDF blob) throws instead of
+        // silently decoding to U+FFFD replacement-character mojibake.
+        return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    } catch (e) {
+        const err = new Error('binary');
+        err.code = 'binary';
+        throw err;
+    }
 }
 
 const schema = {
@@ -54,6 +69,7 @@ const schema = {
 
 export default withUrlState(schema, () => ({
     error: '',
+    binaryDecode: false,
     file: null,
     fileResult: '',
     fileError: '',
@@ -61,15 +77,21 @@ export default withUrlState(schema, () => ({
 
     get output() {
         this.error = '';
+        this.binaryDecode = false;
         if (!this.input) return '';
         try {
             return this.direction === 'encode'
                 ? encodeText(this.input, this.urlSafe)
                 : decodeText(this.input);
         } catch (e) {
-            this.error = this.direction === 'decode'
-                ? 'Input is not valid Base64.'
-                : 'Could not encode this text.';
+            if (this.direction === 'encode') {
+                this.error = 'Could not encode this text.';
+            } else if (e.code === 'binary') {
+                this.error = 'This Base64 decodes to binary data, not text. Use "Download as file" to save it.';
+                this.binaryDecode = true;
+            } else {
+                this.error = 'Input is not valid Base64.';
+            }
             return '';
         }
     },
@@ -138,7 +160,7 @@ export default withUrlState(schema, () => ({
     },
 
     downloadDecoded() {
-        if (this.direction !== 'decode' || !this.output) return;
+        if (this.direction !== 'decode' || !this.input) return;
         try {
             let normalised = this.input.replace(/\s+/g, '').replace(/-/g, '+').replace(/_/g, '/');
             const pad = normalised.length % 4;

@@ -1,5 +1,8 @@
 <x-layouts.app>
 
+    @push('head')
+        <link href="https://fonts.bunny.net/css?family=Libre+Barcode+128&display=swap" rel="stylesheet" />
+    @endpush
 
     <form
         class="mx-auto max-w-[1200px]"
@@ -42,7 +45,10 @@
                 </div>
                 <div class="grid gap-8">
                     <flux:input name="label" x-model="label" label="Label" placeholder="my label" />
-                    <flux:input name="value" x-model="value" label="Value" placeholder="value" />
+                    <div class="grid gap-2">
+                        <flux:input name="value" x-model="value" label="Value" placeholder="value" />
+                        <p x-show="error" x-cloak x-text="error" class="text-sm text-red-600 dark:text-red-400"></p>
+                    </div>
                 </div>
             </div>
             <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
@@ -61,7 +67,7 @@
                         </div>
                     </div>
                 </div>
-                <flux:button class="w-full" type="submit" variant="primary">
+                <flux:button class="w-full" type="submit" variant="primary" x-bind:disabled="!!error">
                     Print
                 </flux:button>
             </div>
@@ -126,5 +132,75 @@
             </div>
         </div>
     </form>
+
+    <section class="mx-auto mt-12 grid max-w-3xl gap-10 leading-relaxed text-zinc-700 dark:text-zinc-300">
+        <div>
+            <flux:heading level="2" class="!mb-4 !text-2xl !font-semibold tracking-tight">What is a Code 128 barcode?</flux:heading>
+            <p class="mb-3">
+                Code 128 is a high-density 1D (linear) barcode designed to encode the full ASCII character set:
+                uppercase and lowercase letters, digits, and common punctuation. It is one of the most widely used
+                symbologies in shipping labels, inventory tags, and warehouse systems because it fits a lot of data
+                into a small width and includes a check digit for reliable scanning.
+            </p>
+            <p>
+                This generator turns whatever you type into a scannable Code 128 barcode right in your browser. Type
+                text or a number, adjust the sticker size, and print it or share the link. Nothing is uploaded.
+            </p>
+        </div>
+
+        <div>
+            <flux:heading level="2" class="!mb-4 !text-2xl !font-semibold tracking-tight">Code 128 subsets</flux:heading>
+            <p class="mb-4">Code 128 has three character subsets. The encoder switches between them automatically to keep the barcode as short as possible.</p>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="border-b border-black/10 dark:border-white/10">
+                        <tr>
+                            <th class="py-2 pr-4 font-semibold">Subset</th>
+                            <th class="py-2 pr-4 font-semibold">Covers</th>
+                            <th class="py-2 font-semibold">Best for</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-black/5 dark:divide-white/10">
+                        <tr><td class="py-2 pr-4 font-mono">A</td><td class="py-2 pr-4">Uppercase, digits, control characters</td><td class="py-2">Legacy systems needing control codes</td></tr>
+                        <tr><td class="py-2 pr-4 font-mono">B</td><td class="py-2 pr-4">Upper and lowercase, digits, symbols</td><td class="py-2">General text and mixed-case values</td></tr>
+                        <tr><td class="py-2 pr-4 font-mono">C</td><td class="py-2 pr-4">Pairs of digits (00–99)</td><td class="py-2">Long numeric codes, at double density</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div>
+            <flux:heading level="2" class="!mb-4 !text-2xl !font-semibold tracking-tight">Code 128 vs other barcodes</flux:heading>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="border-b border-black/10 dark:border-white/10">
+                        <tr>
+                            <th class="py-2 pr-4 font-semibold">Symbology</th>
+                            <th class="py-2 pr-4 font-semibold">Encodes</th>
+                            <th class="py-2 font-semibold">Typical use</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-black/5 dark:divide-white/10">
+                        <tr><td class="py-2 pr-4 font-medium">Code 128</td><td class="py-2 pr-4">Full ASCII, any length</td><td class="py-2">Shipping, inventory, logistics</td></tr>
+                        <tr><td class="py-2 pr-4 font-medium">Code 39</td><td class="py-2 pr-4">Uppercase, digits, few symbols</td><td class="py-2">Older industrial and ID systems</td></tr>
+                        <tr><td class="py-2 pr-4 font-medium">EAN-13 / UPC-A</td><td class="py-2 pr-4">Fixed-length product numbers</td><td class="py-2">Retail products at point of sale</td></tr>
+                        <tr><td class="py-2 pr-4 font-medium"><a href="{{ route('qr-code-generator') }}" wire:navigate class="underline underline-offset-4">QR code</a></td><td class="py-2 pr-4">2D: URLs, text, Wi-Fi, contacts</td><td class="py-2">Phone-camera scanning, links</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div>
+            <flux:heading level="2" class="!mb-4 !text-2xl !font-semibold tracking-tight">Printing and scanning checklist</flux:heading>
+            <ul class="ml-5 grid list-disc gap-2">
+                <li>Leave a clear quiet zone (blank margin) on both sides of the bars.</li>
+                <li>Print solid black on a white background for maximum contrast.</li>
+                <li>Print at 300 DPI or higher so thin bars stay sharp.</li>
+                <li>If a scanner struggles, make the sticker wider rather than smaller.</li>
+                <li>Stick to printable ASCII; accented or non-Latin characters can't be encoded in Code 128.</li>
+            </ul>
+        </div>
+    </section>
+
     <x-tool-content />
 </x-layouts.app>

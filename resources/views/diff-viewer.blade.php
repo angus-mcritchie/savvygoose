@@ -1,6 +1,6 @@
 <x-layouts.app>
 
-    <div class="mx-auto max-w-[1400px]" x-data="diffViewer">
+    <div class="mx-auto max-w-[1400px]" x-data="diffViewer" x-on:keydown.window.escape="clear()">
         <div class="mb-8 flex justify-center">
             <div class="grid grid-cols-[auto_1fr] items-center gap-4">
                 <flux:icon.arrows-right-left class="size-20 text-zinc-700 dark:text-zinc-200" />
@@ -86,16 +86,35 @@
 
                 <template x-if="hasContent && hasChanges">
                     <div>
-                        <div class="mb-4 flex flex-wrap gap-2 text-sm">
-                            <span class="rounded bg-emerald-500/10 px-2 py-1 font-mono text-emerald-700 dark:text-emerald-300">
-                                + <span x-text="stats.added"></span> added
-                            </span>
-                            <span class="rounded bg-red-500/10 px-2 py-1 font-mono text-red-700 dark:text-red-300">
-                                − <span x-text="stats.removed"></span> removed
-                            </span>
-                            <span class="rounded bg-zinc-500/10 px-2 py-1 font-mono text-zinc-700 dark:text-zinc-300">
-                                = <span x-text="stats.unchanged"></span> unchanged
-                            </span>
+                        <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                            <div class="flex flex-wrap gap-2 text-sm">
+                                <span class="rounded bg-emerald-500/10 px-2 py-1 font-mono text-emerald-700 dark:text-emerald-300">
+                                    + <span x-text="stats.added"></span> added
+                                </span>
+                                <span class="rounded bg-red-500/10 px-2 py-1 font-mono text-red-700 dark:text-red-300">
+                                    − <span x-text="stats.removed"></span> removed
+                                </span>
+                                <span class="rounded bg-zinc-500/10 px-2 py-1 font-mono text-zinc-700 dark:text-zinc-300">
+                                    = <span x-text="stats.unchanged"></span> unchanged
+                                </span>
+                            </div>
+                            <div class="flex gap-2">
+                                <x-copy-button
+                                    value="unifiedText"
+                                    flash="'diff-output'"
+                                    icon="document-duplicate"
+                                    size="xs"
+                                    label="Copy diff"
+                                />
+                                <flux:button
+                                    x-on:click="$download(unifiedText, 'changes.diff', 'text/plain')"
+                                    icon="arrow-down-tray"
+                                    size="xs"
+                                    variant="ghost"
+                                >
+                                    .diff
+                                </flux:button>
+                            </div>
                         </div>
 
                         <template x-if="mode === 'side-by-side'">

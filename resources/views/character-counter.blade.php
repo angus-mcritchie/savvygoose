@@ -1,6 +1,6 @@
 <x-layouts.app>
 
-    <div class="mx-auto max-w-[1200px]" x-data="characterCounter">
+    <div class="mx-auto max-w-[1200px]" x-data="characterCounter" x-on:keydown.window.escape="clear()">
         <div class="mb-8 flex justify-center">
             <div class="grid grid-cols-[auto_1fr] items-center gap-4">
                 <flux:icon.hashtag class="size-20 text-zinc-700 dark:text-zinc-200" />

@@ -1,6 +1,6 @@
 <x-layouts.app>
 
-    <div class="mx-auto max-w-[1200px]" x-data="base64Encoder">
+    <div class="mx-auto max-w-[1200px]" x-data="base64Encoder" x-on:keydown.window.escape="clear()">
         <div class="mb-8 flex justify-center">
             <div class="grid grid-cols-[auto_1fr] items-center gap-4">
                 <flux:icon.arrows-right-left class="size-20 text-zinc-700 dark:text-zinc-200" />
@@ -76,7 +76,7 @@
                                     <flux:label x-text="outputLabel">Output</flux:label>
                                     <div class="flex gap-2">
                                         <flux:button
-                                            x-show="direction === 'decode' && output"
+                                            x-show="direction === 'decode' && (output || binaryDecode)"
                                             x-cloak
                                             x-on:click="downloadDecoded()"
                                             icon="arrow-down-tray"

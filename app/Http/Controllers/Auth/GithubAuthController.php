@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -22,9 +23,20 @@ class GithubAuthController extends Controller
             ->redirect();
     }
 
-    public function callback(): RedirectResponse
+    public function callback(Request $request): RedirectResponse
     {
-        $githubUser = Socialite::driver('github')->user();
+        // The most common outcome after "Connect" is the visitor declining on
+        // GitHub, which redirects back with ?error=access_denied and no code.
+        // Handle that (and any token-exchange failure) instead of 500-ing.
+        if ($request->has('error') || ! $request->has('code')) {
+            return redirect()->route('star-dependencies', ['auth_error' => 1]);
+        }
+
+        try {
+            $githubUser = Socialite::driver('github')->user();
+        } catch (\Throwable) {
+            return redirect()->route('star-dependencies', ['auth_error' => 1]);
+        }
 
         session(['github_token' => $githubUser->token]);
 

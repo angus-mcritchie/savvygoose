@@ -1,5 +1,4 @@
 import { withUrlState } from '../lib/urlState';
-import words from './effLargeWordlist';
 
 const SEPARATORS = {
     space: ' ',
@@ -22,8 +21,6 @@ const randomInt = (max) => {
     return n % max;
 };
 
-const pickWord = () => words[randomInt(words.length)];
-
 const applyCase = (word, mode) => {
     if (mode === 'first') return word.charAt(0).toUpperCase() + word.slice(1);
     if (mode === 'all') return word.toUpperCase();
@@ -41,9 +38,16 @@ const schema = {
 
 export default withUrlState(schema, () => ({
     passphrase: '',
-    wordlistSize: words.length,
+    wordlist: null,
+    wordlistSize: 0,
 
-    init() {
+    async init() {
+        // The 7,776-word EFF list is ~77 KB; load it only on this page rather
+        // than bundling it into the app.js that ships on every route.
+        const mod = await import('./effLargeWordlist');
+        this.wordlist = mod.default;
+        this.wordlistSize = this.wordlist.length;
+
         ['words', 'separator', 'capitalize', 'includeNumber', 'includeSymbol'].forEach((prop) => {
             this.$watch(prop, () => this.generate());
         });
@@ -55,8 +59,9 @@ export default withUrlState(schema, () => ({
     },
 
     get entropy() {
+        if (!this.wordlistSize) return 0;
         const count = Math.max(2, Math.min(12, parseInt(this.words, 10) || 0));
-        let bits = Math.log2(words.length) * count;
+        let bits = Math.log2(this.wordlistSize) * count;
         if (this.includeNumber) bits += Math.log2(10);
         if (this.includeSymbol) bits += Math.log2(SYMBOLS.length);
         return Math.round(bits);
@@ -76,10 +81,12 @@ export default withUrlState(schema, () => ({
     },
 
     generate() {
+        if (!this.wordlist) return;
         const count = Math.max(2, Math.min(12, parseInt(this.words, 10) || 0));
         const picked = [];
         for (let i = 0; i < count; i++) {
-            picked.push(applyCase(pickWord(), this.capitalize));
+            const word = this.wordlist[randomInt(this.wordlist.length)];
+            picked.push(applyCase(word, this.capitalize));
         }
         let out = picked.join(this.separatorChar);
         if (this.includeNumber) out += randomInt(10).toString();

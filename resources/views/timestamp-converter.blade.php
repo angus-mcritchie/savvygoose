@@ -131,6 +131,11 @@
                         <x-copy-button value="isoZoned()" flash="'ts-zoned'" icon="document-duplicate" size="xs" />
                     </div>
                     <div class="{{ $rowClass }}">
+                        <span class="{{ $labelClass }}">RFC 2822</span>
+                        <span class="{{ $valClass }}" x-text="rfc2822()"></span>
+                        <x-copy-button value="rfc2822()" flash="'ts-rfc'" icon="document-duplicate" size="xs" />
+                    </div>
+                    <div class="{{ $rowClass }}">
                         <span class="{{ $labelClass }}">Human</span>
                         <span class="{{ $valClass }} !font-sans" x-text="humanLong()"></span>
                         <x-copy-button value="humanLong()" flash="'ts-human'" icon="document-duplicate" size="xs" />
@@ -150,5 +155,53 @@
             />
         </div>
     </div>
+
+    <section class="mx-auto mt-12 grid max-w-3xl gap-10 leading-relaxed text-zinc-700 dark:text-zinc-300">
+        <div>
+            <flux:heading level="2" class="!mb-4 !text-2xl !font-semibold tracking-tight">Unix time and ISO 8601, briefly</flux:heading>
+            <p class="mb-3">
+                A Unix timestamp (also called epoch time) is the number of seconds since 1970-01-01 00:00:00 UTC.
+                It's compact and timezone-free, which makes it ideal for storing and comparing moments in code and databases.
+            </p>
+            <p>
+                ISO 8601 is the human-and-machine-friendly text format for the same instant. It reads
+                <span class="font-mono">YYYY-MM-DDThh:mm:ssZ</span>, where the trailing <span class="font-mono">Z</span>
+                means UTC and an offset like <span class="font-mono">+05:30</span> shifts it into a local timezone.
+                For example, epoch <span class="font-mono">1700000000</span> is
+                <span class="font-mono">2023-11-14T22:13:20Z</span> in ISO 8601.
+            </p>
+        </div>
+
+        <div>
+            <flux:heading level="2" class="!mb-4 !text-2xl !font-semibold tracking-tight">Notable epoch values</flux:heading>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="border-b border-black/10 dark:border-white/10">
+                        <tr>
+                            <th class="py-2 pr-4 font-semibold">Unix timestamp</th>
+                            <th class="py-2 pr-4 font-semibold">ISO 8601 (UTC)</th>
+                            <th class="py-2 font-semibold">What it is</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-black/5 dark:divide-white/10 font-mono">
+                        <tr><td class="py-2 pr-4">0</td><td class="py-2 pr-4">1970-01-01T00:00:00Z</td><td class="py-2 font-sans">The Unix epoch (time zero)</td></tr>
+                        <tr><td class="py-2 pr-4">1000000000</td><td class="py-2 pr-4">2001-09-09T01:46:40Z</td><td class="py-2 font-sans">One billion seconds</td></tr>
+                        <tr><td class="py-2 pr-4">2147483647</td><td class="py-2 pr-4">2038-01-19T03:14:07Z</td><td class="py-2 font-sans">The 32-bit "Year 2038" limit</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div>
+            <flux:heading level="2" class="!mb-4 !text-2xl !font-semibold tracking-tight">Converting to a specific timezone</flux:heading>
+            <p>
+                Pick an IANA timezone to see the same instant in local time. Common ones: <span class="font-mono">Asia/Kolkata</span>
+                for IST, <span class="font-mono">America/New_York</span> for Eastern, <span class="font-mono">America/Los_Angeles</span>
+                for Pacific, <span class="font-mono">Europe/London</span> for GMT/BST, and <span class="font-mono">UTC</span> itself.
+                The zoned ISO output carries the correct offset, including daylight saving where it applies.
+            </p>
+        </div>
+    </section>
+
     <x-tool-content />
 </x-layouts.app>

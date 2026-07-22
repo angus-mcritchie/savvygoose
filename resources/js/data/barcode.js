@@ -1,5 +1,7 @@
 import Code128Generator from "code-128-encoder";
-import "../../css/barcode-generator.css";
+// The barcode print styles are loaded on the barcode view itself (via a
+// Vite::asset <link>) and injected into the Printd iframe — no need to also
+// bundle them into the global app.js entry, which would link them on every page.
 import { Printd } from "printd";
 import { withUrlState } from "../lib/urlState";
 
@@ -35,16 +37,36 @@ const schema = {
     showValue: { type: 'boolean', default: true },
 };
 
+// Code 128 only covers ASCII (code points 0-127). Anything outside that range
+// can't be encoded and would otherwise produce a corrupt, unscannable barcode.
+const hasUnsupportedChars = (text) => [...text].some((ch) => ch.codePointAt(0) > 127);
+
 export default withUrlState(schema, () => ({
     label: null,
     value: null,
     code: null,
+    error: '',
 
     init() {
-        this.$watch('value', () => this.code = (new Code128Generator()).encode(this.value));
-        if (this.print) {
+        // Compute the initial code BEFORE wiring the watcher: withUrlState sets
+        // `value` from the query string during its own init(), which runs before
+        // this userInit(), so a watcher alone never fires for a restored value.
+        this.encode();
+        this.$watch('value', () => this.encode());
+        if (this.print && !this.error) {
             this.$nextTick(() => this.printBarcode());
         }
+    },
+
+    encode() {
+        const text = this.value || '';
+        if (hasUnsupportedChars(text)) {
+            this.code = null;
+            this.error = 'Code 128 supports ASCII only (letters, digits, and common symbols). Remove accented or non-Latin characters to generate a scannable barcode.';
+            return;
+        }
+        this.error = '';
+        this.code = text === '' ? null : (new Code128Generator()).encode(text);
     },
 
     canvasStyle() {
@@ -63,6 +85,7 @@ export default withUrlState(schema, () => ({
     },
 
     getCode() {
+        if (this.error) return '';
         return this.code || 'ÌvalueÈÎ';
     },
 
@@ -71,6 +94,7 @@ export default withUrlState(schema, () => ({
     },
 
     printBarcode() {
+        if (this.error || !this.code) return;
         const text = this.getCode();
         (new Printd()).print(
             this.$refs.barcodeCanvas,

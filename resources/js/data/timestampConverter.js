@@ -52,7 +52,7 @@ function wallToUnixMs(year, month, day, hour, minute, second, tz) {
     return guess - offset;
 }
 
-function smartParse(input) {
+export function smartParse(input) {
     const raw = (input || '').trim();
     if (!raw) return null;
 
@@ -60,8 +60,19 @@ function smartParse(input) {
         const n = parseFloat(raw);
         if (!Number.isFinite(n)) return null;
         const abs = Math.abs(n);
-        if (abs >= 1e12) return { ms: Math.round(n), source: 'unix-ms' };
-        return { ms: Math.round(n * 1000), source: 'unix-s' };
+        // Auto-detect the unit by magnitude so nanosecond/microsecond epochs
+        // (common from Go, Postgres, and log lines) don't overflow the Date range.
+        let ms;
+        let source;
+        if (abs >= 1e17) { ms = n / 1e6; source = 'unix-ns'; }
+        else if (abs >= 1e14) { ms = n / 1e3; source = 'unix-us'; }
+        else if (abs >= 1e12) { ms = n; source = 'unix-ms'; }
+        else { ms = n * 1000; source = 'unix-s'; }
+        ms = Math.round(ms);
+        // The valid Date range is ±8.64e15 ms; reject anything outside it so the
+        // conversions show a parse error instead of throwing a RangeError.
+        if (!Number.isFinite(ms) || Math.abs(ms) > 8.64e15) return null;
+        return { ms, source };
     }
 
     const t = Date.parse(raw);
@@ -176,7 +187,7 @@ export default withUrlState(schema, () => ({
     refreshHint() {
         const parsed = smartParse(this.rawInput);
         if (!parsed) { this.parseHint = ''; return; }
-        const labels = { 'unix-s': 'Unix seconds', 'unix-ms': 'Unix milliseconds', iso: 'ISO 8601 / parsed' };
+        const labels = { 'unix-s': 'Unix seconds', 'unix-ms': 'Unix milliseconds', 'unix-us': 'Unix microseconds', 'unix-ns': 'Unix nanoseconds', iso: 'ISO 8601 / parsed' };
         this.parseHint = `Detected: ${labels[parsed.source]}`;
     },
 
@@ -215,14 +226,21 @@ export default withUrlState(schema, () => ({
     },
 
     isoUtc() {
-        return new Date(this.unixMs).toISOString();
+        const d = new Date(this.unixMs);
+        return Number.isNaN(d.getTime()) ? '' : d.toISOString();
     },
 
     isoZoned() {
+        if (!Number.isFinite(this.unixMs) || Math.abs(this.unixMs) > 8.64e15) return '';
         const p = partsInZone(this.unixMs, this.tz);
         const offset = offsetToString(-tzOffsetMs(this.unixMs, this.tz));
         const pad = (n, w = 2) => String(n).padStart(w, '0');
         return `${pad(p.year, 4)}-${pad(p.month)}-${pad(p.day)}T${pad(p.hour)}:${pad(p.minute)}:${pad(p.second)}${offset}`;
+    },
+
+    rfc2822() {
+        const d = new Date(this.unixMs);
+        return Number.isNaN(d.getTime()) ? '' : d.toUTCString();
     },
 
     humanLong() {

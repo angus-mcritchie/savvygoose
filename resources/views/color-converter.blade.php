@@ -26,6 +26,14 @@
                                 dropper
                             />
 
+                            <flux:input
+                                type="text"
+                                label="Paste any color"
+                                placeholder="#2563eb · rgb(37, 99, 235) · tomato"
+                                x-on:change="parseColor('{{ $key }}', $event.target.value); $event.target.value = ''"
+                                x-on:keydown.enter.prevent="parseColor('{{ $key }}', $event.target.value); $event.target.value = ''"
+                            />
+
                             <div class="grid gap-2">
                                 <flux:label>RGB</flux:label>
                                 <div class="grid grid-cols-3 gap-2">
@@ -158,5 +166,34 @@
             />
         </div>
     </div>
+
+    <section class="mx-auto mt-12 grid max-w-3xl gap-6 leading-relaxed text-zinc-700 dark:text-zinc-300">
+        <div>
+            <flux:heading level="2" class="!mb-4 !text-2xl !font-semibold tracking-tight">Common color values</flux:heading>
+            <p class="mb-4">A quick reference for turning an RGB triplet into its HEX code and HSL equivalent. Paste any of these into the box above to load it.</p>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="border-b border-black/10 dark:border-white/10">
+                        <tr>
+                            <th class="py-2 pr-4 font-semibold">Name</th>
+                            <th class="py-2 pr-4 font-semibold">HEX</th>
+                            <th class="py-2 pr-4 font-semibold">RGB</th>
+                            <th class="py-2 font-semibold">HSL</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-black/5 dark:divide-white/10 font-mono">
+                        <tr><td class="py-2 pr-4 font-sans">Black</td><td class="py-2 pr-4">#000000</td><td class="py-2 pr-4">rgb(0, 0, 0)</td><td class="py-2">hsl(0, 0%, 0%)</td></tr>
+                        <tr><td class="py-2 pr-4 font-sans">White</td><td class="py-2 pr-4">#FFFFFF</td><td class="py-2 pr-4">rgb(255, 255, 255)</td><td class="py-2">hsl(0, 0%, 100%)</td></tr>
+                        <tr><td class="py-2 pr-4 font-sans">Grey 40%</td><td class="py-2 pr-4">#666666</td><td class="py-2 pr-4">rgb(102, 102, 102)</td><td class="py-2">hsl(0, 0%, 40%)</td></tr>
+                        <tr><td class="py-2 pr-4 font-sans">Grey 50%</td><td class="py-2 pr-4">#808080</td><td class="py-2 pr-4">rgb(128, 128, 128)</td><td class="py-2">hsl(0, 0%, 50%)</td></tr>
+                        <tr><td class="py-2 pr-4 font-sans">Blue 600</td><td class="py-2 pr-4">#2563EB</td><td class="py-2 pr-4">rgb(37, 99, 235)</td><td class="py-2">hsl(221, 83%, 53%)</td></tr>
+                        <tr><td class="py-2 pr-4 font-sans">Red</td><td class="py-2 pr-4">#FF0000</td><td class="py-2 pr-4">rgb(255, 0, 0)</td><td class="py-2">hsl(0, 100%, 50%)</td></tr>
+                        <tr><td class="py-2 pr-4 font-sans">Green</td><td class="py-2 pr-4">#008000</td><td class="py-2 pr-4">rgb(0, 128, 0)</td><td class="py-2">hsl(120, 100%, 25%)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
     <x-tool-content />
 </x-layouts.app>

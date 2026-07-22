@@ -4,7 +4,7 @@
 
         <div class="mb-8 flex justify-center">
             <div class="grid grid-cols-[auto_1fr] items-center gap-4">
-                <flux:icon name="qr-code" class="size-[96px] text-zinc-700 dark:text-zinc-200" />
+                <flux:icon name="qr-code" class="size-20 text-zinc-700 dark:text-zinc-200" />
                 <div>
                     <flux:heading class="mb-1" level="1" size="xl">QR Code Generator</flux:heading>
                     <flux:heading class="font-normal opacity-70" level="2">Create QR codes for URLs, text, Wi-Fi, and more.</flux:heading>
@@ -47,26 +47,33 @@
                 </p>
 
                 <div
-                    x-show="contrastWarning && text"
+                    x-show="contrastWarning && text && !capacityError"
                     x-cloak
                     class="mb-4 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-300"
                 >
                     Low contrast between foreground and background. Scanners may struggle.
                 </div>
 
+                <div
+                    x-show="capacityError"
+                    x-cloak
+                    class="mb-4 rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-300"
+                    x-text="capacityError"
+                ></div>
+
                 <div class="grid gap-3 sm:grid-cols-2">
                     <flux:button
                         type="button"
                         variant="primary"
                         x-on:click="downloadPng"
-                        x-bind:disabled="!text"
+                        x-bind:disabled="!text || !!capacityError"
                     >
                         Download PNG
                     </flux:button>
                     <flux:button
                         type="button"
                         x-on:click="downloadSvg"
-                        x-bind:disabled="!text"
+                        x-bind:disabled="!text || !!capacityError"
                     >
                         Download SVG
                     </flux:button>

@@ -16,6 +16,11 @@ foreach (config('tools.tools') as $tool) {
     Route::view('/'.$tool['slug'], $tool['slug'])->name($tool['slug']);
 }
 
+// Static trust / info pages.
+Route::view('/about', 'pages.about')->name('about');
+Route::view('/privacy', 'pages.privacy')->name('privacy');
+Route::view('/contact', 'pages.contact')->name('contact');
+
 // Private internal pages — not in the tool registry, dashboard, nav, or sitemap.
 Route::view('/on-it-rc-header-card', 'on-it-rc-header-card')->name('on-it-rc-header-card');
 Route::view('/atrek-rc-header-card', 'atrek-rc-header-card')->name('atrek-rc-header-card');
@@ -23,14 +28,36 @@ Route::view('/atrek-rc-header-card', 'atrek-rc-header-card')->name('atrek-rc-hea
 Route::get('/sitemap.xml', function () {
     $base = rtrim(config('app.url'), '/');
 
-    $urls = [['loc' => $base.'/', 'changefreq' => 'weekly', 'priority' => '1.0']];
+    // lastmod from the max mtime of the page's Blade view and the tool registry,
+    // so a content edit to either bumps the freshness signal Google uses.
+    $configMtime = is_file(config_path('tools.php')) ? filemtime(config_path('tools.php')) : time();
+    $lastmod = function (string $view) use ($configMtime) {
+        $full = resource_path('views/'.$view);
+        $times = [$configMtime];
+        if (is_file($full)) {
+            $times[] = filemtime($full);
+        }
+
+        return date('Y-m-d', max($times));
+    };
+
+    $urls = [[
+        'loc' => $base.'/',
+        'changefreq' => 'weekly',
+        'priority' => '1.0',
+        'lastmod' => $lastmod('dashboard.blade.php'),
+    ]];
 
     foreach (array_keys(config('tools.categories')) as $key) {
-        $urls[] = ['loc' => $base.'/'.$key, 'changefreq' => 'weekly', 'priority' => '0.8'];
+        $urls[] = ['loc' => $base.'/'.$key, 'changefreq' => 'weekly', 'priority' => '0.8', 'lastmod' => $lastmod('category.blade.php')];
     }
 
     foreach (config('tools.tools') as $tool) {
-        $urls[] = ['loc' => $base.'/'.$tool['slug'], 'changefreq' => 'monthly', 'priority' => '0.7'];
+        $urls[] = ['loc' => $base.'/'.$tool['slug'], 'changefreq' => 'monthly', 'priority' => '0.7', 'lastmod' => $lastmod($tool['slug'].'.blade.php')];
+    }
+
+    foreach (['about', 'privacy', 'contact'] as $page) {
+        $urls[] = ['loc' => $base.'/'.$page, 'changefreq' => 'yearly', 'priority' => '0.3', 'lastmod' => $lastmod('pages/'.$page.'.blade.php')];
     }
 
     return response()

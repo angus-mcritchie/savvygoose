@@ -1,6 +1,6 @@
 <x-layouts.app>
 
-    <div class="mx-auto max-w-[1200px]" x-data="markdownConverter">
+    <div class="mx-auto max-w-[1200px]" x-data="markdownConverter" x-on:keydown.window.escape="clear()">
         <div class="mb-8 flex justify-center">
             <div class="grid grid-cols-[auto_1fr] items-center gap-4">
                 <flux:icon.code-bracket-square class="size-20 text-zinc-700 dark:text-zinc-200" />

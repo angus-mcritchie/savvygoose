@@ -77,7 +77,7 @@ class Seo
 
             $jsonLd = [
                 self::breadcrumbJsonLd($breadcrumbs),
-                self::webApplicationJsonLd($tool, $url, $description, $categoryLabel),
+                self::webApplicationJsonLd($tool, $url, $description),
             ];
 
             if (! empty($tool['faqs'])) {
@@ -93,10 +93,44 @@ class Seo
             ]);
         }
 
+        $staticPages = [
+            'about' => [
+                'title' => 'About',
+                'description' => 'Savvy Goose is a free kit of browser-based utility tools. No sign-up, no accounts, and your input never leaves your device.',
+            ],
+            'privacy' => [
+                'title' => 'Privacy',
+                'description' => 'How Savvy Goose handles your data: tools run in your browser, there are no accounts, and nothing you type is uploaded or stored.',
+            ],
+            'contact' => [
+                'title' => 'Contact',
+                'description' => 'Report a bug, request a tool, or contribute to Savvy Goose on GitHub.',
+            ],
+        ];
+
+        if (isset($staticPages[$routeName])) {
+            $page = $staticPages[$routeName];
+            $url = $siteUrl.'/'.$routeName;
+            $crumbs = [
+                ['name' => 'Home', 'url' => $siteUrl.'/'],
+                ['name' => $page['title'], 'url' => $url],
+            ];
+
+            return array_merge($base, [
+                'title' => $page['title'].' — '.$siteName,
+                'description' => $page['description'],
+                'canonical' => $url,
+                'breadcrumbs' => $crumbs,
+                'json_ld' => [self::breadcrumbJsonLd($crumbs)],
+            ]);
+        }
+
         return array_merge($base, [
             'title' => $siteName.' — '.$site['tagline'],
             'description' => $site['description'],
-            'canonical' => rtrim($siteUrl.Request::getRequestUri(), '/'),
+            // Path only (no query string) so a fallthrough route still gets a
+            // clean self-referencing canonical, matching the tool/category branches.
+            'canonical' => rtrim($siteUrl.'/'.ltrim(Request::path(), '/'), '/'),
             'breadcrumbs' => [],
             'json_ld' => [],
         ]);
@@ -128,15 +162,22 @@ class Seo
         ];
     }
 
-    private static function webApplicationJsonLd(array $tool, string $url, string $description, string $categoryLabel): array
+    private static function webApplicationJsonLd(array $tool, string $url, string $description): array
     {
+        // Conventional schema.org applicationCategory values (the human labels
+        // like "Data & Encoding" aren't recognised values).
+        $appCategories = [
+            'dev' => 'DeveloperApplication',
+            'diagrams' => 'DesignApplication',
+        ];
+
         return [
             '@context' => 'https://schema.org',
             '@type' => 'WebApplication',
             'name' => $tool['name'],
             'description' => $description,
             'url' => $url,
-            'applicationCategory' => $categoryLabel,
+            'applicationCategory' => $appCategories[$tool['category']] ?? 'UtilitiesApplication',
             'operatingSystem' => 'Any',
             'browserRequirements' => 'Requires JavaScript',
             'offers' => [

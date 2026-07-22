@@ -68,6 +68,7 @@ export default withUrlState(schema, () => ({
     presets: PRESET_ICONS,
     renderToken: 0,
     contrastWarning: false,
+    capacityError: '',
 
     init() {
         ['text', 'size', 'ec', 'fg', 'bg', 'margin'].forEach((prop) => {
@@ -180,6 +181,7 @@ export default withUrlState(schema, () => ({
             canvas.height = canvas.width;
             canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
             this.contrastWarning = false;
+            this.capacityError = '';
             return;
         }
 
@@ -198,22 +200,34 @@ export default withUrlState(schema, () => ({
             canvas.getContext('2d').drawImage(off, 0, 0);
 
             this.contrastWarning = this.computeContrast(this.fg, this.bg) < 3;
+            this.capacityError = '';
         } catch (err) {
-            console.error('QR render failed:', err);
+            if (token !== this.renderToken) return;
+            // Almost always "too much data for this error-correction level".
+            this.capacityError = 'This is too much data for a QR code at this error-correction level. Shorten the text, or lower the error correction.';
+            this.contrastWarning = false;
+            canvas.width = parseInt(this.size, 10) || DEFAULTS.size;
+            canvas.height = canvas.width;
+            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
         }
     },
 
     async downloadPng() {
-        if (!this.text) return;
-        const canvas = document.createElement('canvas');
-        await QRCode.toCanvas(canvas, this.text, this.options());
-        const img = await this.loadLogoImage();
-        this.drawLogoOnCanvas(canvas, img);
-        canvas.toBlob((blob) => this.triggerDownload(blob, 'qr-code.png'));
+        if (!this.text || this.capacityError) return;
+        try {
+            const canvas = document.createElement('canvas');
+            await QRCode.toCanvas(canvas, this.text, this.options());
+            const img = await this.loadLogoImage();
+            this.drawLogoOnCanvas(canvas, img);
+            canvas.toBlob((blob) => this.triggerDownload(blob, 'qr-code.png'));
+        } catch (err) {
+            console.error('QR PNG download failed:', err);
+        }
     },
 
     async downloadSvg() {
-        if (!this.text) return;
+        if (!this.text || this.capacityError) return;
+        try {
         let svg = await QRCode.toString(this.text, { ...this.options(), type: 'svg' });
 
         if (this.logo) {
@@ -240,6 +254,9 @@ export default withUrlState(schema, () => ({
 
         const blob = new Blob([svg], { type: 'image/svg+xml' });
         this.triggerDownload(blob, 'qr-code.svg');
+        } catch (err) {
+            console.error('QR SVG download failed:', err);
+        }
     },
 
     triggerDownload(blob, filename) {

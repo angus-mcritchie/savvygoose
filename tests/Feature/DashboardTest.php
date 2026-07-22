@@ -72,6 +72,14 @@ test('the image resizer renders', function () {
     $this->get('/image-resizer')->assertOk();
 });
 
+test('the image to base64 tool renders', function () {
+    $this->get('/image-to-base64')->assertOk()->assertSee('Image to Base64');
+});
+
+test('the favicon generator renders', function () {
+    $this->get('/favicon-generator')->assertOk()->assertSee('Favicon Generator');
+});
+
 test('the json formatter renders', function () {
     $this->get('/json-formatter')->assertOk();
 });
@@ -114,6 +122,35 @@ test('the time between dates tool renders', function () {
 
 test('the star dependencies tool renders', function () {
     $this->get('/star-dependencies')->assertOk()->assertSee('GitHub Dependency Starrer');
+});
+
+test('the cron expression generator renders', function () {
+    $this->get('/cron-expression-generator')->assertOk()->assertSee('Cron Expression Generator');
+});
+
+test('the about page renders', function () {
+    $this->get('/about')->assertOk()->assertSee('About Savvy Goose');
+});
+
+test('the privacy page renders', function () {
+    $this->get('/privacy')->assertOk()->assertSee('Privacy');
+});
+
+test('the contact page renders', function () {
+    $this->get('/contact')->assertOk()->assertSee('Contact');
+});
+
+test('a missing page returns a branded 404', function () {
+    $this->get('/no-such-tool-abc123')
+        ->assertNotFound()
+        ->assertSee('Page not found');
+});
+
+test('tool pages render related tools and a breadcrumb', function () {
+    $this->get('/case-converter')
+        ->assertOk()
+        ->assertSee('Related tools')
+        ->assertSee('Breadcrumb', false); // aria-label on the breadcrumb nav
 });
 
 test('the holidays api returns holidays for a country and range', function () {
