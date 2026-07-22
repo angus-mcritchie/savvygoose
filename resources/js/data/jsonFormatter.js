@@ -13,6 +13,75 @@ const SAMPLE = JSON.stringify(
     2,
 );
 
+// Re-serialize JSON while preserving number and string literals verbatim.
+// JSON.parse + JSON.stringify silently rounds integers past 2^53 and huge
+// exponents through a JS double (e.g. a Discord/Twitter snowflake id or 1e400),
+// which is unacceptable for a formatter. The input is validated by JSON.parse
+// first, so this tokenizer only ever runs over known-valid JSON.
+function tokenizeJson(text) {
+    const tokens = [];
+    let i = 0;
+    const n = text.length;
+    while (i < n) {
+        const c = text[i];
+        if (c === ' ' || c === '\t' || c === '\n' || c === '\r') { i++; continue; }
+        if (c === '{' || c === '}' || c === '[' || c === ']' || c === ':' || c === ',') {
+            tokens.push({ t: c });
+            i++;
+            continue;
+        }
+        if (c === '"') {
+            let j = i + 1;
+            while (j < n) {
+                if (text[j] === '\\') { j += 2; continue; }
+                if (text[j] === '"') { j++; break; }
+                j++;
+            }
+            tokens.push({ t: 'lit', v: text.slice(i, j) });
+            i = j;
+            continue;
+        }
+        // number or true/false/null — copy the literal run verbatim
+        let j = i;
+        while (j < n && ' \t\n\r{}[]:,"'.indexOf(text[j]) === -1) j++;
+        tokens.push({ t: 'lit', v: text.slice(i, j) });
+        i = j;
+    }
+    return tokens;
+}
+
+export function reformatJson(text, indentUnit) {
+    const minified = indentUnit === '';
+    const tokens = tokenizeJson(text);
+    let out = '';
+    let depth = 0;
+    const newline = () => (minified ? '' : '\n' + indentUnit.repeat(depth));
+    for (let k = 0; k < tokens.length; k++) {
+        const tok = tokens[k];
+        const next = tokens[k + 1];
+        if (tok.t === '{' || tok.t === '[') {
+            out += tok.t;
+            if (next && (next.t === '}' || next.t === ']')) {
+                out += next.t;
+                k++;
+            } else {
+                depth++;
+                out += newline();
+            }
+        } else if (tok.t === '}' || tok.t === ']') {
+            depth--;
+            out += newline() + tok.t;
+        } else if (tok.t === ':') {
+            out += minified ? ':' : ': ';
+        } else if (tok.t === ',') {
+            out += ',' + newline();
+        } else {
+            out += tok.v;
+        }
+    }
+    return out;
+}
+
 function positionToLineCol(text, position) {
     let line = 1;
     let col = 1;
@@ -54,13 +123,15 @@ export default withUrlState(schema, () => ({
         }
 
         try {
-            const parsed = JSON.parse(text);
+            JSON.parse(text); // validate + surface error positions below
             this.error = null;
-            const indent = this.indent === 'tab' ? '\t' : Number(this.indent);
-            this.output =
+            const indentUnit =
                 this.mode === 'minified'
-                    ? JSON.stringify(parsed)
-                    : JSON.stringify(parsed, null, indent);
+                    ? ''
+                    : this.indent === 'tab'
+                        ? '\t'
+                        : ' '.repeat(Number(this.indent));
+            this.output = reformatJson(text, indentUnit);
         } catch (e) {
             this.output = '';
             const message = e.message || 'Invalid JSON';

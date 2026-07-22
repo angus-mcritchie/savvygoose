@@ -93,6 +93,34 @@ function contrastRatio(hexA, hexB) {
     return (light + 0.05) / (dark + 0.05);
 }
 
+// Parse any CSS color the user might paste (hex, rgb()/rgba(), hsl()/hsla(),
+// or a named color like "rebeccapurple") down to a normalized #rrggbb hex.
+function parseAnyColor(input) {
+    const value = String(input || '').trim();
+    if (!value) return null;
+
+    const hex = normalizeHex(value);
+    if (hex) return hex;
+
+    // The canvas 2D context normalizes every valid CSS color string for us.
+    try {
+        const ctx = document.createElement('canvas').getContext('2d');
+        ctx.fillStyle = '#000';
+        ctx.fillStyle = value;
+        const a = ctx.fillStyle;
+        ctx.fillStyle = '#fff';
+        ctx.fillStyle = value;
+        const b = ctx.fillStyle;
+        if (a !== b) return null; // invalid string: the sentinel never changed
+        if (a.startsWith('#')) return normalizeHex(a);
+        const m = a.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+        if (m) return rgbToHex(+m[1], +m[2], +m[3]);
+    } catch (e) {
+        return null;
+    }
+    return null;
+}
+
 const schema = {
     fg: { type: 'color', default: '#2563eb', alias: 'c' },
     bg: { type: 'color', default: '#ffffff' },
@@ -104,6 +132,18 @@ export default withUrlState(schema, () => ({
             const norm = normalizeHex(this[p]);
             if (norm && norm !== this[p]) this[p] = norm;
         }));
+    },
+
+    pasteError: '',
+
+    parseColor(target, value) {
+        const hex = parseAnyColor(value);
+        if (hex) {
+            this[target] = hex;
+            this.pasteError = '';
+        } else if (String(value || '').trim()) {
+            this.pasteError = "That doesn't look like a color. Try a hex, rgb(), hsl(), or a name like tomato.";
+        }
     },
 
     setRgb(target, channel, value) {

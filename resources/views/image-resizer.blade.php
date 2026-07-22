@@ -10,7 +10,7 @@
 
         <div class="mb-8 flex justify-center">
             <div class="grid grid-cols-[auto_1fr] items-center gap-4">
-                <flux:icon name="photo" class="size-[96px] text-zinc-700 dark:text-zinc-200" />
+                <flux:icon name="photo" class="size-20 text-zinc-700 dark:text-zinc-200" />
                 <div>
                     <flux:heading class="mb-1" level="1" size="xl">Image Resizer</flux:heading>
                     <flux:heading class="font-normal opacity-70" level="2">

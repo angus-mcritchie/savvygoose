@@ -67,18 +67,36 @@ const schema = {
     input: { type: 'string', maxLength: MAX_URL_INPUT },
 };
 
+// Papa's dynamicTyping is lossy: it turns "07030" into 7030, long ids past
+// Number.MAX_SAFE_INTEGER lose precision, and "true"/"false" become booleans.
+// Instead, keep every cell a string and only coerce numbers that survive a
+// lossless round-trip, so zip codes, phone numbers, ISBNs, and IDs are safe.
+export function coerceCell(value) {
+    if (typeof value !== 'string' || value === '') return value;
+    if (/^-?(0|[1-9]\d*)(\.\d+)?$/.test(value)) {
+        const n = Number(value);
+        if (Number.isFinite(n) && String(n) === value) return n;
+    }
+    return value;
+}
+
 function parseCsv(text, delimiter) {
     const result = Papa.parse(text, {
         header: true,
         skipEmptyLines: true,
         delimiter,
-        dynamicTyping: true,
+        dynamicTyping: false,
     });
     const fatal = (result.errors || []).find(
         (e) => e.type !== 'FieldMismatch',
     );
     if (fatal) throw new Error(`CSV parse error: ${fatal.message}`);
-    return result.data;
+    return result.data.map((row) => {
+        if (!row || typeof row !== 'object') return row;
+        const out = {};
+        for (const [key, val] of Object.entries(row)) out[key] = coerceCell(val);
+        return out;
+    });
 }
 
 function buildCsv(value, delimiter) {

@@ -45,6 +45,12 @@ export default ({ connected = false } = {}) => ({
             const qs = params.toString();
             history.replaceState(null, '', window.location.pathname + (qs ? `?${qs}` : ''));
         }
+        if (params.get('auth_error') === '1') {
+            this.error = "GitHub sign-in didn't complete. You can try connecting again when you're ready.";
+            params.delete('auth_error');
+            const qs = params.toString();
+            history.replaceState(null, '', window.location.pathname + (qs ? `?${qs}` : ''));
+        }
 
         const saved = sessionStorage.getItem(SESSION_KEY);
         if (!saved) return;

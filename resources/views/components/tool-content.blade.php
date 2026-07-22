@@ -36,4 +36,6 @@
             </div>
         @endif
     </section>
+
+    <x-related-tools :slug="$resolvedSlug" />
 @endif

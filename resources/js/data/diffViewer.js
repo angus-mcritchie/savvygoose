@@ -1,4 +1,4 @@
-import { diffLines, diffWordsWithSpace } from 'diff';
+import { diffLines, diffWords, diffWordsWithSpace } from 'diff';
 import { withUrlState } from '../lib/urlState';
 
 const MAX_URL_INPUT = 2500;
@@ -92,8 +92,12 @@ function buildUnified(parts) {
     return rows;
 }
 
-function buildWordDiff(original, modified) {
-    return diffWordsWithSpace(original, modified).map((part) => ({
+function buildWordDiff(original, modified, ignoreWhitespace) {
+    // diffWords collapses whitespace-only differences; diffWordsWithSpace keeps
+    // them. Honour the "ignore whitespace" toggle so word mode matches the
+    // line-based modes instead of flagging spaces the user asked to ignore.
+    const fn = ignoreWhitespace ? diffWords : diffWordsWithSpace;
+    return fn(original, modified).map((part) => ({
         type: part.added ? 'added' : part.removed ? 'removed' : 'context',
         text: part.value,
     }));
@@ -131,7 +135,17 @@ export default withUrlState(schema, () => ({
     },
 
     get wordDiff() {
-        return buildWordDiff(this.original, this.modified);
+        return buildWordDiff(this.original, this.modified, this.ignoreWhitespace);
+    },
+
+    // Git-style unified text (+/-/space prefixes) for copy and download.
+    get unifiedText() {
+        return this.unified
+            .map((row) => {
+                const prefix = row.type === 'added' ? '+' : row.type === 'removed' ? '-' : ' ';
+                return prefix + row.text;
+            })
+            .join('\n');
     },
 
     get stats() {

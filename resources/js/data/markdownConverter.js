@@ -2,6 +2,7 @@ import { marked } from 'marked';
 import { markedHighlight } from 'marked-highlight';
 import hljs from 'highlight.js/lib/common';
 import TurndownService from 'turndown';
+import DOMPurify from 'dompurify';
 import { withUrlState } from '../lib/urlState';
 
 marked.use(
@@ -43,9 +44,12 @@ export default withUrlState(schema, () => ({
     get preview() {
         if (!this.input) return '';
         try {
-            return this.direction === 'md-to-html'
+            const html = this.direction === 'md-to-html'
                 ? this.output
                 : marked.parse(this.output);
+            // The preview is injected via x-html, and `input` is read from the
+            // shareable URL — sanitize so a crafted ?input= link can't run JS.
+            return DOMPurify.sanitize(html);
         } catch (e) {
             return '';
         }

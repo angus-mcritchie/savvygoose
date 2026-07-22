@@ -1,5 +1,6 @@
 <x-layouts.app.header>
     <flux:main>
+        <x-breadcrumbs />
         {{ $slot }}
     </flux:main>
 
@@ -9,7 +10,10 @@
                 Made for free with
                 <flux:icon.heart variant="solid" class="size-4 text-rose-500" />
             </p>
-            <div class="flex items-center gap-5">
+            <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+                <flux:link href="{{ route('about') }}" wire:navigate variant="subtle">About</flux:link>
+                <flux:link href="{{ route('privacy') }}" wire:navigate variant="subtle">Privacy</flux:link>
+                <flux:link href="{{ route('contact') }}" wire:navigate variant="subtle">Contact</flux:link>
                 <flux:link href="https://github.com/angus-mcritchie/savvygoose" target="_blank" rel="noopener" variant="subtle">
                     Open source — PRs welcome
                 </flux:link>

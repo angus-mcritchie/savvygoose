@@ -38,7 +38,7 @@
                 <div>
                     <flux:heading class="mb-1" level="1" size="xl">Unit Converter</flux:heading>
                     <flux:heading class="font-normal opacity-70" level="2">
-                        Convert length, weight, temperature, and data sizes.
+                        Convert length, weight, temperature, volume, and data sizes.
                     </flux:heading>
                 </div>
             </div>

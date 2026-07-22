@@ -6,7 +6,7 @@ return [
         'name' => 'Savvy Goose',
         'tagline' => 'Free Online Tools, No Sign-up',
         'description' => 'A small kit of online tools for everyday work: barcode and QR generators, JSON formatter, percentage calculator, and more. No sign-up.',
-        'og_image' => '/image/og.png',
+        'og_image' => '/image/og.jpg',
     ],
 
     'categories' => [
@@ -41,7 +41,7 @@ return [
         ],
         'dev' => [
             'title' => 'Developer Tools',
-            'description' => 'Tools built around everyday developer chores, starting with resolving and starring the GitHub repos behind your dependencies.',
+            'description' => 'Tools for everyday developer chores: build and explain cron schedules, or resolve and star the GitHub repos behind your dependencies.',
         ],
     ],
 
@@ -62,7 +62,8 @@ return [
                 'Use the Copy button to grab your text, or Clear to start over.',
             ],
             'faqs' => [
-                ['q' => 'How are characters counted?', 'a' => 'Every Unicode code point counts as one character, including spaces and line breaks. There\'s a separate count that excludes whitespace.'],
+                ['q' => 'How are characters counted?', 'a' => 'Every Unicode code point counts as one character, including spaces and line breaks. There\'s a separate count that excludes whitespace, so you can count characters in a string with or without spaces.'],
+                ['q' => 'What are common character limits?', 'a' => 'A few worth knowing: X/Twitter posts are 280 characters, a single SMS is 160, a meta description shows about 155 to 160, and an SEO title tag is around 60. The live count makes it easy to stay under any of them.'],
                 ['q' => 'How is reading time estimated?', 'a' => 'Reading time assumes 200 words per minute, the average for adult silent reading.'],
                 ['q' => 'Is my text uploaded anywhere?', 'a' => 'No. Counting runs in your browser, so your text never leaves your device.'],
             ],
@@ -73,6 +74,7 @@ return [
             'tagline' => 'camelCase, snake_case, kebab-case & more.',
             'category' => 'text',
             'icon' => ['type' => 'flux', 'name' => 'language'],
+            'related' => ['slug-generator', 'character-counter'],
             'meta' => [
                 'title' => 'Case Converter: camelCase, snake_case & more',
                 'description' => 'Converts text between camelCase, snake_case, kebab-case, PascalCase, Title Case, UPPER, and lower. Instant, browser-only.',
@@ -84,6 +86,9 @@ return [
             ],
             'faqs' => [
                 ['q' => 'Which cases are supported?', 'a' => 'camelCase, PascalCase, snake_case, SCREAMING_SNAKE_CASE, kebab-case, Title Case, sentence case, UPPER, and lower.'],
+                ['q' => 'How do I convert a string to camelCase?', 'a' => 'Paste your text and read the camelCase row. Words are joined with no spaces, the first word is lowercase, and each following word is capitalised, so "user profile id" becomes "userProfileId".'],
+                ['q' => 'What is the difference between camelCase and PascalCase?', 'a' => 'Both remove spaces and capitalise each word. camelCase leaves the very first letter lowercase (userProfileId), while PascalCase capitalises it too (UserProfileId).'],
+                ['q' => 'How do I reverse camelCase back into words?', 'a' => 'Paste the camelCase (or PascalCase) string and pick sentence case or Title Case. The converter splits on the capital-letter boundaries, so "userProfileId" becomes "User Profile Id".'],
                 ['q' => 'Does it handle non-English text?', 'a' => 'Unicode letters are preserved, and diacritics are kept rather than stripped.'],
                 ['q' => 'Is my text sent anywhere?', 'a' => 'No. The conversion runs locally.'],
             ],
@@ -143,22 +148,22 @@ return [
             'howto' => [
                 'Pick the percentage operation you need.',
                 'Enter the values. The result updates as you type.',
-                'Copy the result, or share the URL (calculations are URL-encoded).',
+                'Copy any result with one click.',
             ],
             'faqs' => [
-                ['q' => 'What can it calculate?', 'a' => 'Percent of a number, percent change, percent of total, discounts, and tip splits.'],
+                ['q' => 'What can it calculate?', 'a' => 'Five things: what X% of a number is, what percent one number is of another, the percent change between two numbers, the reverse (a number is X% of what), and adding or subtracting a percentage for tax, tip, markup, or discount.'],
                 ['q' => 'Is the calculation private?', 'a' => 'Yes. Everything runs locally in your browser.'],
             ],
         ],
         [
             'slug' => 'unit-converter',
             'name' => 'Unit Converter',
-            'tagline' => 'Length, weight, temperature & data sizes.',
+            'tagline' => 'Length, weight, temperature, volume & data sizes.',
             'category' => 'numbers',
             'icon' => ['type' => 'flux', 'name' => 'scale'],
             'meta' => [
-                'title' => 'Unit Converter: Length, Weight, Temperature, Data',
-                'description' => 'Convert between metric and imperial units. Covers length, weight, temperature, volume, area, and digital data sizes.',
+                'title' => 'Unit Converter: Length, Weight, Temp, Volume, Data',
+                'description' => 'Convert between metric and imperial units. Covers length, weight, temperature, volume, and digital data sizes.',
             ],
             'howto' => [
                 'Pick a unit category (length, weight, etc.).',
@@ -166,7 +171,7 @@ return [
                 'Type a value. The conversion updates live.',
             ],
             'faqs' => [
-                ['q' => 'Which categories are supported?', 'a' => 'Length, weight/mass, temperature, volume, area, and digital data sizes (bytes through terabytes).'],
+                ['q' => 'Which categories are supported?', 'a' => 'Length, weight/mass, temperature, volume, and digital data sizes (bytes through terabytes).'],
                 ['q' => 'How precise are the conversions?', 'a' => 'Conversions use standard SI factors with high-precision floating point.'],
             ],
         ],
@@ -186,8 +191,12 @@ return [
                 'Copy the format you need: Unix, ISO 8601, RFC 2822, or human-readable.',
             ],
             'faqs' => [
-                ['q' => 'Does it support milliseconds?', 'a' => 'Yes. Both seconds and milliseconds are auto-detected, and you can switch manually.'],
-                ['q' => 'Are timezones handled?', 'a' => 'Pick any IANA timezone and the conversion updates instantly.'],
+                ['q' => 'How do I convert a Unix timestamp to a date?', 'a' => 'Paste the timestamp and the date appears as ISO 8601 (UTC), a zoned ISO string, RFC 2822, and a human-readable date, all at once.'],
+                ['q' => 'How do I convert ISO 8601 to a Unix timestamp?', 'a' => 'Paste an ISO 8601 string like 2026-01-15T09:30:00Z and the Unix timestamp appears in both seconds and milliseconds.'],
+                ['q' => 'How do I convert epoch to ISO 8601?', 'a' => 'Enter the epoch (Unix) value and read the ISO 8601 (UTC) row. Epoch 0 is 1970-01-01T00:00:00Z, the moment Unix time starts counting.'],
+                ['q' => 'How do I convert a timestamp to my timezone (IST, PST, GMT)?', 'a' => 'Pick any IANA timezone (for example Asia/Kolkata for IST, America/Los_Angeles for PST, or UTC for GMT) and the zoned outputs update instantly.'],
+                ['q' => 'What is ISO 8601 format?', 'a' => 'ISO 8601 writes dates as YYYY-MM-DDThh:mm:ss followed by a timezone: Z for UTC, or an offset like +05:30. It sorts chronologically as plain text, which is why it is the default for logs and APIs.'],
+                ['q' => 'Does it support milliseconds?', 'a' => 'Yes. Seconds, milliseconds, microseconds, and nanoseconds are detected automatically from the magnitude of the number you paste.'],
             ],
         ],
         [
@@ -217,7 +226,7 @@ return [
             'category' => 'generators',
             'icon' => ['type' => 'flux', 'name' => 'tag'],
             'meta' => [
-                'title' => 'Free Barcode Generator: Code 128, Print or Share',
+                'title' => 'Code 128 Barcode Generator: Print & Share',
                 'description' => 'Generates Code 128 barcodes you can print straight from the page, or share by URL. No sign-up, works on mobile.',
             ],
             'howto' => [
@@ -226,9 +235,16 @@ return [
                 'Hit Print, or copy the share URL. Opening it later restores the same barcode.',
             ],
             'faqs' => [
-                ['q' => 'Which symbology is used?', 'a' => 'Code 128, which encodes any printable ASCII (letters, digits, and most punctuation).'],
-                ['q' => 'How do shareable URLs work?', 'a' => 'Settings are encoded in the URL query string, so anyone opening the link sees the same barcode. Add ?print=true to auto-open the print dialog.'],
-                ['q' => 'Is the barcode generated on a server?', 'a' => 'No. The SVG is rendered locally, so the value you type never leaves your device.'],
+                ['q' => 'How do I turn text into a barcode?', 'a' => 'Type your text or number into the Value field and the Code 128 barcode updates instantly. Any printable ASCII works: letters, digits, and common punctuation.'],
+                ['q' => 'What is a Code 128 barcode?', 'a' => 'Code 128 is a high-density 1D barcode used across shipping, inventory, and warehousing. It encodes the full ASCII set and packs more characters into less width than older symbologies like Code 39.'],
+                ['q' => 'Can I copy and paste a barcode?', 'a' => 'A barcode is an image rather than text, so there is nothing to paste into a cell. Use Print to send it straight to a printer or a PDF, or take a screenshot of the preview to drop into another document.'],
+                ['q' => 'What is the difference between Code 128 and Code 39?', 'a' => 'Code 39 only handles uppercase letters, digits, and a few symbols, and produces wider barcodes. Code 128 covers the full ASCII set (including lowercase) and is denser, which is why it has largely replaced Code 39 in logistics.'],
+                ['q' => 'How is Code 128 different from EAN-13 or UPC?', 'a' => 'EAN-13 and UPC-A are fixed-length retail product codes tied to a global numbering system. Code 128 is general purpose: encode any text or number you like, at any length.'],
+                ['q' => 'What are the Code 128 subsets (A, B, and C)?', 'a' => 'Subset A covers uppercase and control characters, B covers upper and lowercase plus symbols, and C packs pairs of digits for compact numeric codes. The encoder picks and switches subsets for you to keep the barcode as short as possible.'],
+                ['q' => 'Why won\'t my barcode scan?', 'a' => 'The usual culprits are too little quiet zone (white space) around the bars, low print contrast, or printing too small. Keep a clear margin, print in solid black on white, and increase the size if a scanner struggles.'],
+                ['q' => 'What size or DPI should I print at?', 'a' => 'Aim for at least 300 DPI so the bars stay crisp. If a handheld scanner has trouble, widen the sticker rather than cramming the same barcode smaller.'],
+                ['q' => 'Can I share a barcode by link?', 'a' => 'Settings are stored in the URL, so opening the link reproduces the exact same barcode. Add ?print=true to the link to auto-open the print dialog.'],
+                ['q' => 'Does the value leave my device?', 'a' => 'No. The barcode is rendered in your browser, so whatever you encode stays local.'],
             ],
         ],
         [
@@ -273,11 +289,35 @@ return [
             ],
         ],
         [
+            'slug' => 'image-to-base64',
+            'name' => 'Image to Base64',
+            'tagline' => 'Convert an image to a Base64 data URI.',
+            'category' => 'data',
+            'icon' => ['type' => 'flux', 'name' => 'photo'],
+            'related' => ['base64-encoder', 'image-resizer', 'hash-generator'],
+            'meta' => [
+                'title' => 'Image to Base64 Converter (Data URI)',
+                'description' => 'Convert PNG, JPEG, GIF, SVG, or WebP images to a Base64 data URI. Copy the raw string, an img tag, or a CSS background. Runs in your browser.',
+            ],
+            'howto' => [
+                'Drop in or pick an image (PNG, JPEG, GIF, SVG, or WebP).',
+                'The Base64 data URI is generated instantly, with the size shown.',
+                'Copy the raw data URI, a ready-made img tag, or a CSS background rule.',
+            ],
+            'faqs' => [
+                ['q' => 'What is a Base64 data URI?', 'a' => 'A data URI embeds a file directly in text as data:[type];base64,[data]. In HTML or CSS it lets a small image load without a separate network request.'],
+                ['q' => 'When should I inline an image as Base64?', 'a' => 'It works best for small, frequently used assets like icons and logos, where saving a request matters. Base64 adds about a third to the byte size, so large photos are better left as normal files.'],
+                ['q' => 'Which image formats are supported?', 'a' => 'PNG, JPEG, GIF, SVG, and WebP. The data URI keeps the original format; it does not re-encode the image.'],
+                ['q' => 'Is my image uploaded?', 'a' => 'No. The file is read and encoded locally with the browser FileReader, so it never leaves your device.'],
+            ],
+        ],
+        [
             'slug' => 'url-encoder',
             'name' => 'URL Encoder',
             'tagline' => 'Percent-encode & decode URL components.',
             'category' => 'data',
             'icon' => ['type' => 'flux', 'name' => 'link'],
+            'related' => ['base64-encoder', 'slug-generator'],
             'meta' => [
                 'title' => 'URL Encoder & Decoder (Percent-encode Online)',
                 'description' => 'Percent-encode and decode URLs and URL components in the browser. No sign-up.',
@@ -336,6 +376,7 @@ return [
             'tagline' => 'HEX ↔ RGB ↔ HSL with a contrast checker.',
             'category' => 'data',
             'icon' => ['type' => 'flux', 'name' => 'swatch'],
+            'related' => ['image-resizer'],
             'meta' => [
                 'title' => 'Color Converter (HEX ↔ RGB ↔ HSL with Contrast)',
                 'description' => 'Convert colors between HEX, RGB, and HSL, and check WCAG contrast ratios between two colors.',
@@ -346,7 +387,10 @@ return [
                 'Pair two colors to see the WCAG contrast ratio.',
             ],
             'faqs' => [
-                ['q' => 'How is contrast measured?', 'a' => 'Using the WCAG 2.1 luminance ratio formula. Pass/fail thresholds for AA and AAA at normal and large text are shown.'],
+                ['q' => 'How do I convert RGB to HEX?', 'a' => 'Type or paste your RGB values and read the HEX field. For example, rgb(37, 99, 235) is #2563EB. You can also paste a full rgb() string into the "Paste any color" box.'],
+                ['q' => 'How do I convert HEX to RGB?', 'a' => 'Enter a HEX code and the red, green, and blue channels appear alongside it, along with the HSL equivalent.'],
+                ['q' => 'Can I paste an rgb() or hsl() string?', 'a' => 'Yes. The "Paste any color" box accepts hex, rgb(), rgba(), hsl(), hsla(), and named colors like tomato, and fills in the other formats.'],
+                ['q' => 'How is contrast measured?', 'a' => 'Using the WCAG 2.1 luminance ratio formula. Pass and fail thresholds for AA and AAA at normal and large text are shown.'],
             ],
         ],
         [
@@ -448,7 +492,7 @@ return [
             ],
             'faqs' => [
                 ['q' => 'How are passwords generated?', 'a' => 'Using the browser\'s cryptographically secure random source (window.crypto). Nothing leaves your device.'],
-                ['q' => 'How is strength estimated?', 'a' => 'With zxcvbn-style heuristics that look at length, character classes, and common patterns.'],
+                ['q' => 'How is strength estimated?', 'a' => 'As bits of entropy: the password length times the log base 2 of the character-set size. It assumes a uniformly random password, which is exactly how these are generated.'],
             ],
         ],
         [
@@ -489,17 +533,46 @@ return [
             ],
             'faqs' => [
                 ['q' => 'What\'s the difference between v4 and v7?', 'a' => 'v4 is fully random. v7 prepends a millisecond timestamp so IDs sort chronologically, which is friendlier to database indexes.'],
+                ['q' => 'What is a UUID (or GUID)?', 'a' => 'A UUID (Universally Unique Identifier), also called a GUID on Microsoft platforms, is a 128-bit value written as 32 hex digits in five hyphen-separated groups. It identifies something uniquely without a central authority handing out numbers.'],
+                ['q' => 'Are UUIDs guaranteed to be unique?', 'a' => 'Not guaranteed, but collisions are astronomically unlikely. A v4 UUID has 122 random bits, so you would need to generate billions per second for many years before a clash became probable.'],
+                ['q' => 'Are these generated offline?', 'a' => 'Yes. IDs are created in your browser with window.crypto, so nothing is requested from a server and nothing you generate is logged.'],
+                ['q' => 'Does a v7 UUID reveal when it was created?', 'a' => 'Yes. v7 embeds a millisecond timestamp, so the creation time is recoverable from the ID. Use v4 if you need the value to leak nothing about timing.'],
+            ],
+        ],
+        [
+            'slug' => 'favicon-generator',
+            'name' => 'Favicon Generator',
+            'tagline' => 'Turn an image into favicons and a .ico file.',
+            'category' => 'generators',
+            'icon' => ['type' => 'flux', 'name' => 'sparkles'],
+            'related' => ['image-resizer', 'image-to-base64', 'qr-code-generator'],
+            'meta' => [
+                'title' => 'Favicon Generator: PNG and Multi-size .ico',
+                'description' => 'Turn any image into favicons: 16, 32, 48, 180, and 512 px PNGs plus a multi-size favicon.ico, with the HTML to embed them. Runs in your browser.',
+            ],
+            'howto' => [
+                'Drop in or pick an image. A square PNG or SVG gives the sharpest result.',
+                'Preview the favicon at every standard size.',
+                'Download individual PNGs, the multi-size favicon.ico, and copy the HTML to embed them.',
+            ],
+            'faqs' => [
+                ['q' => 'What image should I use for a favicon?', 'a' => 'A square image works best, ideally 512×512 or larger so the small sizes stay crisp. A transparent PNG or an SVG keeps clean edges. Non-square images are centered and fit without cropping.'],
+                ['q' => 'What is the .ico file for?', 'a' => 'favicon.ico is the classic icon browsers look for at your site root. This one bundles 16, 32, and 48 px images in a single file so the browser can pick the size it needs.'],
+                ['q' => 'Which sizes do I actually need?', 'a' => 'A favicon.ico plus a 32 px PNG covers most browsers, and a 180 px apple-touch-icon handles iOS home screens. The 192 and 512 px sizes are used by Android and web app manifests.'],
+                ['q' => 'How do I add the favicon to my site?', 'a' => 'Put the downloaded files at your site root and paste the generated link tags into your page head. The HTML block on this page is ready to copy.'],
+                ['q' => 'Is my image uploaded?', 'a' => 'No. The resizing and .ico packaging happen on a canvas in your browser, so the image never leaves your device.'],
             ],
         ],
         [
             'slug' => 'image-resizer',
             'name' => 'Image Resizer',
-            'tagline' => 'Resize, convert & build favicons in your browser.',
+            'tagline' => 'Resize and convert images in your browser.',
             'category' => 'generators',
             'icon' => ['type' => 'flux', 'name' => 'photo'],
+            'related' => ['color-converter', 'favicon-generator'],
             'meta' => [
-                'title' => 'Image Resizer: Resize, Convert, Build Favicons',
-                'description' => 'Resize images, convert between PNG, JPEG, and WebP, and build favicons. Nothing is uploaded; files stay on your device.',
+                'title' => 'Image Resizer: Resize & Convert PNG, JPEG, WebP',
+                'description' => 'Resize images and convert between PNG, JPEG, and WebP. Nothing is uploaded; files stay on your device.',
             ],
             'howto' => [
                 'Drop in or pick an image.',
@@ -508,7 +581,7 @@ return [
             ],
             'faqs' => [
                 ['q' => 'Is my image uploaded?', 'a' => 'No. Resizing and conversion run on a canvas in your browser, so files never leave your device.'],
-                ['q' => 'Which output formats are supported?', 'a' => 'PNG, JPEG, and WebP. Multi-size .ico is generated for favicons.'],
+                ['q' => 'Which output formats are supported?', 'a' => 'PNG, JPEG, and WebP. Pick the format from the dropdown before you download.'],
             ],
         ],
         [
@@ -517,6 +590,7 @@ return [
             'tagline' => 'Turn any string into a URL slug.',
             'category' => 'generators',
             'icon' => ['type' => 'flux', 'name' => 'link'],
+            'related' => ['case-converter', 'url-encoder'],
             'meta' => [
                 'title' => 'Slug Generator: String to URL Slug',
                 'description' => 'Turn any string into a URL-friendly slug. Handles diacritics, emoji, and custom separators.',
@@ -527,7 +601,10 @@ return [
                 'Copy the result.',
             ],
             'faqs' => [
-                ['q' => 'How are diacritics handled?', 'a' => 'Diacritics (é, ü, ñ, etc.) are normalized to their ASCII equivalents.'],
+                ['q' => 'How do I convert a string to a URL slug?', 'a' => 'Paste your text and it becomes a lowercase, hyphenated slug. "My Blog Post: 10 Things!" turns into "my-blog-post-10-things".'],
+                ['q' => 'Should a slug use hyphens or underscores?', 'a' => 'Hyphens. Google treats a hyphen as a word separator but an underscore as a word joiner, so hyphens are the standard for readable, SEO-friendly URLs.'],
+                ['q' => 'Are slugs case-sensitive?', 'a' => 'URLs can be, so slugs are lowercased by default to avoid duplicate-address confusion between /My-Page and /my-page.'],
+                ['q' => 'How are diacritics handled?', 'a' => 'Diacritics (é, ü, ñ, and so on) are normalized to their ASCII equivalents.'],
                 ['q' => 'What about emoji?', 'a' => 'Emoji are stripped, so slugs end up as plain ASCII suitable for URLs.'],
             ],
         ],
@@ -575,13 +652,38 @@ return [
             ],
         ],
         [
+            'slug' => 'cron-expression-generator',
+            'name' => 'Cron Expression Generator',
+            'tagline' => 'Build and explain cron schedules, with next run times.',
+            'category' => 'dev',
+            'icon' => ['type' => 'flux', 'name' => 'clock'],
+            'related' => ['timestamp-converter', 'time-between-dates'],
+            'meta' => [
+                'title' => 'Cron Expression Generator & Explainer',
+                'description' => 'Write a cron expression, read it in plain English, and preview the next run times. Presets for the common schedules, all in your browser.',
+            ],
+            'howto' => [
+                'Type a 5-field cron expression, or pick a preset to start.',
+                'Read the plain-English description to confirm it does what you meant.',
+                'Check the next five run times, then copy the share link.',
+            ],
+            'faqs' => [
+                ['q' => 'What do the five cron fields mean?', 'a' => 'In order: minute (0–59), hour (0–23), day of month (1–31), month (1–12), and day of week (0–6, where 0 and 7 are both Sunday). A star means "every".'],
+                ['q' => 'How do I run a job every 5 minutes?', 'a' => 'Use */5 * * * *. The */n syntax means "every n units", so */5 in the minute field fires at 0, 5, 10, and so on.'],
+                ['q' => 'How do I schedule weekdays only?', 'a' => 'Put 1-5 in the day-of-week field, for example 0 9 * * 1-5 to run at 9am Monday through Friday.'],
+                ['q' => 'What happens if I set both day-of-month and day-of-week?', 'a' => 'Standard cron treats them as OR when both are restricted: the job runs when either condition matches. This tool follows that behaviour when computing the next runs.'],
+                ['q' => 'Which timezone are the next runs shown in?', 'a' => 'Your browser\'s local timezone. Cron itself has no timezone; it runs against the clock of whatever machine schedules it.'],
+            ],
+        ],
+        [
             'slug' => 'star-dependencies',
             'name' => 'GitHub Dependency Starrer',
             'tagline' => "Star every GitHub repo behind your project's dependencies.",
             'category' => 'dev',
             'icon' => ['type' => 'flux', 'name' => 'star'],
+            'related' => ['cron-expression-generator'],
             'meta' => [
-                'title' => 'GitHub Dependency Starrer: Star Your package.json or composer.json Deps',
+                'title' => 'GitHub Dependency Starrer: Star Your Deps',
                 'description' => 'Paste a package.json or composer.json, resolve each dependency to its GitHub repo, and star the ones you pick with one click.',
             ],
             'howto' => [

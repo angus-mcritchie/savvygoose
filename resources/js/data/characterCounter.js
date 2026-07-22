@@ -8,10 +8,12 @@ const schema = {
 
 export default withUrlState(schema, () => ({
     get characterCount() {
-        return this.text.length;
+        // Count Unicode code points (via the string iterator), not UTF-16 code
+        // units, so an emoji like 😀 counts as one character as the copy promises.
+        return [...this.text].length;
     },
     get characterCountNoSpaces() {
-        return this.text.replace(/\s/g, '').length;
+        return [...this.text.replace(/\s/g, '')].length;
     },
     get wordCount() {
         const trimmed = this.text.trim();

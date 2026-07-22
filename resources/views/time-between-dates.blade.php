@@ -98,6 +98,10 @@
 
                 <div x-show="errorMessage" x-cloak class="mb-4 rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-300" x-text="errorMessage"></div>
 
+                <div x-show="!errorMessage && country && holidaysError" x-cloak class="mb-4 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-300">
+                    Public holidays couldn't be loaded, so business days can't exclude them here.
+                </div>
+
                 <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" x-show="!errorMessage" x-cloak>
                     <div class="rounded-md border border-black/10 px-4 py-3 dark:border-white/10">
                         <div class="text-sm text-zinc-500 dark:text-zinc-400">Calendar days</div>
@@ -116,11 +120,11 @@
                             <span>Public holidays</span>
                             <span x-show="holidaysLoading" x-cloak class="text-xs opacity-60">(loading…)</span>
                         </div>
-                        <div class="mt-1 font-mono text-2xl tabular-nums" x-text="country ? formatNumber(stats.holidays) : '—'"></div>
+                        <div class="mt-1 font-mono text-2xl tabular-nums" x-text="country && !holidaysError ? formatNumber(stats.holidays) : '—'"></div>
                     </div>
                     <div class="rounded-md border border-black/10 px-4 py-3 dark:border-white/10 sm:col-span-2 lg:col-span-2">
                         <div class="text-sm text-zinc-500 dark:text-zinc-400">Business days <span class="text-xs opacity-60">(weekdays minus holidays)</span></div>
-                        <div class="mt-1 font-mono text-2xl tabular-nums" x-text="formatNumber(stats.businessDays)"></div>
+                        <div class="mt-1 font-mono text-2xl tabular-nums" x-text="country && holidaysError ? '—' : formatNumber(stats.businessDays)"></div>
                     </div>
                 </div>
 

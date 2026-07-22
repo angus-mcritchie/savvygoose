@@ -46,29 +46,26 @@ function readFileChunk(file, start, end) {
 }
 
 async function hashFile(file, onProgress) {
+    // crypto.subtle.digest can't stream, so the whole file must live in memory
+    // once regardless. Read it into a single buffer instead of retaining every
+    // chunk AND a second combined copy (which doubled peak memory and could
+    // OOM a mobile tab near the advertised 100 MB limit).
+    const buffer = await readFileChunk(file, 0, file.size);
+    const view = new Uint8Array(buffer);
+
+    // MD5 in slices so large files still report progress; each slice is a small
+    // transient copy that gets collected, not another full-file buffer.
     const md5 = new SparkMD5.ArrayBuffer();
-
-    const chunks = [];
-    for (let start = 0; start < file.size; start += FILE_CHUNK) {
-        const end = Math.min(start + FILE_CHUNK, file.size);
-        const buf = await readFileChunk(file, start, end);
-        md5.append(buf);
-        chunks.push(new Uint8Array(buf));
-        onProgress?.(end / file.size);
-    }
-
-    const total = chunks.reduce((n, c) => n + c.byteLength, 0);
-    const combined = new Uint8Array(total);
-    let offset = 0;
-    for (const c of chunks) {
-        combined.set(c, offset);
-        offset += c.byteLength;
+    for (let start = 0; start < view.byteLength; start += FILE_CHUNK) {
+        const end = Math.min(start + FILE_CHUNK, view.byteLength);
+        md5.append(buffer.slice(start, end));
+        onProgress?.(end / view.byteLength);
     }
 
     const [sha1, sha256, sha512] = await Promise.all([
-        subtleDigest('SHA-1', combined),
-        subtleDigest('SHA-256', combined),
-        subtleDigest('SHA-512', combined),
+        subtleDigest('SHA-1', buffer),
+        subtleDigest('SHA-256', buffer),
+        subtleDigest('SHA-512', buffer),
     ]);
 
     return { md5: md5.end(), sha1, sha256, sha512 };

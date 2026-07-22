@@ -53,6 +53,14 @@
                             <flux:radio value="uri" label="Whole URI" description="encodeURI leaves URL structure (: / ? & # =) intact. Use for full URLs." />
                         </flux:radio.group>
                     </flux:field>
+
+                    <flux:checkbox
+                        x-show="direction === 'decode'"
+                        x-cloak
+                        x-model="plusAsSpace"
+                        label="Treat + as a space"
+                        description="Query strings encode spaces as +. Turn off to keep literal plus signs."
+                    />
                 </div>
 
                 <div class="grid gap-6 lg:grid-cols-2">

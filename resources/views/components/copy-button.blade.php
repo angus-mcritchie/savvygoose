@@ -3,7 +3,7 @@
     'flash' => null,
     'label' => 'Copy',
     'copiedLabel' => 'Copied!',
-    'icon' => 'clipboard',
+    'icon' => 'document-duplicate',
     'iconCopied' => 'check',
     'variant' => 'ghost',
     'size' => 'sm',
