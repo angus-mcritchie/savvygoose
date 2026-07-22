@@ -17,11 +17,18 @@ export default () => ({
     fileSize: 0,
     error: '',
     busy: false,
+    _loadId: 0,
 
     onFileSelected(event) {
+        const loadId = ++this._loadId;
         const file = event.target.files?.[0];
+        this.file = null;
         this.error = '';
         this.dataUri = '';
+        this.fileName = '';
+        this.fileType = '';
+        this.fileSize = 0;
+        this.busy = false;
 
         if (!file) return;
 
@@ -45,10 +52,12 @@ export default () => ({
 
         const reader = new FileReader();
         reader.onload = () => {
+            if (loadId !== this._loadId) return;
             this.dataUri = String(reader.result || '');
             this.busy = false;
         };
         reader.onerror = () => {
+            if (loadId !== this._loadId) return;
             this.error = 'Could not read that image.';
             this.busy = false;
         };
@@ -56,12 +65,14 @@ export default () => ({
     },
 
     clearFile() {
+        this._loadId++;
         this.file = null;
         this.dataUri = '';
         this.fileName = '';
         this.fileType = '';
         this.fileSize = 0;
         this.error = '';
+        this.busy = false;
         if (this.$refs.fileInput) this.$refs.fileInput.value = '';
     },
 

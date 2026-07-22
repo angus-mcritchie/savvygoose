@@ -17,5 +17,8 @@
         {{ $tooLongMessage }}
     </p>
     <flux:input type="url" x-model="url" readonly copyable label="Share URL" />
+    <p class="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
+        Anyone with this link can read the values it contains. Do not use it for sensitive data.
+    </p>
     {{ $slot }}
 </div>

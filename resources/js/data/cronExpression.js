@@ -32,8 +32,12 @@ function parseField(expr, def) {
         const slash = part.split('/');
         if (slash.length === 2) {
             range = slash[0];
-            step = parseInt(slash[1], 10);
-            if (!Number.isInteger(step) || step < 1) throw new Error(`bad step in ${def.key}`);
+            if (!/^\d+$/.test(slash[1])) throw new Error(`bad step in ${def.key}`);
+            step = Number(slash[1]);
+            if (step < 1) throw new Error(`bad step in ${def.key}`);
+            if (range !== '*' && !range.includes('-')) {
+                throw new Error(`a step in ${def.key} needs * or a range`);
+            }
         } else if (slash.length > 2) {
             throw new Error(`bad term in ${def.key}`);
         }
@@ -44,7 +48,11 @@ function parseField(expr, def) {
             lo = def.min;
             hi = def.max;
         } else if (range.includes('-')) {
-            const [a, b] = range.split('-');
+            const bounds = range.split('-');
+            if (bounds.length !== 2 || bounds.some((bound) => bound === '')) {
+                throw new Error(`bad range in ${def.key}`);
+            }
+            const [a, b] = bounds;
             lo = nameToNum(a, def);
             hi = nameToNum(b, def);
         } else {
@@ -144,8 +152,15 @@ function describe(parsed) {
         parts.push(`At ${minPhrase} of ${hourPhrase}`);
     }
 
-    if (domRaw !== '*') parts.push(`on day-of-month ${listPhrase(sets.dom, String)}`);
-    if (dowRaw !== '*') parts.push(`on ${listPhrase(sets.dow, (n) => DOW_NAMES[n])}`);
+    if (domRaw !== '*' && dowRaw !== '*') {
+        parts.push(
+            `when either day-of-month ${listPhrase(sets.dom, String)} or ${listPhrase(sets.dow, (n) => DOW_NAMES[n])} matches`,
+        );
+    } else if (domRaw !== '*') {
+        parts.push(`on day-of-month ${listPhrase(sets.dom, String)}`);
+    } else if (dowRaw !== '*') {
+        parts.push(`on ${listPhrase(sets.dow, (n) => DOW_NAMES[n])}`);
+    }
     if (monthRaw !== '*') parts.push(`in ${listPhrase(sets.month, (n) => MONTH_NAMES[n - 1])}`);
 
     return parts.join(', ') + '.';

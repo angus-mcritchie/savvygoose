@@ -20,7 +20,7 @@
                             type="button"
                             x-on:click="setPreset(preset.expr)"
                             x-text="preset.label"
-                            class="rounded-md border border-black/10 px-2.5 py-1 text-xs font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:border-white/10 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-zinc-100"
+                            class="min-h-9 rounded-md border border-black/10 px-3 py-2 text-xs font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:border-white/10 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-zinc-100"
                         ></button>
                     </template>
                 </div>
@@ -33,20 +33,27 @@
                     spellcheck="false"
                 />
 
-                <div class="mt-2 grid grid-cols-5 gap-2 text-center font-mono text-[11px] text-zinc-500 dark:text-zinc-400">
+                <div class="mt-2 grid grid-cols-5 gap-1 text-center font-mono text-[10px] text-zinc-500 sm:gap-2 sm:text-[11px] dark:text-zinc-400">
                     <span>minute<br>0–59</span>
                     <span>hour<br>0–23</span>
-                    <span>day&nbsp;/&nbsp;month<br>1–31</span>
+                    <span>day<br>1–31</span>
                     <span>month<br>1–12</span>
-                    <span>day&nbsp;/&nbsp;week<br>0–6</span>
+                    <span>weekday<br>0–6</span>
                 </div>
 
-                <div x-show="error" x-cloak class="mt-4 rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-300" x-text="error"></div>
+                <div
+                    x-show="error"
+                    x-cloak
+                    class="mt-4 rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-300"
+                    role="alert"
+                    aria-live="assertive"
+                    x-text="error"
+                ></div>
             </div>
 
             <template x-if="!error">
                 <div class="grid gap-6 sm:grid-cols-2">
-                    <div class="rounded-lg border border-black/10 p-6 dark:border-white/10">
+                    <div class="rounded-lg border border-black/10 p-6 dark:border-white/10" aria-live="polite">
                         <flux:heading size="sm" class="mb-3 text-zinc-500 dark:text-zinc-400">In plain English</flux:heading>
                         <p class="text-lg" x-text="description"></p>
                     </div>

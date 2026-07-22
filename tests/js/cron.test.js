@@ -12,6 +12,12 @@ descTest('cron parsing and validation', () => {
         expect(() => parseCron('* 24 * * *')).toThrow();
     });
 
+    it('rejects malformed steps and ranges instead of partially parsing them', () => {
+        expect(() => parseCron('*/2x * * * *')).toThrow('bad step');
+        expect(() => parseCron('5/15 * * * *')).toThrow('needs * or a range');
+        expect(() => parseCron('1-2-3 * * * *')).toThrow('bad range');
+    });
+
     it('accepts steps, ranges, lists, and names', () => {
         expect(() => parseCron('*/5 * * * *')).not.toThrow();
         expect(() => parseCron('0 9 * * 1-5')).not.toThrow();
@@ -32,6 +38,10 @@ descTest('cron descriptions', () => {
         expect(describe(parseCron('*/5 * * * *'))).toContain('Every 5 minutes');
         expect(describe(parseCron('0 9 * * *'))).toContain('At 09:00');
         expect(describe(parseCron('0 9 * * 1-5'))).toContain('Monday');
+    });
+
+    it('makes the OR relationship between both restricted day fields explicit', () => {
+        expect(describe(parseCron('0 9 1 * 1'))).toContain('either day-of-month 1 or Monday matches');
     });
 });
 

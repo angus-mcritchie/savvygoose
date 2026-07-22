@@ -27,7 +27,7 @@ class Seo
             'type' => 'website',
         ];
 
-        if ($routeName === 'dashboard' || $routeName === null) {
+        if ($routeName === 'dashboard') {
             return array_merge($base, [
                 'title' => $siteName.' — '.$site['tagline'],
                 'description' => $site['description'],
@@ -100,7 +100,7 @@ class Seo
             ],
             'privacy' => [
                 'title' => 'Privacy',
-                'description' => 'How Savvy Goose handles your data: tools run in your browser, there are no accounts, and nothing you type is uploaded or stored.',
+                'description' => 'How Savvy Goose handles local tool inputs, optional share URLs, GitHub OAuth, and operational request data.',
             ],
             'contact' => [
                 'title' => 'Contact',
@@ -122,6 +122,19 @@ class Seo
                 'canonical' => $url,
                 'breadcrumbs' => $crumbs,
                 'json_ld' => [self::breadcrumbJsonLd($crumbs)],
+            ]);
+        }
+
+        if ($routeName === null) {
+            $path = ltrim(Request::path(), '/');
+            $url = $path === '' ? $siteUrl.'/' : $siteUrl.'/'.$path;
+
+            return array_merge($base, [
+                'title' => 'Page not found — '.$siteName,
+                'description' => 'That page could not be found. Browse the free tools available on Savvy Goose.',
+                'canonical' => $url,
+                'breadcrumbs' => [],
+                'json_ld' => [],
             ]);
         }
 

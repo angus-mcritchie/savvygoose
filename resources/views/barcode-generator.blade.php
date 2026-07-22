@@ -1,7 +1,7 @@
 <x-layouts.app>
 
     @push('head')
-        <link href="https://fonts.bunny.net/css?family=Libre+Barcode+128&display=swap" rel="stylesheet" />
+        @vite('resources/css/barcode-generator.css')
     @endpush
 
     <form
@@ -21,8 +21,6 @@
                 </div>
             </div>
         </div>
-
-        <link href="{{ Vite::asset('resources/css/barcode-generator.css') }}" rel="stylesheet" x-ref="stylesheet">
 
         <div class="grid gap-6 lg:grid-cols-2">
             <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">

@@ -347,7 +347,7 @@ return [
             ],
             'faqs' => [
                 ['q' => 'Does this verify the signature?', 'a' => 'No, it only decodes the token. Verifying the signature needs the issuer\'s key.'],
-                ['q' => 'Are tokens uploaded?', 'a' => 'No. Decoding happens locally, so it\'s safe to paste sensitive tokens.'],
+                ['q' => 'Are tokens uploaded?', 'a' => 'Decoding happens locally. Tokens can also appear in the optional share URL, so avoid sharing sensitive or production credentials.'],
             ],
         ],
         [

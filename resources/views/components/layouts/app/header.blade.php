@@ -12,7 +12,7 @@
         @endphp
 
         <flux:header class="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900" container>
-            <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
+            <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" aria-label="Open navigation" />
 
             <a class="ml-2 mr-5 flex items-center space-x-2 !py-0 lg:ml-0" href="{{ route('dashboard') }}" wire:navigate>
                 <x-app-logo class="size-8" href="/"></x-app-logo>
@@ -68,12 +68,13 @@
                 x-on:click="$flux.dark = ! $flux.dark"
                 icon="moon"
                 variant="subtle"
+                aria-label="Toggle dark mode"
             />
         </flux:header>
 
         <!-- Mobile Menu -->
         <flux:sidebar class="border-r border-zinc-200 bg-zinc-50 lg:hidden dark:border-zinc-700 dark:bg-zinc-900" stashable sticky>
-            <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
+            <flux:sidebar.toggle class="lg:hidden" icon="x-mark" aria-label="Close navigation" />
 
             <a class="ml-1 flex items-center space-x-2" href="{{ route('dashboard') }}" wire:navigate>
                 <x-app-logo class="size-8" href="/"></x-app-logo>

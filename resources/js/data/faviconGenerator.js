@@ -44,10 +44,16 @@ export default () => ({
     ready: false,
     previews: {},
     previewSizes: PREVIEW_SIZES,
+    _loadId: 0,
 
     onFileSelected(event) {
+        const loadId = ++this._loadId;
         const file = event.target.files?.[0];
+        this.file = null;
+        this.sourceImage = null;
+        this.fileName = '';
         this.error = '';
+        this.busy = false;
         this.ready = false;
         this.previews = {};
 
@@ -70,6 +76,10 @@ export default () => ({
         const url = URL.createObjectURL(file);
         const img = new Image();
         img.onload = () => {
+            if (loadId !== this._loadId) {
+                URL.revokeObjectURL(url);
+                return;
+            }
             this.sourceImage = img;
             const p = {};
             for (const s of PREVIEW_SIZES) p[s] = this.drawSize(s).toDataURL('image/png');
@@ -79,6 +89,10 @@ export default () => ({
             this.ready = true;
         };
         img.onerror = () => {
+            if (loadId !== this._loadId) {
+                URL.revokeObjectURL(url);
+                return;
+            }
             this.error = 'Could not load that image.';
             this.busy = false;
             URL.revokeObjectURL(url);
@@ -87,10 +101,12 @@ export default () => ({
     },
 
     clearFile() {
+        this._loadId++;
         this.file = null;
         this.sourceImage = null;
         this.fileName = '';
         this.error = '';
+        this.busy = false;
         this.ready = false;
         this.previews = {};
         if (this.$refs.fileInput) this.$refs.fileInput.value = '';

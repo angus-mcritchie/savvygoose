@@ -143,7 +143,11 @@ test('the contact page renders', function () {
 test('a missing page returns a branded 404', function () {
     $this->get('/no-such-tool-abc123')
         ->assertNotFound()
-        ->assertSee('Page not found');
+        ->assertSee('Page not found')
+        ->assertSee('<title>Page not found — Savvy Goose</title>', false)
+        ->assertSee('<meta name="robots" content="noindex"', false)
+        ->assertSee('<link rel="canonical" href="'.config('app.url').'/no-such-tool-abc123"', false)
+        ->assertDontSee('"@type":"WebSite"', false);
 });
 
 test('tool pages render related tools and a breadcrumb', function () {

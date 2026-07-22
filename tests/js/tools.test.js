@@ -1,9 +1,15 @@
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import { reformatJson } from '../../resources/js/data/jsonFormatter';
 import { coerceCell } from '../../resources/js/data/formatConverter';
 import { smartParse } from '../../resources/js/data/timestampConverter';
 import xPercentOfY from '../../resources/js/data/xPercentOfY';
 import percentDiff from '../../resources/js/data/percentageDifferenceOfXAndY';
+import faviconGenerator from '../../resources/js/data/faviconGenerator';
+import imageToBase64 from '../../resources/js/data/imageToBase64';
+
+afterEach(() => {
+    vi.unstubAllGlobals();
+});
 
 describe('jsonFormatter.reformatJson', () => {
     it('preserves big integers and huge exponents instead of rounding them', () => {
@@ -91,5 +97,54 @@ describe('percentage calculators handle zero operands', () => {
         const c = percentDiff();
         c.x = 0; c.y = 100;
         expect(c.getResult()).toBe('--');
+    });
+});
+
+describe('file tool async state', () => {
+    it('does not restore a Base64 result after the user clears a pending read', () => {
+        const readers = [];
+        vi.stubGlobal('FileReader', class {
+            constructor() { readers.push(this); }
+            readAsDataURL() {}
+        });
+
+        const component = imageToBase64();
+        component.$refs = {};
+        component.onFileSelected({
+            target: { files: [{ name: 'first.png', type: 'image/png', size: 100 }], value: 'first.png' },
+        });
+        component.clearFile();
+
+        readers[0].result = 'data:image/png;base64,abc';
+        readers[0].onload();
+
+        expect(component.dataUri).toBe('');
+        expect(component.file).toBeNull();
+        expect(component.busy).toBe(false);
+    });
+
+    it('does not restore favicon previews after the user clears a pending image', () => {
+        let pendingImage;
+        vi.stubGlobal('URL', {
+            createObjectURL: () => 'blob:test',
+            revokeObjectURL: vi.fn(),
+        });
+        vi.stubGlobal('Image', class {
+            constructor() { pendingImage = this; }
+            set src(value) { this._src = value; }
+        });
+
+        const component = faviconGenerator();
+        component.$refs = {};
+        component.onFileSelected({
+            target: { files: [{ name: 'first.png', type: 'image/png', size: 100 }], value: 'first.png' },
+        });
+        component.clearFile();
+        pendingImage.onload();
+
+        expect(component.ready).toBe(false);
+        expect(component.file).toBeNull();
+        expect(component.previews).toEqual({});
+        expect(component.busy).toBe(false);
     });
 });

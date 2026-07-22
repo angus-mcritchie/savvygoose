@@ -46,17 +46,29 @@ class GithubAuthController extends Controller
     public function disconnect(): JsonResponse
     {
         $token = session('github_token');
+        $revoked = $token === null;
 
-        if ($token) {
-            Http::withBasicAuth(config('services.github.client_id'), config('services.github.client_secret'))
-                ->withHeaders(['Accept' => 'application/vnd.github+json'])
-                ->delete('https://api.github.com/applications/'.config('services.github.client_id').'/grant', [
-                    'access_token' => $token,
-                ]);
+        try {
+            if ($token) {
+                $revoked = Http::withBasicAuth(config('services.github.client_id'), config('services.github.client_secret'))
+                    ->withHeaders(['Accept' => 'application/vnd.github+json'])
+                    ->timeout(8)
+                    ->delete('https://api.github.com/applications/'.config('services.github.client_id').'/grant', [
+                        'access_token' => $token,
+                    ])
+                    ->successful();
+            }
+        } catch (\Throwable) {
+            $revoked = false;
+        } finally {
+            // A network or GitHub failure must not leave the local credential
+            // active after the visitor explicitly disconnects.
+            session()->forget('github_token');
         }
 
-        session()->forget('github_token');
-
-        return response()->json(['disconnected' => true]);
+        return response()->json([
+            'disconnected' => true,
+            'revoked' => $revoked,
+        ]);
     }
 }

@@ -13,7 +13,9 @@
                 The thing that makes them different is where the work happens. Almost every tool here runs
                 as JavaScript in your own browser. When you paste text into the character counter or drop an
                 image into the resizer, that data is processed on your device and never sent to a server.
-                It's faster, it works offline once the page has loaded, and it means your input stays yours.
+                It's faster, it works offline once the page has loaded, and it means your input stays yours. Some
+                tools can place short inputs in an optional share URL; the <a href="{{ route('privacy') }}" wire:navigate class="underline underline-offset-4">privacy page</a>
+                explains that exception.
             </p>
             <p>
                 There's no database and no user accounts behind the site, on purpose. Fewer moving parts means

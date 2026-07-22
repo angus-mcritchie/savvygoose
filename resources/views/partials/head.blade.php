@@ -7,6 +7,7 @@
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fafafa" />
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#18181b" />
 <meta name="csrf-token" content="{{ csrf_token() }}" />
+<meta name="referrer" content="strict-origin" />
 
 <title>{{ $title ?? $seo['title'] }}</title>
 <meta name="description" content="{{ $seo['description'] }}" />
@@ -36,9 +37,6 @@
 @foreach ($seo['json_ld'] as $entry)
     <script type="application/ld+json">{!! json_encode($entry, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
 @endforeach
-
-<link rel="preconnect" href="https://fonts.bunny.net">
-<link href="https://fonts.bunny.net/css?family=inter:400,500,600&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet" />
 
 {{-- Libre Barcode 128 is only needed on the barcode generator; that view pushes it here. --}}
 @stack('head')

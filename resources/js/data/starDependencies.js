@@ -167,12 +167,21 @@ export default ({ connected = false } = {}) => ({
 
     async disconnect() {
         try {
-            await fetch('/auth/github/disconnect', {
+            const response = await fetch('/auth/github/disconnect', {
                 method: 'POST',
                 headers: { 'X-CSRF-TOKEN': csrfToken() },
             });
-        } finally {
+            const body = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                this.error = body.message || "Couldn't disconnect from GitHub. Try again.";
+                return;
+            }
             this.connected = false;
+            if (body.revoked === false) {
+                this.error = 'Disconnected here, but GitHub could not confirm the authorization was revoked. Remove Savvy Goose from your GitHub application settings.';
+            }
+        } catch {
+            this.error = "Couldn't reach the server to disconnect. Check your connection and try again.";
         }
     },
 });

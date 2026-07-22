@@ -32,7 +32,7 @@
                             <template x-for="size in previewSizes" :key="size">
                                 <div class="flex flex-col items-center gap-2">
                                     <div class="flex items-center justify-center rounded-md border border-black/10 bg-[repeating-conic-gradient(#e5e5e5_0_25%,transparent_0_50%)] bg-[length:12px_12px] p-2 dark:border-white/10">
-                                        <img :src="previews[size]" :width="Math.min(size, 96)" :height="Math.min(size, 96)" :alt="size + ' pixel favicon'" class="block" />
+                                        <img :src="previews[size]" :width="Math.min(size, 96)" :height="Math.min(size, 96)" :alt="size + ' by ' + size + ' pixel favicon'" class="block" />
                                     </div>
                                     <span class="font-mono text-xs text-zinc-500 dark:text-zinc-400" x-text="size + '×' + size"></span>
                                     <flux:button size="xs" variant="ghost" icon="arrow-down-tray" x-on:click="downloadPng(size)">PNG</flux:button>

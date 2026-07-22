@@ -30,7 +30,14 @@
                     <span class="font-medium" x-text="{{ $binding }}.name"></span>
                     <span class="opacity-60" x-text="' · ' + $formatBytes({{ $binding }}.size)"></span>
                 </div>
-                <flux:button x-on:click="{{ $onClear }}()" icon="x-mark" size="xs" variant="ghost" />
+                <flux:button
+                    type="button"
+                    x-on:click="{{ $onClear }}()"
+                    icon="x-mark"
+                    size="xs"
+                    variant="ghost"
+                    aria-label="Remove selected file"
+                />
             </div>
         </template>
         @if ($helper)
@@ -46,6 +53,8 @@
             x-cloak
             x-text="{{ $error }}"
             class="text-sm text-red-600 dark:text-red-400"
+            role="alert"
+            aria-live="assertive"
         ></p>
     @endif
 </div>
