@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 
 test('resolve returns a github repo for an npm dependency', function () {
@@ -117,4 +118,18 @@ test('star repos when connected to github', function () {
             ['owner' => 'laravel', 'repo' => 'framework', 'starred' => true],
         ],
     ]);
+});
+
+test('disconnect clears the local token even when github revocation fails', function () {
+    Http::fake(fn () => throw new ConnectionException('GitHub is unavailable'));
+
+    $this->withSession(['github_token' => 'test-token'])
+        ->postJson('/auth/github/disconnect')
+        ->assertOk()
+        ->assertJson([
+            'disconnected' => true,
+            'revoked' => false,
+        ]);
+
+    expect(session('github_token'))->toBeNull();
 });

@@ -15,7 +15,7 @@
             </flux:heading>
 
             <flux:subheading class="max-w-xl !text-base sm:!text-lg" level="2">
-                A small, growing collection of utilities. They run in your browser, ask for nothing, and never see your data.
+                A small, growing collection of utilities. Most work in your browser and none require an account.
             </flux:subheading>
         </div>
 

@@ -8,8 +8,18 @@
                 <flux:heading level="3" size="lg" class="mb-3">Tools run in your browser</flux:heading>
                 <p>
                     The utilities on this site are built as JavaScript that runs on your own device. Text you type,
-                    files you drop in, and the results they produce are processed locally. That content is not
-                    uploaded, logged, or stored on a server. Close the tab and it's gone.
+                    files you drop in, and the results they produce are usually processed locally. Choosing a file
+                    does not upload it to Savvy Goose.
+                </p>
+            </div>
+
+            <div>
+                <flux:heading level="3" size="lg" class="mb-3">Share links contain your input</flux:heading>
+                <p>
+                    Some tools put short inputs and settings in the page URL so you can share the result. Anyone
+                    with that link can read those values. Opening a shared link also sends its URL to the web server
+                    as part of the normal page request, so do not put passwords, private tokens, or other sensitive
+                    data in a share link.
                 </p>
             </div>
 
@@ -42,9 +52,9 @@
             <div>
                 <flux:heading level="3" size="lg" class="mb-3">Operational data</flux:heading>
                 <p>
-                    Like most websites, the server may record standard request information (such as timing and
-                    error data) to keep the site healthy and fast. This is aggregate operational telemetry, not a
-                    profile of you.
+                    The hosting platform and application monitoring may process standard request information such
+                    as your IP address, requested URL, browser headers, timing, and error data. It is used to operate
+                    and debug the site, not to build advertising profiles.
                 </p>
             </div>
 
