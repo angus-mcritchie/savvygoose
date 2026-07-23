@@ -166,6 +166,8 @@ export default ({ connected = false } = {}) => ({
     },
 
     async disconnect() {
+        this.error = '';
+
         try {
             const response = await fetch('/auth/github/disconnect', {
                 method: 'POST',
