@@ -123,12 +123,13 @@
                     </div>
                 </div>
 
+                {{-- No x-cloak, and a blank line held server-side: the default conversion always
+                     produces a formula, so the line reserves its space instead of appearing. --}}
                 <p
                     class="mt-8 text-center font-mono text-sm text-zinc-500 dark:text-zinc-400"
                     x-show="formula()"
-                    x-cloak
                     x-text="formula()"
-                ></p>
+                >&nbsp;</p>
             </div>
 
             <x-share-field

@@ -97,6 +97,15 @@
 
                 <div class="max-h-[480px] overflow-y-auto rounded-md border border-black/10 dark:border-white/10">
                     <ul class="divide-y divide-black/5 font-mono text-sm dark:divide-white/5">
+                        {{-- UUIDs are generated in the browser, so the list is empty until Alpine boots.
+                             These blank rows hold the default five-row height so nothing below jumps. --}}
+                        @for ($i = 0; $i < 5; $i++)
+                            <li class="grid grid-cols-[1fr_auto] items-center gap-3 px-4 py-2" x-show="!uuids.length" aria-hidden="true">
+                                <span class="truncate">&nbsp;</span>
+                                {{-- A button, not a span: it has to measure exactly like the real row's copy button. --}}
+                                <button type="button" tabindex="-1" class="rounded px-2 py-1 text-xs opacity-0">Copy</button>
+                            </li>
+                        @endfor
                         <template x-for="(u, i) in uuids" :key="i + u">
                             <li class="grid grid-cols-[1fr_auto] items-center gap-3 px-4 py-2 hover:bg-black/5 dark:hover:bg-white/5">
                                 <span class="truncate" x-text="format(u)"></span>

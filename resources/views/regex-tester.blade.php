@@ -49,18 +49,21 @@
                     </div>
                 </flux:field>
 
+                {{-- Rendered server-side rather than with x-for so the flag row is sized before
+                     Alpine boots. Mirrors ALL_FLAGS in resources/js/data/regexTester.js. --}}
                 <div class="mt-4 flex flex-wrap gap-2">
-                    <template x-for="flag in allFlags" :key="flag">
+                    @foreach (['g' => 'global, match all occurrences', 'i' => 'ignore case', 'm' => 'multiline (^ and $ match line boundaries)', 's' => 'dotall (. matches newlines)', 'u' => 'unicode', 'y' => 'sticky (match at lastIndex only)'] as $flag => $description)
                         <flux:button
                             type="button"
                             size="xs"
-                            x-on:click="toggleFlag(flag)"
-                            x-bind:variant="hasFlag(flag) ? 'primary' : 'outline'"
-                            x-bind:title="flagDescriptions[flag]"
+                            variant="outline"
+                            x-on:click="toggleFlag('{{ $flag }}')"
+                            x-bind:variant="hasFlag('{{ $flag }}') ? 'primary' : 'outline'"
+                            title="{{ $description }}"
                         >
-                            <span x-text="flag" class="font-mono"></span>
+                            <span class="font-mono">{{ $flag }}</span>
                         </flux:button>
-                    </template>
+                    @endforeach
                 </div>
 
                 <div
@@ -144,46 +147,42 @@
                     <flux:checkbox x-model="replaceMode" label="Enable replace" />
                 </div>
 
-                <template x-if="replaceMode">
-                    <div class="grid gap-4">
-                        <flux:input
-                            x-model="replacement"
-                            label="Replacement"
-                            description="Use $1, $2, … to reference capture groups."
-                            placeholder="hello $1"
-                            class="font-mono"
-                        />
+                <div class="grid gap-4" x-show="replaceMode" x-cloak>
+                    <flux:input
+                        x-model="replacement"
+                        label="Replacement"
+                        description="Use $1, $2, … to reference capture groups."
+                        placeholder="hello $1"
+                        class="font-mono"
+                    />
 
-                        <div>
-                            <div class="flex items-center justify-between">
-                                <flux:label>Result</flux:label>
-                                <div class="flex gap-2">
-                                    <x-copy-button
-                                        value="replaceResult"
-                                        flash="'regex-result'"
-                                        icon="document-duplicate"
-                                        size="xs"
-                                        x-bind:disabled="!replaceResult"
-                                    />
-                                    <flux:button
-                                        x-on:click="$download(replaceResult, 'replaced.txt')"
-                                        x-bind:disabled="!replaceResult"
-                                        icon="arrow-down-tray"
-                                        size="xs"
-                                        variant="ghost"
-                                    >
-                                        .txt
-                                    </flux:button>
-                                </div>
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <flux:label>Result</flux:label>
+                            <div class="flex gap-2">
+                                <x-copy-button
+                                    value="replaceResult"
+                                    flash="'regex-result'"
+                                    icon="document-duplicate"
+                                    size="xs"
+                                    x-bind:disabled="!replaceResult"
+                                />
+                                <flux:button
+                                    x-on:click="$download(replaceResult, 'replaced.txt')"
+                                    x-bind:disabled="!replaceResult"
+                                    icon="arrow-down-tray"
+                                    size="xs"
+                                    variant="ghost"
+                                >
+                                    .txt
+                                </flux:button>
                             </div>
-                            <div class="mt-2 min-h-[5rem] whitespace-pre-wrap rounded-md border border-black/10 bg-zinc-50 p-4 font-mono text-sm dark:border-white/10 dark:bg-zinc-900"
-                                x-text="replaceResult || '(empty)'"></div>
                         </div>
+                        <div class="mt-2 min-h-[5rem] whitespace-pre-wrap rounded-md border border-black/10 bg-zinc-50 p-4 font-mono text-sm dark:border-white/10 dark:bg-zinc-900"
+                            x-text="replaceResult || '(empty)'"></div>
                     </div>
-                </template>
-                <template x-if="!replaceMode">
-                    <flux:text class="opacity-60">Turn on replace to substitute matched text.</flux:text>
-                </template>
+                </div>
+                <flux:text class="opacity-60" x-show="!replaceMode">Turn on replace to substitute matched text.</flux:text>
             </div>
 
             <x-share-field

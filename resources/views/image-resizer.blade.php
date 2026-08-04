@@ -85,17 +85,18 @@
                     <div class="mb-6 grid gap-3">
                         <flux:label>Quick sizes</flux:label>
                         <div class="flex flex-wrap gap-2">
-                            <template x-for="preset in sizePresets" :key="preset.label">
+                            {{-- Rendered server-side rather than with x-for so the button rows are laid
+                                 out before Alpine boots. Mirrors SIZE_PRESETS in resources/js/data/imageResizer.js. --}}
+                            @foreach ([['256²', 256, 256], ['512²', 512, 512], ['1024²', 1024, 1024], ['1200×630', 1200, 630], ['1920×1080', 1920, 1080], ['1280×720', 1280, 720]] as [$label, $w, $h])
                                 <button
                                     type="button"
-                                    x-on:click="applyCanvasSize(preset.w, preset.h)"
-                                    :class="canvasWidth === preset.w && canvasHeight === preset.h
+                                    x-on:click="applyCanvasSize({{ $w }}, {{ $h }})"
+                                    :class="canvasWidth === {{ $w }} && canvasHeight === {{ $h }}
                                         ? 'border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-zinc-900'
                                         : 'border-black/15 hover:border-black/40 dark:border-white/15 dark:hover:border-white/40'"
                                     class="rounded-md border px-3 py-1.5 font-mono text-xs transition"
-                                    x-text="preset.label"
-                                ></button>
-                            </template>
+                                >{{ $label }}</button>
+                            @endforeach
                             <flux:button size="sm" variant="subtle" x-on:click="canvasMatchSource">Match source</flux:button>
                         </div>
                     </div>
@@ -103,14 +104,14 @@
                     <div class="mb-6 grid gap-3">
                         <flux:label>Aspect ratio</flux:label>
                         <div class="flex flex-wrap gap-2">
-                            <template x-for="ratio in ratioPresets" :key="ratio.label">
+                            {{-- Mirrors RATIO_PRESETS in resources/js/data/imageResizer.js. --}}
+                            @foreach ([['1:1', 1, 1], ['4:3', 4, 3], ['3:2', 3, 2], ['16:9', 16, 9], ['21:9', 21, 9], ['3:4', 3, 4], ['9:16', 9, 16]] as [$label, $w, $h])
                                 <button
                                     type="button"
-                                    x-on:click="applyCanvasRatio(ratio.w, ratio.h)"
+                                    x-on:click="applyCanvasRatio({{ $w }}, {{ $h }})"
                                     class="rounded-md border border-black/15 px-3 py-1.5 font-mono text-xs transition hover:border-black/40 dark:border-white/15 dark:hover:border-white/40"
-                                    x-text="ratio.label"
-                                ></button>
-                            </template>
+                                >{{ $label }}</button>
+                            @endforeach
                         </div>
                     </div>
 

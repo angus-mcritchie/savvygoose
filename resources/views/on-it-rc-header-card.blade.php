@@ -39,7 +39,9 @@
                                 <div class="name" x-text="name"></div>
                             </div>
                             <div class="right">
-                                <svg x-ref="barcodeSvg"></svg>
+                                {{-- viewBox/width match what JsBarcode emits for the default 13-digit value, so the
+                                     sticker is laid out before the barcode is drawn. --}}
+                                <svg x-ref="barcodeSvg" viewBox="0 0 246 40" width="246" height="40"></svg>
                                 <div class="barcode" x-text="barcode"></div>
                             </div>
                         </div>
@@ -82,6 +84,11 @@
             border-radius: 1mm;
         }
         .header-card-preview .sticker .left { min-width: 0; }
+        /* The sticker fields are filled in by Alpine; these hold each line's height up front. */
+        .header-card-preview .sticker .left .sku { min-height: 4mm; }
+        .header-card-preview .sticker .left .name { min-height: 2.625mm; }
+        /* Explicit line-height so the reserved min-height matches the rendered line exactly. */
+        .header-card-preview .sticker .right .barcode { line-height: 1.2; min-height: 2.16mm; }
         .header-card-preview .sticker .left .sku { font-weight: 700; font-size: 4mm; line-height: 1; color: black; }
         .header-card-preview .sticker .left .name {
             font-weight: 400; font-size: 2.5mm; line-height: 1.05; margin-top: 0.7mm; color: black;

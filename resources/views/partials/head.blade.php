@@ -34,6 +34,10 @@
 <link rel="icon" type="image/png" href="/fav.png" />
 <link rel="apple-touch-icon" href="/fav.png" />
 
+{{-- Inter is the body font on every page; fetch it alongside the stylesheet rather than after it. --}}
+<link rel="preload" as="font" type="font/woff2" href="{{ Vite::asset('resources/fonts/inter-400.woff2') }}" crossorigin />
+<link rel="preload" as="font" type="font/woff2" href="{{ Vite::asset('resources/fonts/inter-700.woff2') }}" crossorigin />
+
 @foreach ($seo['json_ld'] as $entry)
     <script type="application/ld+json">{!! json_encode($entry, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
 @endforeach

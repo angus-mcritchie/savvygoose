@@ -53,20 +53,36 @@
                 </div>
             </div>
 
+            @php
+                // Rendered server-side rather than with x-for so the ten cards hold their space
+                // before Alpine boots. Keys must match CONVERTERS in resources/js/data/caseConverter.js.
+                $converters = [
+                    ['key' => 'camel', 'label' => 'camelCase', 'description' => 'Lowercase first word, capitalize the rest, no separators.'],
+                    ['key' => 'pascal', 'label' => 'PascalCase', 'description' => 'Capitalize every word, no separators.'],
+                    ['key' => 'snake', 'label' => 'snake_case', 'description' => 'Lowercase words joined with underscores.'],
+                    ['key' => 'kebab', 'label' => 'kebab-case', 'description' => 'Lowercase words joined with hyphens.'],
+                    ['key' => 'constant', 'label' => 'CONSTANT_CASE', 'description' => 'Uppercase words joined with underscores.'],
+                    ['key' => 'dot', 'label' => 'dot.case', 'description' => 'Lowercase words joined with dots.'],
+                    ['key' => 'title', 'label' => 'Title Case', 'description' => 'Each word capitalized, separated by spaces.'],
+                    ['key' => 'sentence', 'label' => 'Sentence case', 'description' => 'First letter capitalized, the rest lowercase.'],
+                    ['key' => 'lower', 'label' => 'lowercase', 'description' => 'All characters lowercase.'],
+                    ['key' => 'upper', 'label' => 'UPPERCASE', 'description' => 'All characters uppercase.'],
+                ];
+            @endphp
             <div class="grid gap-4 md:grid-cols-2">
-                <template x-for="c in converters" :key="c.key">
+                @foreach ($converters as $c)
                     <div
                         class="rounded-lg border border-black/10 p-6 transition dark:border-white/10"
                         x-bind:class="{ 'opacity-50': !text }"
                     >
                         <div class="mb-3 flex items-start justify-between gap-3">
                             <div>
-                                <flux:heading class="!font-bold" size="lg" x-text="c.label"></flux:heading>
-                                <flux:subheading size="sm" x-text="c.description"></flux:subheading>
+                                <flux:heading class="!font-bold" size="lg">{{ $c['label'] }}</flux:heading>
+                                <flux:subheading size="sm">{{ $c['description'] }}</flux:subheading>
                             </div>
                             <x-copy-button
-                                value="convert(c.key)"
-                                flash="c.key"
+                                value="convert('{{ $c['key'] }}')"
+                                flash="'{{ $c['key'] }}'"
                                 icon="document-duplicate"
                                 size="xs"
                                 x-bind:disabled="!text"
@@ -74,10 +90,10 @@
                         </div>
                         <div
                             class="break-all rounded-md bg-zinc-100 p-3 font-mono text-sm dark:bg-zinc-900"
-                            x-text="convert(c.key) || '...'"
-                        ></div>
+                            x-text="convert('{{ $c['key'] }}') || '...'"
+                        >...</div>
                     </div>
-                </template>
+                @endforeach
             </div>
 
             <x-share-field

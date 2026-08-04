@@ -22,28 +22,31 @@
             x-on:click="$refs.{{ $reference }}.click()"
             icon="document-arrow-up"
         >
-            <span x-text="{{ $binding }} ? 'Replace file' : 'Choose a file'"></span>
+            {{-- Server-rendered label: an empty span would size the button wrong until Alpine boots. --}}
+            <span x-text="{{ $binding }} ? 'Replace file' : 'Choose a file'">Choose a file</span>
         </flux:button>
-        <template x-if="{{ $binding }}">
-            <div class="flex items-center justify-between gap-4 rounded-md bg-zinc-100 px-4 py-2 text-sm dark:bg-zinc-700">
-                <div class="truncate">
-                    <span class="font-medium" x-text="{{ $binding }}.name"></span>
-                    <span class="opacity-60" x-text="' · ' + $formatBytes({{ $binding }}.size)"></span>
-                </div>
-                <flux:button
-                    type="button"
-                    x-on:click="{{ $onClear }}()"
-                    icon="x-mark"
-                    size="xs"
-                    variant="ghost"
-                    aria-label="Remove selected file"
-                />
+        {{-- x-show rather than x-if so the row is in the DOM from the first paint; the
+             bindings therefore run with no file selected and have to tolerate null. --}}
+        <div
+            class="flex items-center justify-between gap-4 rounded-md bg-zinc-100 px-4 py-2 text-sm dark:bg-zinc-700"
+            x-show="{{ $binding }}"
+            x-cloak
+        >
+            <div class="truncate">
+                <span class="font-medium" x-text="{{ $binding }}?.name ?? ''"></span>
+                <span class="opacity-60" x-text="{{ $binding }} ? ' · ' + $formatBytes({{ $binding }}.size) : ''"></span>
             </div>
-        </template>
+            <flux:button
+                type="button"
+                x-on:click="{{ $onClear }}()"
+                icon="x-mark"
+                size="xs"
+                variant="ghost"
+                aria-label="Remove selected file"
+            />
+        </div>
         @if ($helper)
-            <template x-if="!{{ $binding }}">
-                <p class="text-sm opacity-60">{{ $helper }}</p>
-            </template>
+            <p class="text-sm opacity-60" x-show="!{{ $binding }}">{{ $helper }}</p>
         @endif
     </div>
 

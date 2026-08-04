@@ -20,6 +20,24 @@
     src: url('../fonts/inter-700.woff2') format('woff2');
 }
 
+/*
+ * Metric-matched stand-in used while Inter downloads. The overrides make a local
+ * Arial/Liberation Sans render at Inter's line box and average advance width, so
+ * the swap to the real Inter does not reflow anything (CLS stays at 0).
+ * Values are the standard Inter-on-Arial adjustments; do not tweak them in
+ * isolation, they are derived from Inter's 2816 unitsPerEm metrics.
+ */
+@font-face {
+    font-family: 'Inter Fallback';
+    font-style: normal;
+    font-weight: 400 700;
+    src: local('Arial'), local('Helvetica Neue'), local('Liberation Sans');
+    ascent-override: 90.49%;
+    descent-override: 22.56%;
+    line-gap-override: 0%;
+    size-adjust: 107.06%;
+}
+
 @source "../views";
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../vendor/livewire/flux-pro/stubs/**/*.blade.php';
@@ -28,7 +46,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-    --font-sans: Inter, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: Inter, 'Inter Fallback', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
     --color-zinc-50: #fafafa;
     --color-zinc-100: #f5f5f5;
@@ -69,6 +87,16 @@
     [role="button"]:not([aria-disabled="true"]) {
         cursor: pointer;
     }
+}
+
+/*
+ * Flux places the slider fill and thumb with inline styles once its JS runs. Until then they sit
+ * at the wrong end of the track, and the jump to the real value registers as a layout shift.
+ * Hidden until placed, they simply appear where they belong.
+ */
+[data-flux-slider-indicator]:not([style]),
+[data-flux-slider-thumb]:not([style]) {
+    display: none;
 }
 
 [data-flux-field] {

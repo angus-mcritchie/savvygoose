@@ -49,7 +49,9 @@
                     x-bind:disabled="!password"
                 />
 
-                <div x-show="hasCharset" x-cloak>
+                {{-- No x-cloak: a charset is on by default, so the meter renders straight away and
+                     only its labels fill in, rather than the whole block appearing after boot. --}}
+                <div x-show="hasCharset">
                     <div class="mb-2 flex items-baseline justify-between">
                         <div class="flex items-center gap-1">
                             <flux:subheading>Strength</flux:subheading>
@@ -71,19 +73,21 @@
                                 </flux:popover>
                             </flux:dropdown>
                         </div>
-                        <flux:subheading>
-                            <span x-text="strength.label"></span>
+                        {{-- Placeholders keep the line's height, and flex-1 keeps its box the same
+                             width, so neither the text landing nor its length moves anything. --}}
+                        <flux:subheading class="min-w-0 flex-1 truncate text-right">
+                            <span x-text="strength.label">Strong</span>
                             <span class="opacity-60">·</span>
-                            <span><span x-text="entropy"></span> bits of entropy</span>
+                            <span><span x-text="entropy">0</span> bits of entropy</span>
                         </flux:subheading>
                     </div>
                     <div class="grid grid-cols-5 gap-1">
-                        <template x-for="i in 5" :key="i">
+                        @for ($i = 1; $i <= 5; $i++)
                             <div
                                 class="h-2 rounded-full"
-                                :class="i <= strength.score ? strength.tone : 'bg-black/10 dark:bg-white/10'"
+                                :class="{{ $i }} <= strength.score ? strength.tone : 'bg-black/10 dark:bg-white/10'"
                             ></div>
-                        </template>
+                        @endfor
                     </div>
                 </div>
             </div>
@@ -96,7 +100,9 @@
                 <div class="mb-6">
                     <div class="mb-2 flex items-baseline justify-between">
                         <flux:label>Length</flux:label>
-                        <flux:subheading class="font-mono tabular-nums" x-text="length"></flux:subheading>
+                        {{-- &nbsp; holds the mono line box (a touch taller than the label beside it); the fixed
+                             width keeps the right-aligned number from sliding when it lands. --}}
+                        <flux:subheading class="w-10 text-right font-mono tabular-nums" x-text="length">&nbsp;</flux:subheading>
                     </div>
                     <flux:slider min="4" max="128" step="1" x-model.number="length" />
                     <div class="mt-2 flex justify-between text-xs opacity-60">
