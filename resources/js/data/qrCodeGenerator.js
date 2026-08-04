@@ -1,5 +1,14 @@
 import QRCode from 'qrcode';
 import { withUrlState } from '../lib/urlState';
+import {
+    EYE_SHAPE_KEYS,
+    MODULE_SHAPE_KEYS,
+    QR_PRESETS,
+    buildQrGeometry,
+    clearAreaFor,
+    qrToCanvas,
+    qrToSvg,
+} from '../lib/qrRenderer';
 
 const DEFAULTS = {
     size: 256,
@@ -7,12 +16,28 @@ const DEFAULTS = {
     fg: '#000000',
     bg: '#ffffff',
     margin: 4,
-    logoSize: 20,
-    logoPadding: true,
+    mod: 'square',
+    eye: 'square',
+    logoSize: 16,
+    logoClearance: true,
 };
 
 const EC_LEVELS = ['L', 'M', 'Q', 'H'];
 const MAX_LOGO_BYTES = 2 * 1024 * 1024;
+const MAX_PREVIEW_PIXELS = 4096;
+// Below roughly two device pixels per module a raster export stops decoding,
+// so exports grow past the requested size rather than ship something unusable.
+const MIN_EXPORT_MODULE_PX = 2;
+// The finder patterns fill the outer 7 modules of three corners; a centred
+// logo must stay inside what is left.
+const FINDER_MODULES = 7;
+const LOGO_PAD_RATIO = 0.12;
+// Widest logo, as a percentage of the code, that still decoded across symbol
+// versions 1 to 40 at each error-correction level. Measured against zbar; the
+// covered modules have to be rebuilt from redundancy, and level L has almost
+// none to spare.
+const LOGO_LIMITS = { L: 8, M: 16, Q: 16, H: 22 };
+const RENDER_DEBOUNCE_MS = 90;
 
 // Heroicons solid 24x24, recolored at use-time via {color} placeholder.
 const PRESET_ICONS = {
@@ -42,8 +67,28 @@ const PRESET_ICONS = {
     },
 };
 
+// Rendered once and shared by every instance: a fixed sample symbol drawn in
+// each preset, used as the swatch art in the theme picker.
+let thumbnailCache = null;
+
+function presetThumbnails() {
+    if (thumbnailCache) return thumbnailCache;
+
+    const sample = QRCode.create('savvygoose.com', { errorCorrectionLevel: 'M' });
+    thumbnailCache = {};
+
+    for (const [key, preset] of Object.entries(QR_PRESETS)) {
+        const geo = buildQrGeometry(sample.modules.data, sample.modules.size, { ...preset, margin: 1 });
+        thumbnailCache[key] = qrToSvg(geo, { fg: 'currentColor', bg: null });
+    }
+
+    return thumbnailCache;
+}
+
 const schema = {
     text: { type: 'string' },
+    mod: { type: 'enum', values: MODULE_SHAPE_KEYS, default: DEFAULTS.mod },
+    eye: { type: 'enum', values: EYE_SHAPE_KEYS, default: DEFAULTS.eye },
     size: { type: 'integer', default: DEFAULTS.size, min: 64, max: 2048 },
     ec: {
         type: 'enum',
@@ -62,28 +107,88 @@ const schema = {
 export default withUrlState(schema, () => ({
     logo: null,
     logoSize: DEFAULTS.logoSize,
-    logoPadding: DEFAULTS.logoPadding,
+    logoClearance: DEFAULTS.logoClearance,
     logoError: null,
     activePreset: null,
     presets: PRESET_ICONS,
+    themes: QR_PRESETS,
+    themeThumbs: presetThumbnails(),
     renderToken: 0,
+    renderTimer: null,
+    logoToken: 0,
     contrastWarning: false,
     capacityError: '',
+    renderError: '',
+    downloadError: '',
+    logoClamped: false,
+    ecRaised: false,
+    exportSize: 0,
 
     init() {
-        ['text', 'size', 'ec', 'fg', 'bg', 'margin'].forEach((prop) => {
-            this.$watch(prop, () => this.render());
-        });
+        // `ec` comes from the URL, so the default logo size may already be
+        // above what this code can carry.
+        this.clampLogoSize();
 
-        ['logo', 'logoSize', 'logoPadding'].forEach((prop) => {
-            this.$watch(prop, () => this.render());
+        [
+            'text', 'size', 'ec', 'fg', 'bg', 'margin', 'mod', 'eye',
+            'logo', 'logoSize', 'logoClearance',
+        ].forEach((prop) => {
+            this.$watch(prop, () => this.scheduleRender());
         });
 
         this.$watch('fg', () => {
             if (this.activePreset) this.applyPreset(this.activePreset);
         });
 
+        this.$watch('ec', (value) => {
+            // Dropping to a weaker level leaves less redundancy to rebuild
+            // whatever the logo covers, so the logo has to give way.
+            this.clampLogoSize();
+            if (value !== 'H') this.ecRaised = false;
+        });
+
         this.$nextTick(() => this.render());
+    },
+
+    // wire:navigate tears components down mid-flight; a queued render would
+    // otherwise fire against a detached canvas.
+    destroy() {
+        clearTimeout(this.renderTimer);
+    },
+
+    // Building path data for a dense symbol is not free, so typing coalesces
+    // into one render instead of one per keystroke. Bumping the token here
+    // rather than in render() retires any in-flight render straight away, so
+    // one still waiting on a logo image cannot paint over the newer settings.
+    scheduleRender() {
+        this.renderToken++;
+        clearTimeout(this.renderTimer);
+        this.renderTimer = setTimeout(() => this.render(), RENDER_DEBOUNCE_MS);
+    },
+
+    clampLogoSize() {
+        if (this.logoSize > this.maxLogoSize) this.logoSize = this.maxLogoSize;
+    },
+
+    applyTheme(key) {
+        const preset = QR_PRESETS[key];
+        if (!preset) return;
+
+        this.mod = preset.module;
+        this.eye = preset.eye;
+    },
+
+    // How big a logo the current error-correction level can carry.
+    get maxLogoSize() {
+        return LOGO_LIMITS[this.ec] ?? LOGO_LIMITS.M;
+    },
+
+    // Which named preset the current shape pair adds up to, if any.
+    get activeTheme() {
+        const match = Object.entries(QR_PRESETS)
+            .find(([, preset]) => preset.module === this.mod && preset.eye === this.eye);
+
+        return match ? match[0] : null;
     },
 
     onLogoSelected(event) {
@@ -104,10 +209,14 @@ export default withUrlState(schema, () => ({
             return;
         }
 
+        // A slow read must not resurrect itself over a preset picked, or a
+        // second file chosen, while it was still going.
+        const token = ++this.logoToken;
         const reader = new FileReader();
         reader.onload = () => {
+            if (token !== this.logoToken) return;
             this.activePreset = null;
-            this.logo = reader.result;
+            this.setLogo(reader.result);
         };
         reader.readAsDataURL(file);
     },
@@ -117,57 +226,148 @@ export default withUrlState(schema, () => ({
         if (!preset) return;
 
         const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${this.fg}">${preset.path}</svg>`;
+        this.logoToken++;
         this.activePreset = key;
-        this.logo = `data:image/svg+xml;base64,${btoa(svg)}`;
+        this.setLogo(`data:image/svg+xml;base64,${btoa(svg)}`);
         if (this.$refs.logoInput) this.$refs.logoInput.value = '';
+    },
+
+    // Anything the logo covers has to be rebuilt from redundancy, so a code
+    // that was fine bare may not be with a logo on it. Other generators do the
+    // same; the level stays editable, and the note says what happened.
+    setLogo(dataUrl) {
+        this.logo = dataUrl;
         this.logoError = null;
+
+        if (this.ec !== 'H') {
+            this.ec = 'H';
+            this.ecRaised = true;
+        }
     },
 
     clearLogo() {
+        this.logoToken++;
         this.logo = null;
         this.logoError = null;
         this.activePreset = null;
+        this.ecRaised = false;
         if (this.$refs.logoInput) this.$refs.logoInput.value = '';
     },
 
+    // Resolves to null rather than rejecting when the image will not decode,
+    // so a bad logo costs you the logo, not the whole QR code.
     loadLogoImage() {
         if (!this.logo) return Promise.resolve(null);
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             const img = new Image();
             img.onload = () => resolve(img);
-            img.onerror = reject;
+            img.onerror = () => {
+                this.logoError = 'That image could not be loaded, so it has been left off the code.';
+                resolve(null);
+            };
             img.src = this.logo;
         });
     },
 
-    drawLogoOnCanvas(canvas, img) {
-        if (!img) return;
-        const ctx = canvas.getContext('2d');
-        const ratio = Math.max(5, Math.min(40, parseInt(this.logoSize, 10))) / 100;
-        const target = Math.round(canvas.width * ratio);
+    // Where the logo sits, in module units relative to the symbol itself.
+    //
+    // The size is a share of the symbol rather than of the padded canvas, so
+    // widening the quiet zone no longer grows the logo. Two ceilings apply: the
+    // error-correction budget, and the square the three finder patterns leave
+    // free. Redundancy can rebuild covered data modules; nothing rebuilds a
+    // finder.
+    logoBox(img, count) {
+        // An image with no intrinsic size would make every measurement below
+        // NaN, so bail rather than punch a hole in the code for nothing.
+        if (!img?.width || !img?.height) return null;
+
+        const requested = Math.max(5, Math.min(40, parseInt(this.logoSize, 10) || DEFAULTS.logoSize));
+        const padScale = this.logoClearance ? 1 + 2 * LOGO_PAD_RATIO : 1;
+        const safe = Math.max(0, count - 2 * FINDER_MODULES) / padScale;
+        const allowed = Math.min(requested, this.maxLogoSize);
+        const wanted = count * requested / 100;
+        const target = Math.min(count * allowed / 100, safe);
+
+        if (target <= 0) return null;
 
         const scale = Math.min(target / img.width, target / img.height);
-        const drawW = img.width * scale;
-        const drawH = img.height * scale;
-        const cx = (canvas.width - drawW) / 2;
-        const cy = (canvas.height - drawH) / 2;
+        const w = img.width * scale;
+        const h = img.height * scale;
 
-        if (this.logoPadding) {
-            const pad = Math.round(target * 0.12);
-            ctx.fillStyle = this.bg;
-            ctx.fillRect(cx - pad, cy - pad, drawW + pad * 2, drawH + pad * 2);
-        }
-
-        ctx.drawImage(img, cx, cy, drawW, drawH);
+        return {
+            x: (count - w) / 2,
+            y: (count - h) / 2,
+            w,
+            h,
+            pad: target * LOGO_PAD_RATIO,
+            clamped: target < wanted - 1e-9,
+        };
     },
 
-    options() {
-        return {
-            errorCorrectionLevel: this.ec,
-            margin: parseInt(this.margin, 10),
-            color: { dark: this.fg, light: this.bg },
-            width: parseInt(this.size, 10),
-        };
+    // Throws when the text exceeds the capacity of the chosen error-correction
+    // level. Callers treat only this as the capacity error.
+    symbol() {
+        return QRCode.create(this.text, { errorCorrectionLevel: this.ec });
+    },
+
+    // Resolving the logo first lets the renderer drop the modules underneath
+    // it, which is what stops a knockout from slicing modules in half.
+    async compose(qr) {
+        const count = qr.modules.size;
+        const img = await this.loadLogoImage();
+        const box = img ? this.logoBox(img, count) : null;
+
+        const geo = buildQrGeometry(qr.modules.data, count, {
+            module: this.mod,
+            eye: this.eye,
+            margin: parseInt(this.margin, 10) || 0,
+            clear: box && this.logoClearance ? clearAreaFor(box, box.pad) : null,
+        });
+
+        return { geo, img, box };
+    },
+
+    drawLogoOnCanvas(canvas, img, geo, box) {
+        if (!img || !box) return;
+
+        // Module units to canvas pixels, including the quiet zone offset.
+        const s = canvas.width / geo.total;
+        const ctx = canvas.getContext('2d');
+
+        ctx.drawImage(img, (geo.margin + box.x) * s, (geo.margin + box.y) * s, box.w * s, box.h * s);
+    },
+
+    displaySize() {
+        return parseInt(this.size, 10) || DEFAULTS.size;
+    },
+
+    // Exports honour the requested size, except that a dense symbol is never
+    // squeezed below the point where it stops decoding.
+    exportPixels(geo) {
+        return Math.max(this.displaySize(), geo.total * MIN_EXPORT_MODULE_PX);
+    },
+
+    paintOptions(width) {
+        return { width, fg: this.fg, bg: this.bg };
+    },
+
+    // The preview is laid out at `size` CSS pixels, so on a HiDPI screen a
+    // canvas of exactly that many device pixels gets upscaled and goes soft.
+    // Render at device resolution instead, rounded so every module covers a
+    // whole number of pixels and the edges stay hard.
+    previewPixels(geo) {
+        const dpr = Math.min(window.devicePixelRatio || 1, 3);
+        const ideal = Math.round((this.displaySize() * dpr) / geo.total);
+        const ceiling = Math.floor(MAX_PREVIEW_PIXELS / geo.total);
+
+        return Math.max(1, Math.min(ideal, ceiling)) * geo.total;
+    },
+
+    blankCanvas(canvas) {
+        canvas.width = this.displaySize();
+        canvas.height = canvas.width;
+        canvas.style.width = `${this.displaySize()}px`;
+        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
     },
 
     async render() {
@@ -175,87 +375,102 @@ export default withUrlState(schema, () => ({
         if (!canvas) return;
 
         const token = ++this.renderToken;
+        this.downloadError = '';
 
         if (!this.text) {
-            canvas.width = parseInt(this.size, 10) || DEFAULTS.size;
-            canvas.height = canvas.width;
-            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+            this.blankCanvas(canvas);
             this.contrastWarning = false;
             this.capacityError = '';
+            this.renderError = '';
+            this.logoClamped = false;
+            this.exportSize = 0;
             return;
         }
 
+        let qr;
         try {
-            const img = await this.loadLogoImage();
+            qr = this.symbol();
+        } catch {
+            this.capacityError = 'This is too much data for a QR code at this error-correction level. Shorten the text, or lower the error correction.';
+            this.renderError = '';
+            this.contrastWarning = false;
+            this.logoClamped = false;
+            this.exportSize = 0;
+            this.blankCanvas(canvas);
+            return;
+        }
+
+        this.capacityError = '';
+
+        try {
+            const { geo, img, box } = await this.compose(qr);
             if (token !== this.renderToken) return;
 
+            // Compose offscreen so the visible canvas never flashes a
+            // half-drawn symbol.
             const off = document.createElement('canvas');
-            await QRCode.toCanvas(off, this.text, this.options());
-            if (token !== this.renderToken) return;
-
-            this.drawLogoOnCanvas(off, img);
+            qrToCanvas(off, geo, this.paintOptions(this.previewPixels(geo)));
+            this.drawLogoOnCanvas(off, img, geo, box);
 
             canvas.width = off.width;
             canvas.height = off.height;
+            canvas.style.width = `${this.displaySize()}px`;
             canvas.getContext('2d').drawImage(off, 0, 0);
 
             this.contrastWarning = this.computeContrast(this.fg, this.bg) < 3;
-            this.capacityError = '';
+            this.logoClamped = box?.clamped ?? false;
+            this.exportSize = this.exportPixels(geo);
+            this.renderError = '';
         } catch (err) {
             if (token !== this.renderToken) return;
-            // Almost always "too much data for this error-correction level".
-            this.capacityError = 'This is too much data for a QR code at this error-correction level. Shorten the text, or lower the error correction.';
+            console.error('QR render failed:', err);
+            // Only the canvas path can fail here: a logo that will not decode
+            // resolves to null instead of throwing, so SVG is still good.
+            this.renderError = 'Your browser could not draw this QR code. The SVG download should still work.';
             this.contrastWarning = false;
-            canvas.width = parseInt(this.size, 10) || DEFAULTS.size;
-            canvas.height = canvas.width;
-            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+            this.logoClamped = false;
+            this.exportSize = 0;
+            this.blankCanvas(canvas);
         }
     },
 
     async downloadPng() {
-        if (!this.text || this.capacityError) return;
+        if (!this.text || this.capacityError || this.renderError) return;
+
+        this.downloadError = '';
         try {
-            const canvas = document.createElement('canvas');
-            await QRCode.toCanvas(canvas, this.text, this.options());
-            const img = await this.loadLogoImage();
-            this.drawLogoOnCanvas(canvas, img);
-            canvas.toBlob((blob) => this.triggerDownload(blob, 'qr-code.png'));
+            const { geo, img, box } = await this.compose(this.symbol());
+            const canvas = qrToCanvas(document.createElement('canvas'), geo, this.paintOptions(this.exportPixels(geo)));
+            this.drawLogoOnCanvas(canvas, img, geo, box);
+
+            canvas.toBlob((blob) => {
+                if (!blob) {
+                    this.downloadError = 'Your browser could not produce a PNG. Try the SVG download.';
+                    return;
+                }
+                this.triggerDownload(blob, 'qr-code.png');
+            });
         } catch (err) {
             console.error('QR PNG download failed:', err);
+            this.downloadError = 'Your browser could not produce a PNG. Try the SVG download.';
         }
     },
 
     async downloadSvg() {
         if (!this.text || this.capacityError) return;
+
+        this.downloadError = '';
         try {
-        let svg = await QRCode.toString(this.text, { ...this.options(), type: 'svg' });
+            const { geo, box } = await this.compose(this.symbol());
+            const overlay = box
+                ? `<image href="${this.logo}" x="${geo.margin + box.x}" y="${geo.margin + box.y}" width="${box.w}" height="${box.h}" preserveAspectRatio="xMidYMid meet"/>`
+                : '';
 
-        if (this.logo) {
-            const img = await this.loadLogoImage();
-            const ratio = Math.max(5, Math.min(40, parseInt(this.logoSize, 10))) / 100;
-            const viewBoxMatch = svg.match(/viewBox="([^"]+)"/);
-            const viewBox = viewBoxMatch ? viewBoxMatch[1].split(/\s+/).map(Number) : [0, 0, 100, 100];
-            const vbW = viewBox[2];
-            const target = vbW * ratio;
-            const scale = Math.min(target / img.width, target / img.height);
-            const drawW = img.width * scale;
-            const drawH = img.height * scale;
-            const cx = (vbW - drawW) / 2 + viewBox[0];
-            const cy = (vbW - drawH) / 2 + viewBox[1];
-
-            const overlay = [];
-            if (this.logoPadding) {
-                const pad = target * 0.12;
-                overlay.push(`<rect x="${cx - pad}" y="${cy - pad}" width="${drawW + pad * 2}" height="${drawH + pad * 2}" fill="${this.bg}"/>`);
-            }
-            overlay.push(`<image href="${this.logo}" x="${cx}" y="${cy}" width="${drawW}" height="${drawH}" preserveAspectRatio="xMidYMid meet"/>`);
-            svg = svg.replace('</svg>', overlay.join('') + '</svg>');
-        }
-
-        const blob = new Blob([svg], { type: 'image/svg+xml' });
-        this.triggerDownload(blob, 'qr-code.svg');
+            const svg = qrToSvg(geo, { ...this.paintOptions(this.displaySize()), overlay });
+            this.triggerDownload(new Blob([svg], { type: 'image/svg+xml' }), 'qr-code.svg');
         } catch (err) {
             console.error('QR SVG download failed:', err);
+            this.downloadError = 'Your browser could not produce an SVG.';
         }
     },
 
