@@ -9,8 +9,19 @@ import {
     qrToCanvas,
     qrToSvg,
 } from '../lib/qrRenderer';
+import {
+    DEFAULT_CAPTION,
+    FRAME_KEYS,
+    buildFrameLayout,
+    frameHasCaption,
+} from '../lib/qrFrame';
 
 const DEFAULTS = {
+    // Something is encoded on arrival so the preview shows a real code rather
+    // than an empty box. It is dropped from the share URL like any other
+    // default, so a shared link still carries only what was changed.
+    text: 'https://savvygoose.com',
+    frame: 'none',
     size: 256,
     ec: 'M',
     fg: '#000000',
@@ -68,25 +79,58 @@ const PRESET_ICONS = {
 };
 
 // Rendered once and shared by every instance: a fixed sample symbol drawn in
-// each preset, used as the swatch art in the theme picker.
-let thumbnailCache = null;
+// each preset, used as the swatch art in the theme and frame pickers.
+let themeThumbCache = null;
+let frameThumbCache = null;
+let sampleCache = null;
+
+function sample() {
+    if (!sampleCache) sampleCache = QRCode.create('savvygoose.com', { errorCorrectionLevel: 'M' });
+    return sampleCache;
+}
 
 function presetThumbnails() {
-    if (thumbnailCache) return thumbnailCache;
+    if (themeThumbCache) return themeThumbCache;
 
-    const sample = QRCode.create('savvygoose.com', { errorCorrectionLevel: 'M' });
-    thumbnailCache = {};
+    const qr = sample();
+    themeThumbCache = {};
 
     for (const [key, preset] of Object.entries(QR_PRESETS)) {
-        const geo = buildQrGeometry(sample.modules.data, sample.modules.size, { ...preset, margin: 1 });
-        thumbnailCache[key] = qrToSvg(geo, { fg: 'currentColor', bg: null });
+        const geo = buildQrGeometry(qr.modules.data, qr.modules.size, { ...preset, margin: 1 });
+        themeThumbCache[key] = qrToSvg(geo, { fg: 'currentColor', bg: null });
     }
 
-    return thumbnailCache;
+    return themeThumbCache;
+}
+
+// Frame swatches need a real background behind the code, since a caption bar is
+// only legible against one. The CSS variable is set on the swatch slot in the
+// Blade view so the colour follows light and dark mode.
+function frameThumbnails() {
+    if (frameThumbCache) return frameThumbCache;
+
+    const qr = sample();
+    const geo = buildQrGeometry(qr.modules.data, qr.modules.size, { margin: 1 });
+    frameThumbCache = {};
+
+    for (const key of FRAME_KEYS) {
+        frameThumbCache[key] = qrToSvg(geo, {
+            fg: 'currentColor',
+            bg: 'var(--qr-swatch-bg)',
+            frame: buildFrameLayout(geo.total, { frame: key, caption: 'SCAN' }),
+        });
+    }
+
+    return frameThumbCache;
 }
 
 const schema = {
-    text: { type: 'string' },
+    text: { type: 'string', default: DEFAULTS.text },
+    frame: { type: 'enum', values: FRAME_KEYS, default: DEFAULTS.frame },
+    // Empty is a real choice (a frame with no caption), so the default is empty
+    // and the suggested wording is filled in when a caption frame is picked.
+    // That way both states survive a round trip through the URL.
+    caption: { type: 'string', maxLength: 40 },
     mod: { type: 'enum', values: MODULE_SHAPE_KEYS, default: DEFAULTS.mod },
     eye: { type: 'enum', values: EYE_SHAPE_KEYS, default: DEFAULTS.eye },
     size: { type: 'integer', default: DEFAULTS.size, min: 64, max: 2048 },
@@ -113,6 +157,7 @@ export default withUrlState(schema, () => ({
     presets: PRESET_ICONS,
     themes: QR_PRESETS,
     themeThumbs: presetThumbnails(),
+    frameThumbs: frameThumbnails(),
     renderToken: 0,
     renderTimer: null,
     logoToken: 0,
@@ -121,7 +166,6 @@ export default withUrlState(schema, () => ({
     renderError: '',
     downloadError: '',
     logoClamped: false,
-    ecRaised: false,
     exportSize: 0,
 
     init() {
@@ -131,7 +175,7 @@ export default withUrlState(schema, () => ({
 
         [
             'text', 'size', 'ec', 'fg', 'bg', 'margin', 'mod', 'eye',
-            'logo', 'logoSize', 'logoClearance',
+            'frame', 'caption', 'logo', 'logoSize', 'logoClearance',
         ].forEach((prop) => {
             this.$watch(prop, () => this.scheduleRender());
         });
@@ -140,12 +184,9 @@ export default withUrlState(schema, () => ({
             if (this.activePreset) this.applyPreset(this.activePreset);
         });
 
-        this.$watch('ec', (value) => {
-            // Dropping to a weaker level leaves less redundancy to rebuild
-            // whatever the logo covers, so the logo has to give way.
-            this.clampLogoSize();
-            if (value !== 'H') this.ecRaised = false;
-        });
+        // Dropping to a weaker level leaves less redundancy to rebuild whatever
+        // the logo covers, so the logo has to give way.
+        this.$watch('ec', () => this.clampLogoSize());
 
         this.$nextTick(() => this.render());
     },
@@ -176,6 +217,24 @@ export default withUrlState(schema, () => ({
 
         this.mod = preset.module;
         this.eye = preset.eye;
+    },
+
+    // Picking a captioned frame for the first time fills in wording, so the
+    // frame arrives with something in it. Clearing the field afterwards leaves
+    // it clear.
+    setFrame(key) {
+        if (!FRAME_KEYS.includes(key)) return;
+
+        this.frame = key;
+        if (frameHasCaption(key) && !this.caption) this.caption = DEFAULT_CAPTION;
+    },
+
+    get captionEnabled() {
+        return frameHasCaption(this.frame);
+    },
+
+    frameLayout(geo) {
+        return buildFrameLayout(geo.total, { frame: this.frame, caption: this.caption });
     },
 
     // How big a logo the current error-correction level can carry.
@@ -234,15 +293,11 @@ export default withUrlState(schema, () => ({
 
     // Anything the logo covers has to be rebuilt from redundancy, so a code
     // that was fine bare may not be with a logo on it. Other generators do the
-    // same; the level stays editable, and the note says what happened.
+    // same, and the card says so before you pick one. The level stays editable.
     setLogo(dataUrl) {
         this.logo = dataUrl;
         this.logoError = null;
-
-        if (this.ec !== 'H') {
-            this.ec = 'H';
-            this.ecRaised = true;
-        }
+        this.ec = 'H';
     },
 
     clearLogo() {
@@ -250,7 +305,6 @@ export default withUrlState(schema, () => ({
         this.logo = null;
         this.logoError = null;
         this.activePreset = null;
-        this.ecRaised = false;
         if (this.$refs.logoInput) this.$refs.logoInput.value = '';
     },
 
@@ -324,17 +378,24 @@ export default withUrlState(schema, () => ({
             clear: box && this.logoClearance ? clearAreaFor(box, box.pad) : null,
         });
 
-        return { geo, img, box };
+        return { geo, img, box, layout: this.frameLayout(geo) };
     },
 
-    drawLogoOnCanvas(canvas, img, geo, box) {
+    drawLogoOnCanvas(canvas, img, geo, box, layout) {
         if (!img || !box) return;
 
-        // Module units to canvas pixels, including the quiet zone offset.
-        const s = canvas.width / geo.total;
+        // Module units to canvas pixels, including the frame offset and the
+        // quiet zone.
+        const s = canvas.width / layout.width;
         const ctx = canvas.getContext('2d');
 
-        ctx.drawImage(img, (geo.margin + box.x) * s, (geo.margin + box.y) * s, box.w * s, box.h * s);
+        ctx.drawImage(
+            img,
+            (layout.qr.x + geo.margin + box.x) * s,
+            (layout.qr.y + geo.margin + box.y) * s,
+            box.w * s,
+            box.h * s,
+        );
     },
 
     displaySize() {
@@ -342,25 +403,27 @@ export default withUrlState(schema, () => ({
     },
 
     // Exports honour the requested size, except that a dense symbol is never
-    // squeezed below the point where it stops decoding.
-    exportPixels(geo) {
-        return Math.max(this.displaySize(), geo.total * MIN_EXPORT_MODULE_PX);
+    // squeezed below the point where it stops decoding. The size is the width
+    // of the finished image, so a frame eats into what the code itself gets and
+    // the floor rises to match.
+    exportPixels(layout) {
+        return Math.max(this.displaySize(), Math.ceil(layout.width * MIN_EXPORT_MODULE_PX));
     },
 
-    paintOptions(width) {
-        return { width, fg: this.fg, bg: this.bg };
+    paintOptions(width, layout) {
+        return { width, fg: this.fg, bg: this.bg, frame: layout };
     },
 
     // The preview is laid out at `size` CSS pixels, so on a HiDPI screen a
     // canvas of exactly that many device pixels gets upscaled and goes soft.
     // Render at device resolution instead, rounded so every module covers a
     // whole number of pixels and the edges stay hard.
-    previewPixels(geo) {
+    previewPixels(layout) {
         const dpr = Math.min(window.devicePixelRatio || 1, 3);
-        const ideal = Math.round((this.displaySize() * dpr) / geo.total);
-        const ceiling = Math.floor(MAX_PREVIEW_PIXELS / geo.total);
+        const ideal = Math.round((this.displaySize() * dpr) / layout.width);
+        const ceiling = Math.floor(MAX_PREVIEW_PIXELS / layout.width);
 
-        return Math.max(1, Math.min(ideal, ceiling)) * geo.total;
+        return Math.max(1, Math.min(ideal, ceiling)) * layout.width;
     },
 
     blankCanvas(canvas) {
@@ -403,14 +466,14 @@ export default withUrlState(schema, () => ({
         this.capacityError = '';
 
         try {
-            const { geo, img, box } = await this.compose(qr);
+            const { geo, img, box, layout } = await this.compose(qr);
             if (token !== this.renderToken) return;
 
             // Compose offscreen so the visible canvas never flashes a
             // half-drawn symbol.
             const off = document.createElement('canvas');
-            qrToCanvas(off, geo, this.paintOptions(this.previewPixels(geo)));
-            this.drawLogoOnCanvas(off, img, geo, box);
+            qrToCanvas(off, geo, this.paintOptions(this.previewPixels(layout), layout));
+            this.drawLogoOnCanvas(off, img, geo, box, layout);
 
             canvas.width = off.width;
             canvas.height = off.height;
@@ -419,7 +482,7 @@ export default withUrlState(schema, () => ({
 
             this.contrastWarning = this.computeContrast(this.fg, this.bg) < 3;
             this.logoClamped = box?.clamped ?? false;
-            this.exportSize = this.exportPixels(geo);
+            this.exportSize = this.exportPixels(layout);
             this.renderError = '';
         } catch (err) {
             if (token !== this.renderToken) return;
@@ -439,9 +502,13 @@ export default withUrlState(schema, () => ({
 
         this.downloadError = '';
         try {
-            const { geo, img, box } = await this.compose(this.symbol());
-            const canvas = qrToCanvas(document.createElement('canvas'), geo, this.paintOptions(this.exportPixels(geo)));
-            this.drawLogoOnCanvas(canvas, img, geo, box);
+            const { geo, img, box, layout } = await this.compose(this.symbol());
+            const canvas = qrToCanvas(
+                document.createElement('canvas'),
+                geo,
+                this.paintOptions(this.exportPixels(layout), layout),
+            );
+            this.drawLogoOnCanvas(canvas, img, geo, box, layout);
 
             canvas.toBlob((blob) => {
                 if (!blob) {
@@ -461,12 +528,14 @@ export default withUrlState(schema, () => ({
 
         this.downloadError = '';
         try {
-            const { geo, box } = await this.compose(this.symbol());
+            const { geo, box, layout } = await this.compose(this.symbol());
+            // Placed in the symbol's own coordinates; the renderer shifts it
+            // into the frame along with the code.
             const overlay = box
                 ? `<image href="${this.logo}" x="${geo.margin + box.x}" y="${geo.margin + box.y}" width="${box.w}" height="${box.h}" preserveAspectRatio="xMidYMid meet"/>`
                 : '';
 
-            const svg = qrToSvg(geo, { ...this.paintOptions(this.displaySize()), overlay });
+            const svg = qrToSvg(geo, { ...this.paintOptions(this.displaySize(), layout), overlay });
             this.triggerDownload(new Blob([svg], { type: 'image/svg+xml' }), 'qr-code.svg');
         } catch (err) {
             console.error('QR SVG download failed:', err);
