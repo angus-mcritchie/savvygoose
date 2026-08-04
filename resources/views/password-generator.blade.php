@@ -73,8 +73,9 @@
                                 </flux:popover>
                             </flux:dropdown>
                         </div>
-                        {{-- Placeholders keep this line the same height before and after Alpine fills it. --}}
-                        <flux:subheading>
+                        {{-- Placeholders keep the line's height, and flex-1 keeps its box the same
+                             width, so neither the text landing nor its length moves anything. --}}
+                        <flux:subheading class="min-w-0 flex-1 truncate text-right">
                             <span x-text="strength.label">Strong</span>
                             <span class="opacity-60">·</span>
                             <span><span x-text="entropy">0</span> bits of entropy</span>
@@ -99,8 +100,9 @@
                 <div class="mb-6">
                     <div class="mb-2 flex items-baseline justify-between">
                         <flux:label>Length</flux:label>
-                        {{-- &nbsp; holds the mono line box, which is a touch taller than the label beside it. --}}
-                        <flux:subheading class="font-mono tabular-nums" x-text="length">&nbsp;</flux:subheading>
+                        {{-- &nbsp; holds the mono line box (a touch taller than the label beside it); the fixed
+                             width keeps the right-aligned number from sliding when it lands. --}}
+                        <flux:subheading class="w-10 text-right font-mono tabular-nums" x-text="length">&nbsp;</flux:subheading>
                     </div>
                     <flux:slider min="4" max="128" step="1" x-model.number="length" />
                     <div class="mt-2 flex justify-between text-xs opacity-60">

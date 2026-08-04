@@ -89,6 +89,16 @@
     }
 }
 
+/*
+ * Flux places the slider fill and thumb with inline styles once its JS runs. Until then they sit
+ * at the wrong end of the track, and the jump to the real value registers as a layout shift.
+ * Hidden until placed, they simply appear where they belong.
+ */
+[data-flux-slider-indicator]:not([style]),
+[data-flux-slider-thumb]:not([style]) {
+    display: none;
+}
+
 [data-flux-field] {
     @apply grid gap-2;
 }
