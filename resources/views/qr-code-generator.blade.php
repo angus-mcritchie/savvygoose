@@ -35,7 +35,10 @@
                         class="rounded-md border border-black/10 p-4 dark:border-white/10"
                         :style="{ backgroundColor: bg }"
                     >
-                        <canvas x-ref="canvas" class="block max-w-full h-auto"></canvas>
+                        {{-- Sized up front to the default `size` (DEFAULTS.size in
+                             resources/js/data/qrCodeGenerator.js); without it the canvas sits at its
+                             intrinsic 300×150 until the first render and the card resizes. --}}
+                        <canvas x-ref="canvas" width="256" height="256" class="block max-w-full h-auto"></canvas>
                     </div>
                 </div>
 
@@ -106,24 +109,28 @@
                     <flux:subheading class="mt-1" size="sm">
                         A starting point. Each one just sets the two shape controls below, so you can mix your own.
                     </flux:subheading>
+                    {{-- Buttons are rendered server-side so the picker holds its space; only the
+                         swatch art is client-side (it is a real QR drawn in each preset). Keys and
+                         labels mirror QR_PRESETS in resources/js/lib/qrRenderer.js. --}}
                     <div class="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-6">
-                        <template x-for="(preset, key) in themes" :key="key">
+                        @foreach (['classic' => 'Classic', 'rounded' => 'Rounded', 'fluid' => 'Fluid', 'dots' => 'Dots', 'circles' => 'Circles', 'leaf' => 'Leaf'] as $key => $label)
                             <button
                                 type="button"
-                                x-on:click="applyTheme(key)"
-                                :class="activeTheme === key
+                                x-on:click="applyTheme('{{ $key }}')"
+                                :class="activeTheme === '{{ $key }}'
                                     ? 'border-zinc-900 dark:border-white'
                                     : 'border-black/10 dark:border-white/10 hover:border-black/30 dark:hover:border-white/30'"
-                                class="grid place-items-center gap-2 rounded-md border p-3 text-xs transition"
-                                :aria-pressed="activeTheme === key"
+                                class="grid place-items-center gap-2 rounded-md border border-black/10 p-3 text-xs transition dark:border-white/10"
+                                :aria-pressed="activeTheme === '{{ $key }}'"
                             >
+                                {{-- aspect-square keeps the slot the same height empty or filled. --}}
                                 <span
-                                    class="w-full max-w-16 text-zinc-800 dark:text-zinc-100"
-                                    x-html="themeThumbs[key]"
+                                    class="aspect-square w-full max-w-16 text-zinc-800 dark:text-zinc-100"
+                                    x-html="themeThumbs['{{ $key }}']"
                                 ></span>
-                                <span x-text="preset.label"></span>
+                                <span>{{ $label }}</span>
                             </button>
-                        </template>
+                        @endforeach
                     </div>
                 </div>
 
@@ -220,23 +227,25 @@
                 <div class="mb-6">
                     <flux:label>Quick picks</flux:label>
                     <div class="mt-2 flex flex-wrap gap-2">
-                        <template x-for="(preset, key) in presets" :key="key">
+                        {{-- Labels mirror PRESET_ICONS in resources/js/data/qrCodeGenerator.js, which
+                             also holds the icon path drawn into the fixed size-6 slot. --}}
+                        @foreach (['url' => 'URL', 'wifi' => 'Wi-Fi', 'contact' => 'Contact', 'email' => 'Email', 'phone' => 'Phone', 'location' => 'Location'] as $key => $label)
                             <button
                                 type="button"
-                                x-on:click="applyPreset(key)"
-                                :class="activePreset === key
+                                x-on:click="applyPreset('{{ $key }}')"
+                                :class="activePreset === '{{ $key }}'
                                     ? 'border-zinc-900 dark:border-white'
                                     : 'border-black/10 dark:border-white/10 hover:border-black/30 dark:hover:border-white/30'"
-                                class="grid w-20 place-items-center gap-1 rounded-md border px-2 py-3 text-xs transition"
-                                :title="preset.label"
-                                :aria-pressed="activePreset === key"
+                                class="grid w-20 place-items-center gap-1 rounded-md border border-black/10 px-2 py-3 text-xs transition dark:border-white/10"
+                                title="{{ $label }}"
+                                :aria-pressed="activePreset === '{{ $key }}'"
                             >
-                                <span class="size-6" x-html="preset.path
-                                    ? `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'>${preset.path}</svg>`
+                                <span class="size-6" x-html="presets['{{ $key }}'].path
+                                    ? `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'>${presets['{{ $key }}'].path}</svg>`
                                     : ''"></span>
-                                <span x-text="preset.label"></span>
+                                <span>{{ $label }}</span>
                             </button>
-                        </template>
+                        @endforeach
                     </div>
                 </div>
 

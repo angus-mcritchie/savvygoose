@@ -127,15 +127,11 @@
                         </flux:button>
                     </flux:tooltip>
                 </div>
-                <template x-if="preview">
-                    <div class="prose max-w-none dark:prose-invert" x-html="preview"></div>
-                </template>
-                <template x-if="!preview">
-                    <div class="flex flex-col items-center justify-center gap-2 py-10 text-center text-zinc-500 dark:text-zinc-400">
-                        <flux:icon.eye class="size-8 opacity-50" />
-                        <flux:text>Type something on the left to see a rendered preview here.</flux:text>
-                    </div>
-                </template>
+                <div class="prose max-w-none dark:prose-invert" x-html="preview" x-show="preview" x-cloak></div>
+                <div class="flex flex-col items-center justify-center gap-2 py-10 text-center text-zinc-500 dark:text-zinc-400" x-show="!preview">
+                    <flux:icon.eye class="size-8 opacity-50" />
+                    <flux:text>Type something on the left to see a rendered preview here.</flux:text>
+                </div>
             </div>
         </div>
 

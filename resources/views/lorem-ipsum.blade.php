@@ -86,8 +86,11 @@
                     </div>
                 </div>
 
+                {{-- The text is generated in the browser from a random seed, so its length is not
+                     knowable server-side. A fixed-height scroll pane keeps the page from reflowing
+                     when it lands, and holds still as the count changes. --}}
                 <div
-                    class="whitespace-pre-wrap rounded-md bg-zinc-50 p-5 leading-relaxed dark:bg-zinc-900"
+                    class="h-104 overflow-y-auto whitespace-pre-wrap rounded-md bg-zinc-50 p-5 leading-relaxed dark:bg-zinc-900"
                     x-text="output"
                 ></div>
             </div>

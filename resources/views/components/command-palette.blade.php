@@ -12,8 +12,10 @@
     <flux:modal.trigger name="command-palette">
         <flux:button class="ml-auto" icon="magnifying-glass" variant="subtle">
             <span class="max-sm:hidden">{{ __('Search') }}</span>
+            {{-- The label is swapped client-side once we know the platform, so the chip is a
+                 fixed width: 'Ctrl K' is wider than '⌘K' and would otherwise shift the header. --}}
             <kbd
-                class="ms-2 hidden rounded bg-zinc-200/70 px-1.5 py-0.5 font-sans text-xs font-medium text-zinc-500 sm:inline-flex dark:bg-white/10 dark:text-zinc-400"
+                class="ms-2 hidden w-14 justify-center rounded bg-zinc-200/70 px-1.5 py-0.5 font-sans text-xs font-medium text-zinc-500 sm:inline-flex dark:bg-white/10 dark:text-zinc-400"
                 x-data
                 x-text="/mac/i.test(navigator.platform) ? '⌘K' : 'Ctrl K'"
             >⌘K</kbd>

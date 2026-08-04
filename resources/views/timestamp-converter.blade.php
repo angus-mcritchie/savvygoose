@@ -1,7 +1,9 @@
 <x-layouts.app>
     @php
         $rowClass = 'grid grid-cols-[10rem_1fr_auto] items-center gap-3 sm:grid-cols-[12rem_1fr_auto]';
-        $valClass = 'truncate font-mono text-sm sm:text-base text-zinc-800 dark:text-zinc-100 tabular-nums';
+        // min-h holds one line while the conversions are still empty, so the rows do not grow
+        // when Alpine fills them in.
+        $valClass = 'min-h-5 truncate font-mono text-sm sm:min-h-6 sm:text-base text-zinc-800 dark:text-zinc-100 tabular-nums';
         $labelClass = 'text-sm text-zinc-500 dark:text-zinc-400';
         $timezones = \DateTimeZone::listIdentifiers();
     @endphp
@@ -31,9 +33,11 @@
                         <flux:select.option value="{{ $zone }}">{{ $zone }}</flux:select.option>
                     @endforeach
                 </flux:select>
-                <div class="text-right text-sm">
+                {{-- Fixed width: the clock is formatted client-side, and letting it size to its
+                     content would drag the whole row sideways once it lands. --}}
+                <div class="text-right text-sm sm:w-56">
                     <div class="{{ $labelClass }}">Now</div>
-                    <div class="font-mono text-zinc-800 dark:text-zinc-100 tabular-nums" x-text="nowFormatted()"></div>
+                    <div class="font-mono text-zinc-800 dark:text-zinc-100 tabular-nums" x-text="nowFormatted()">&nbsp;</div>
                 </div>
             </div>
 
@@ -58,12 +62,13 @@
                     </div>
                 </div>
 
+                {{-- No x-cloak: init() always detects a format for the default timestamp, so the
+                     hint line holds its space instead of appearing and pushing the card down. --}}
                 <p
                     class="mt-3 text-sm text-zinc-500 dark:text-zinc-400"
                     x-show="parseHint && !parseError"
-                    x-cloak
                     x-text="parseHint"
-                ></p>
+                >&nbsp;</p>
                 <p
                     class="mt-3 text-sm text-red-600 dark:text-red-400"
                     x-show="parseError"

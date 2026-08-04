@@ -22,56 +22,50 @@
                     </flux:radio.group>
                 </div>
 
-                <template x-if="mode === 'text'">
-                    <div class="grid gap-4">
-                        <div class="flex items-center justify-between">
-                            <flux:label>Text</flux:label>
-                            <flux:button x-on:click="clearText()" x-bind:disabled="!text" icon="trash" size="sm" variant="filled">
-                                Clear
-                            </flux:button>
+                <div class="grid gap-4" x-show="mode === 'text'">
+                    <div class="flex items-center justify-between">
+                        <flux:label>Text</flux:label>
+                        <flux:button x-on:click="clearText()" x-bind:disabled="!text" icon="trash" size="sm" variant="filled">
+                            Clear
+                        </flux:button>
+                    </div>
+                    <flux:textarea
+                        name="text"
+                        x-model="text"
+                        placeholder="Type or paste text. Hashes update as you type."
+                        rows="8"
+                        class="font-mono"
+                    />
+                </div>
+
+                <div class="grid gap-4" x-show="mode === 'file'" x-cloak>
+                    <x-file-picker
+                        binding="file"
+                        on-change="onFileSelected"
+                        on-clear="clearFile"
+                        error="fileError"
+                        helper="Files up to 100 MB. Nothing leaves your browser."
+                    />
+
+                    <div x-show="busy" x-cloak>
+                        <div class="h-2 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
+                            <div
+                                class="h-full bg-zinc-900 transition-[width] dark:bg-white"
+                                :style="`width: ${Math.round(progress * 100)}%`"
+                            ></div>
                         </div>
-                        <flux:textarea
-                            name="text"
-                            x-model="text"
-                            placeholder="Type or paste text. Hashes update as you type."
-                            rows="8"
-                            class="font-mono"
-                        />
+                        <p class="mt-2 text-xs opacity-60">
+                            Hashing… <span x-text="Math.round(progress * 100) + '%'"></span>
+                        </p>
                     </div>
-                </template>
 
-                <template x-if="mode === 'file'">
-                    <div class="grid gap-4">
-                        <x-file-picker
-                            binding="file"
-                            on-change="onFileSelected"
-                            on-clear="clearFile"
-                            error="fileError"
-                            helper="Files up to 100 MB. Nothing leaves your browser."
-                        />
-
-                        <template x-if="busy">
-                            <div>
-                                <div class="h-2 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
-                                    <div
-                                        class="h-full bg-zinc-900 transition-[width] dark:bg-white"
-                                        :style="`width: ${Math.round(progress * 100)}%`"
-                                    ></div>
-                                </div>
-                                <p class="mt-2 text-xs opacity-60">
-                                    Hashing… <span x-text="Math.round(progress * 100) + '%'"></span>
-                                </p>
-                            </div>
-                        </template>
-
-                        <p
-                            x-show="fileError"
-                            x-cloak
-                            x-text="fileError"
-                            class="text-sm text-red-600 dark:text-red-400"
-                        ></p>
-                    </div>
-                </template>
+                    <p
+                        x-show="fileError"
+                        x-cloak
+                        x-text="fileError"
+                        class="text-sm text-red-600 dark:text-red-400"
+                    ></p>
+                </div>
             </div>
 
             <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
@@ -103,40 +97,44 @@
                     </flux:dropdown>
                     </div>
                 </div>
+                @php
+                    // Rendered server-side rather than with x-for so the four rows occupy their
+                    // final space before Alpine boots. Mirrors ALGOS in resources/js/data/hashGenerator.js.
+                    $algos = ['md5' => 'MD5', 'sha1' => 'SHA-1', 'sha256' => 'SHA-256', 'sha512' => 'SHA-512'];
+                @endphp
                 <div class="grid gap-4">
-                    <template x-for="algo in algos" :key="algo.key">
+                    @foreach ($algos as $key => $label)
                         <div class="grid gap-2">
                             <div class="flex items-center justify-between">
-                                <flux:label x-text="algo.label">Hash</flux:label>
+                                <flux:label>{{ $label }}</flux:label>
                                 <x-copy-button
-                                    value="hashes[algo.key]"
-                                    flash="'hash-' + algo.key"
+                                    value="hashes.{{ $key }}"
+                                    flash="'hash-{{ $key }}'"
                                     icon="document-duplicate"
                                     size="xs"
-                                    x-bind:disabled="!hashes[algo.key]"
+                                    x-bind:disabled="!hashes.{{ $key }}"
                                 />
                             </div>
                             <flux:input
-                                x-bind:value="hashes[algo.key]"
+                                x-bind:value="hashes.{{ $key }}"
                                 readonly
                                 placeholder=""
                                 class="!font-mono"
                             />
                         </div>
-                    </template>
+                    @endforeach
                 </div>
                 <p class="mt-6 text-xs opacity-60">
                     MD5 and SHA-1 are broken for collision resistance. Use SHA-256 or SHA-512 for security-sensitive checks.
                 </p>
             </div>
 
-            <template x-if="mode === 'text'">
-                <x-share-field
-                    class="rounded-lg border border-black/10 p-8 dark:border-white/10"
-                    subheading="The URL below carries your input. File mode does not share."
-                    tooLongMessage="Input is too long to include in the URL."
-                />
-            </template>
+            <x-share-field
+                class="rounded-lg border border-black/10 p-8 dark:border-white/10"
+                subheading="The URL below carries your input. File mode does not share."
+                tooLongMessage="Input is too long to include in the URL."
+                x-show="mode === 'text'"
+            />
         </div>
     </div>
     <x-tool-content />

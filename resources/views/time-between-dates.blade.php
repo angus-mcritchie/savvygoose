@@ -94,7 +94,7 @@
                     </flux:dropdown>
                 </div>
 
-                <flux:subheading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" x-text="rangeSummary()"></flux:subheading>
+                <flux:subheading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" x-text="rangeSummary()">&nbsp;</flux:subheading>
 
                 <div x-show="errorMessage" x-cloak class="mb-4 rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-300" x-text="errorMessage"></div>
 
@@ -102,29 +102,30 @@
                     Public holidays couldn't be loaded, so business days can't exclude them here.
                 </div>
 
-                <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" x-show="!errorMessage" x-cloak>
+                {{-- No x-cloak: the tiles render blank and fill in, rather than appearing and pushing the page down. --}}
+                <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" x-show="!errorMessage">
                     <div class="rounded-md border border-black/10 px-4 py-3 dark:border-white/10">
                         <div class="text-sm text-zinc-500 dark:text-zinc-400">Calendar days</div>
-                        <div class="mt-1 font-mono text-2xl tabular-nums" x-text="formatNumber(stats.totalDays)"></div>
+                        <div class="mt-1 font-mono text-2xl tabular-nums" x-text="formatNumber(stats.totalDays)">&nbsp;</div>
                     </div>
                     <div class="rounded-md border border-black/10 px-4 py-3 dark:border-white/10">
                         <div class="text-sm text-zinc-500 dark:text-zinc-400">Weekdays</div>
-                        <div class="mt-1 font-mono text-2xl tabular-nums" x-text="formatNumber(stats.weekdays)"></div>
+                        <div class="mt-1 font-mono text-2xl tabular-nums" x-text="formatNumber(stats.weekdays)">&nbsp;</div>
                     </div>
                     <div class="rounded-md border border-black/10 px-4 py-3 dark:border-white/10">
                         <div class="text-sm text-zinc-500 dark:text-zinc-400">Weekend days</div>
-                        <div class="mt-1 font-mono text-2xl tabular-nums" x-text="formatNumber(stats.weekendDays)"></div>
+                        <div class="mt-1 font-mono text-2xl tabular-nums" x-text="formatNumber(stats.weekendDays)">&nbsp;</div>
                     </div>
                     <div class="rounded-md border border-black/10 px-4 py-3 dark:border-white/10">
                         <div class="flex items-center gap-1 text-sm text-zinc-500 dark:text-zinc-400">
                             <span>Public holidays</span>
                             <span x-show="holidaysLoading" x-cloak class="text-xs opacity-60">(loading…)</span>
                         </div>
-                        <div class="mt-1 font-mono text-2xl tabular-nums" x-text="country && !holidaysError ? formatNumber(stats.holidays) : '—'"></div>
+                        <div class="mt-1 font-mono text-2xl tabular-nums" x-text="country && !holidaysError ? formatNumber(stats.holidays) : '—'">&nbsp;</div>
                     </div>
                     <div class="rounded-md border border-black/10 px-4 py-3 dark:border-white/10 sm:col-span-2 lg:col-span-2">
                         <div class="text-sm text-zinc-500 dark:text-zinc-400">Business days <span class="text-xs opacity-60">(weekdays minus holidays)</span></div>
-                        <div class="mt-1 font-mono text-2xl tabular-nums" x-text="country && holidaysError ? '—' : formatNumber(stats.businessDays)"></div>
+                        <div class="mt-1 font-mono text-2xl tabular-nums" x-text="country && holidaysError ? '—' : formatNumber(stats.businessDays)">&nbsp;</div>
                     </div>
                 </div>
 
@@ -132,10 +133,10 @@
 
                 <flux:heading size="sm" class="mb-3">Duration breakdown</flux:heading>
                 <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-sm">
-                    <div><span class="text-zinc-500 dark:text-zinc-400">Years &amp; days:</span> <span class="font-mono tabular-nums" x-text="stats.calendarBreakdown"></span></div>
-                    <div><span class="text-zinc-500 dark:text-zinc-400">Weeks:</span> <span class="font-mono tabular-nums" x-text="formatDecimal(stats.totalDays / 7)"></span></div>
-                    <div><span class="text-zinc-500 dark:text-zinc-400">Hours:</span> <span class="font-mono tabular-nums" x-text="formatNumber(stats.totalDays * 24)"></span></div>
-                    <div><span class="text-zinc-500 dark:text-zinc-400">Minutes:</span> <span class="font-mono tabular-nums" x-text="formatNumber(stats.totalDays * 24 * 60)"></span></div>
+                    <div><span class="text-zinc-500 dark:text-zinc-400">Years &amp; days:</span> <span class="font-mono tabular-nums" x-text="stats.calendarBreakdown">&nbsp;</span></div>
+                    <div><span class="text-zinc-500 dark:text-zinc-400">Weeks:</span> <span class="font-mono tabular-nums" x-text="formatDecimal(stats.totalDays / 7)">&nbsp;</span></div>
+                    <div><span class="text-zinc-500 dark:text-zinc-400">Hours:</span> <span class="font-mono tabular-nums" x-text="formatNumber(stats.totalDays * 24)">&nbsp;</span></div>
+                    <div><span class="text-zinc-500 dark:text-zinc-400">Minutes:</span> <span class="font-mono tabular-nums" x-text="formatNumber(stats.totalDays * 24 * 60)">&nbsp;</span></div>
                 </div>
             </div>
 

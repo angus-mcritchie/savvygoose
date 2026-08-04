@@ -380,8 +380,11 @@ export default withUrlState(schema, () => ({
         this._panZoom.center();
     },
 
-    loadTemplate(value) {
-        if (value) this.code = value;
+    // Takes a template label: the <option> list is rendered server-side (so the
+    // select is sized before Alpine boots), and only the labels cross that boundary.
+    loadTemplate(label) {
+        const template = TEMPLATES.find((t) => t.label === label);
+        if (template) this.code = template.value;
     },
 
     openInMermaidLive() {

@@ -70,21 +70,17 @@
                     </flux:radio.group>
                 </div>
 
-                <template x-if="!hasContent">
-                    <div class="flex flex-col items-center justify-center gap-2 py-10 text-center text-zinc-500 dark:text-zinc-400">
-                        <flux:icon.document-text class="size-8 opacity-50" />
-                        <flux:text>Paste text into both inputs to see the diff.</flux:text>
-                    </div>
-                </template>
+                <div class="flex flex-col items-center justify-center gap-2 py-10 text-center text-zinc-500 dark:text-zinc-400" x-show="!hasContent">
+                    <flux:icon.document-text class="size-8 opacity-50" />
+                    <flux:text>Paste text into both inputs to see the diff.</flux:text>
+                </div>
 
-                <template x-if="hasContent && !hasChanges">
-                    <div class="flex flex-col items-center justify-center gap-2 py-10 text-center text-emerald-600 dark:text-emerald-400">
-                        <flux:icon.check-circle class="size-8" />
-                        <flux:text>Identical. No differences detected.</flux:text>
-                    </div>
-                </template>
+                <div class="flex flex-col items-center justify-center gap-2 py-10 text-center text-emerald-600 dark:text-emerald-400" x-show="hasContent && !hasChanges" x-cloak>
+                    <flux:icon.check-circle class="size-8" />
+                    <flux:text>Identical. No differences detected.</flux:text>
+                </div>
 
-                <template x-if="hasContent && hasChanges">
+                <div x-show="hasContent && hasChanges" x-cloak>
                     <div>
                         <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                             <div class="flex flex-wrap gap-2 text-sm">
@@ -186,7 +182,7 @@
                             </div>
                         </template>
                     </div>
-                </template>
+                </div>
             </div>
 
             <x-share-field

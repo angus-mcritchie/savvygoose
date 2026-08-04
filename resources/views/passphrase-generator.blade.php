@@ -70,19 +70,20 @@
                                 </flux:popover>
                             </flux:dropdown>
                         </div>
+                        {{-- Placeholders keep this line the same height before and after Alpine fills it. --}}
                         <flux:subheading>
-                            <span x-text="strength.label"></span>
+                            <span x-text="strength.label">Strong</span>
                             <span class="opacity-60">·</span>
-                            <span><span x-text="entropy"></span> bits of entropy</span>
+                            <span><span x-text="entropy">0</span> bits of entropy</span>
                         </flux:subheading>
                     </div>
                     <div class="grid grid-cols-5 gap-1">
-                        <template x-for="i in 5" :key="i">
+                        @for ($i = 1; $i <= 5; $i++)
                             <div
                                 class="h-2 rounded-full bg-black/10 dark:bg-white/10"
-                                :class="i <= strength.score ? strength.tone : ''"
+                                :class="{{ $i }} <= strength.score ? strength.tone : ''"
                             ></div>
-                        </template>
+                        @endfor
                     </div>
                 </div>
             </div>
@@ -95,7 +96,8 @@
                 <div class="mb-6">
                     <div class="mb-2 flex items-baseline justify-between">
                         <flux:label>Words</flux:label>
-                        <flux:subheading class="font-mono tabular-nums" x-text="words"></flux:subheading>
+                        {{-- &nbsp; holds the mono line box, which is a touch taller than the label beside it. --}}
+                        <flux:subheading class="font-mono tabular-nums" x-text="words">&nbsp;</flux:subheading>
                     </div>
                     <flux:slider min="2" max="12" step="1" x-model.number="words" />
                     <div class="mt-2 flex justify-between text-xs opacity-60">

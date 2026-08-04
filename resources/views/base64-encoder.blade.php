@@ -22,7 +22,7 @@
                     </flux:radio.group>
                 </div>
 
-                <template x-if="mode === 'text'">
+                <div x-show="mode === 'text'">
                     <div>
                         <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
                             <flux:radio.group x-model="direction" variant="segmented" size="sm">
@@ -110,9 +110,9 @@
                             </div>
                         </div>
                     </div>
-                </template>
+                </div>
 
-                <template x-if="mode === 'file'">
+                <div x-show="mode === 'file'" x-cloak>
                     <div class="grid gap-6">
                         <x-file-picker
                             binding="file"
@@ -122,37 +122,34 @@
                             helper="Files up to 25 MB. Nothing leaves your browser."
                         />
 
-                        <template x-if="fileResult || fileBusy">
-                            <div class="grid gap-2">
-                                <div class="flex items-center justify-between">
-                                    <flux:label>Base64</flux:label>
-                                    <x-copy-button
-                                        value="fileResult"
-                                        flash="'b64-file'"
-                                        icon="document-duplicate"
-                                        size="xs"
-                                        x-bind:disabled="!fileResult"
-                                    />
-                                </div>
-                                <flux:textarea
-                                    x-bind:value="fileBusy ? 'Encoding…' : fileResult"
-                                    readonly
-                                    rows="14"
-                                    class="font-mono"
+                        <div class="grid gap-2" x-show="fileResult || fileBusy" x-cloak>
+                            <div class="flex items-center justify-between">
+                                <flux:label>Base64</flux:label>
+                                <x-copy-button
+                                    value="fileResult"
+                                    flash="'b64-file'"
+                                    icon="document-duplicate"
+                                    size="xs"
+                                    x-bind:disabled="!fileResult"
                                 />
                             </div>
-                        </template>
+                            <flux:textarea
+                                x-bind:value="fileBusy ? 'Encoding…' : fileResult"
+                                readonly
+                                rows="14"
+                                class="font-mono"
+                            />
+                        </div>
                     </div>
-                </template>
+                </div>
             </div>
 
-            <template x-if="mode === 'text'">
-                <x-share-field
-                    class="rounded-lg border border-black/10 p-8 dark:border-white/10"
-                    subheading="The URL below carries the direction, URL-safe flag, and your input. File mode does not share."
-                    tooLongMessage="Input is too long to include in the URL."
-                />
-            </template>
+            <x-share-field
+                class="rounded-lg border border-black/10 p-8 dark:border-white/10"
+                subheading="The URL below carries the direction, URL-safe flag, and your input. File mode does not share."
+                tooLongMessage="Input is too long to include in the URL."
+                x-show="mode === 'text'"
+            />
         </div>
     </div>
     <x-tool-content />

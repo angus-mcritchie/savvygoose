@@ -18,12 +18,15 @@
         </div>
 
         <div class="grid gap-6">
+            {{-- The two-column layout is static so the workspace is laid out before Alpine boots;
+                 the binding only has to describe the fullscreen variant. --}}
             <div
                 x-ref="workspace"
-                class="gap-6"
-                x-bind:class="isFullscreen
-                    ? 'flex h-full overflow-hidden bg-zinc-50 p-4 dark:bg-zinc-950'
-                    : 'grid lg:grid-cols-2'"
+                class="grid gap-6 lg:grid-cols-2"
+                x-bind:class="{
+                    'grid lg:grid-cols-2': !isFullscreen,
+                    'flex h-full overflow-hidden bg-zinc-50 p-4 dark:bg-zinc-950': isFullscreen,
+                }"
             >
                 {{-- Editor --}}
                 <div
@@ -39,9 +42,11 @@
                                 x-on:change="loadTemplate($event.target.value); $event.target.value = ''"
                             >
                                 <flux:select.option value="">Templates</flux:select.option>
-                                <template x-for="t in templates" :key="t.label">
-                                    <flux:select.option ::value="t.value" x-text="t.label"></flux:select.option>
-                                </template>
+                                {{-- Labels mirror TEMPLATES in resources/js/data/mermaidEditor.js, which
+                                     holds the diagram source and is looked up by label. --}}
+                                @foreach (['Flowchart', 'Sequence diagram', 'Class diagram', 'State diagram', 'Entity relationship', 'Gantt chart', 'Pie chart', 'Mindmap', 'Git graph'] as $template)
+                                    <flux:select.option value="{{ $template }}">{{ $template }}</flux:select.option>
+                                @endforeach
                             </flux:select>
                             <flux:button x-on:click="clear()" x-bind:disabled="!code" icon="trash" size="sm" variant="filled">
                                 Clear
@@ -126,9 +131,11 @@
                         </div>
                     </div>
 
+                    {{-- The non-fullscreen height and light background are also set statically so the
+                         pane is 460px tall from the first paint; Alpine only swaps them in fullscreen. --}}
                     <div
                         x-ref="preview"
-                        class="relative flex items-center justify-center overflow-hidden rounded-md border border-black/5 dark:border-white/5"
+                        class="relative flex h-[460px] items-center justify-center overflow-hidden rounded-md border border-black/5 bg-white dark:border-white/5"
                         x-bind:class="{
                             'bg-zinc-900': resolvedTheme === 'dark',
                             'bg-white': resolvedTheme !== 'dark',

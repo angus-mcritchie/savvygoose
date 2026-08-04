@@ -38,11 +38,13 @@
                         </flux:dropdown>
                     </div>
                     <div class="mt-2 flex items-stretch gap-2">
+                        {{-- Placeholder rendered server-side so the box is a full line tall before
+                             Alpine boots, not just its padding. --}}
                         <div
-                            class="grow rounded-md border border-black/10 bg-zinc-50 px-4 py-3 font-mono text-base dark:border-white/10 dark:bg-zinc-900"
+                            class="grow rounded-md border border-black/10 bg-zinc-50 px-4 py-3 font-mono text-base opacity-40 dark:border-white/10 dark:bg-zinc-900"
                             x-bind:class="{ 'opacity-40': !slug }"
                             x-text="slug || 'your-slug-appears-here'"
-                        ></div>
+                        >your-slug-appears-here</div>
                         <x-copy-button
                             value="slug"
                             flash="'slug'"

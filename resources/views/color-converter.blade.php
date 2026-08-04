@@ -140,7 +140,7 @@
                     <div class="grid gap-3">
                         <div>
                             <div class="text-sm text-zinc-500 dark:text-zinc-400">Contrast ratio</div>
-                            <div class="font-mono text-3xl font-semibold tabular-nums" x-text="contrastFormatted()"></div>
+                            <div class="font-mono text-3xl font-semibold tabular-nums" x-text="contrastFormatted()">&nbsp;</div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-2 text-sm">

@@ -99,12 +99,8 @@
                             x-bind:disabled="!prettyHeader"
                         />
                     </div>
-                    <template x-if="prettyHeader">
-                        <pre class="overflow-x-auto rounded-md bg-zinc-100 p-4 text-sm dark:bg-zinc-700"><code x-text="prettyHeader"></code></pre>
-                    </template>
-                    <template x-if="!prettyHeader">
-                        <p class="text-sm opacity-60">Paste a token to see its header.</p>
-                    </template>
+                    <pre class="overflow-x-auto rounded-md bg-zinc-100 p-4 text-sm dark:bg-zinc-700" x-show="prettyHeader" x-cloak><code x-text="prettyHeader"></code></pre>
+                    <p class="text-sm opacity-60" x-show="!prettyHeader">Paste a token to see its header.</p>
                 </div>
 
                 <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
@@ -118,12 +114,8 @@
                             x-bind:disabled="!prettyPayload"
                         />
                     </div>
-                    <template x-if="prettyPayload">
-                        <pre class="overflow-x-auto rounded-md bg-zinc-100 p-4 text-sm dark:bg-zinc-700"><code x-text="prettyPayload"></code></pre>
-                    </template>
-                    <template x-if="!prettyPayload">
-                        <p class="text-sm opacity-60">Paste a token to see its payload.</p>
-                    </template>
+                    <pre class="overflow-x-auto rounded-md bg-zinc-100 p-4 text-sm dark:bg-zinc-700" x-show="prettyPayload" x-cloak><code x-text="prettyPayload"></code></pre>
+                    <p class="text-sm opacity-60" x-show="!prettyPayload">Paste a token to see its payload.</p>
                 </div>
             </div>
 
@@ -169,7 +161,7 @@
 
             <div class="rounded-lg border border-black/10 p-6 dark:border-white/10">
                 <flux:subheading>Signature</flux:subheading>
-                <p class="mt-2 break-all font-mono text-xs opacity-70" x-text="signature || '(none)'"></p>
+                <p class="mt-2 break-all font-mono text-xs opacity-70" x-text="signature || '(none)'">(none)</p>
             </div>
 
             <x-share-field

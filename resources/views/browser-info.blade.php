@@ -1,9 +1,12 @@
 <x-layouts.app>
 
     @php
-        $rowClass = 'grid grid-cols-[10rem_1fr] gap-3 py-2 border-b border-black/5 dark:border-white/5 last:border-0';
+        // Every value here is measured in the browser, so a row that wraps once the value lands
+        // would reflow the page. The narrow value column was the cause: on phones the rows stack
+        // and each value gets the full width, which is enough for all of them to stay on one line.
+        $rowClass = 'grid grid-cols-1 gap-x-3 py-2 border-b border-black/5 dark:border-white/5 last:border-0 sm:grid-cols-[10rem_1fr]';
         $labelClass = 'text-sm text-zinc-500 dark:text-zinc-400';
-        $valClass = 'font-mono text-sm text-zinc-800 dark:text-zinc-100 break-all';
+        $valClass = 'min-h-5 min-w-0 font-mono text-sm text-zinc-800 dark:text-zinc-100 break-all';
     @endphp
 
     <div class="mx-auto max-w-[1100px]" x-data="browserInfo">
@@ -172,7 +175,7 @@
                     size="xs"
                 />
             </div>
-            <pre class="overflow-x-auto rounded-md bg-zinc-100 p-4 text-xs dark:bg-zinc-700"><code x-text="ua"></code></pre>
+            <pre class="overflow-x-auto rounded-md bg-zinc-100 p-4 text-xs dark:bg-zinc-700"><code x-text="ua">&nbsp;</code></pre>
         </div>
     </div>
     <x-tool-content />
