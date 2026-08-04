@@ -55,18 +55,27 @@
                 </div>
 
                 <div
-                    x-show="capacityError"
+                    x-show="capacityError || renderError || downloadError"
                     x-cloak
                     class="mb-4 rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-300"
-                    x-text="capacityError"
+                    x-text="capacityError || renderError || downloadError"
                 ></div>
+
+                <p
+                    x-show="logoClamped"
+                    x-cloak
+                    class="mb-4 text-center text-sm opacity-60"
+                >
+                    The logo was trimmed to fit what this code can spare. Raise the error correction, or encode less
+                    text, for room to grow it.
+                </p>
 
                 <div class="grid gap-3 sm:grid-cols-2">
                     <flux:button
                         type="button"
                         variant="primary"
                         x-on:click="downloadPng"
-                        x-bind:disabled="!text || !!capacityError"
+                        x-bind:disabled="!text || !!capacityError || !!renderError"
                     >
                         Download PNG
                     </flux:button>
@@ -78,10 +87,68 @@
                         Download SVG
                     </flux:button>
                 </div>
+
+                <p
+                    x-show="exportSize && exportSize > size"
+                    x-cloak
+                    class="mt-3 text-center text-sm opacity-60"
+                >
+                    This code needs more room than <span x-text="size"></span> px, so the PNG exports at
+                    <span x-text="exportSize"></span> px to stay readable. The SVG is resolution independent.
+                </p>
             </div>
 
             <div class="rounded-lg border border-black/10 p-8 lg:col-span-2 dark:border-white/10">
-                <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">3. Customize</flux:heading>
+                <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">3. Design</flux:heading>
+
+                <div class="mb-8">
+                    <flux:label>Theme</flux:label>
+                    <flux:subheading class="mt-1" size="sm">
+                        A starting point. Each one just sets the two shape controls below, so you can mix your own.
+                    </flux:subheading>
+                    <div class="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-6">
+                        <template x-for="(preset, key) in themes" :key="key">
+                            <button
+                                type="button"
+                                x-on:click="applyTheme(key)"
+                                :class="activeTheme === key
+                                    ? 'border-zinc-900 dark:border-white'
+                                    : 'border-black/10 dark:border-white/10 hover:border-black/30 dark:hover:border-white/30'"
+                                class="grid place-items-center gap-2 rounded-md border p-3 text-xs transition"
+                                :aria-pressed="activeTheme === key"
+                            >
+                                <span
+                                    class="w-full max-w-16 text-zinc-800 dark:text-zinc-100"
+                                    x-html="themeThumbs[key]"
+                                ></span>
+                                <span x-text="preset.label"></span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="mb-8 grid gap-6 sm:grid-cols-2">
+                    <flux:field>
+                        <flux:label>Module shape</flux:label>
+                        <flux:select x-model="mod">
+                            <flux:select.option value="square">Square</flux:select.option>
+                            <flux:select.option value="rounded">Rounded</flux:select.option>
+                            <flux:select.option value="fluid">Fluid</flux:select.option>
+                            <flux:select.option value="dot">Dots</flux:select.option>
+                        </flux:select>
+                        <flux:description>How the data squares are drawn.</flux:description>
+                    </flux:field>
+                    <flux:field>
+                        <flux:label>Corner shape</flux:label>
+                        <flux:select x-model="eye">
+                            <flux:select.option value="square">Square</flux:select.option>
+                            <flux:select.option value="rounded">Rounded</flux:select.option>
+                            <flux:select.option value="circle">Circle</flux:select.option>
+                            <flux:select.option value="leaf">Leaf</flux:select.option>
+                        </flux:select>
+                        <flux:description>Applies to the three finder squares scanners look for.</flux:description>
+                    </flux:field>
+                </div>
 
                 <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                     <flux:input
@@ -138,7 +205,7 @@
             <div class="rounded-lg border border-black/10 p-8 lg:col-span-2 dark:border-white/10">
                 <flux:heading class="mb-6 border-b border-black/10 pb-4 dark:border-white/10" size="xl">4. Logo</flux:heading>
                 <flux:subheading class="mb-6">
-                    Drop a logo into the centre. Bump error correction up to <strong>H</strong> if you do — scanners need the extra redundancy to read past whatever the logo covers.
+                    Drop a logo into the centre. The modules underneath come out whole, so none are left half-drawn, and how big it can go depends on your error correction — that redundancy is what rebuilds the covered data. Level <strong>H</strong> gives you the most room.
                 </flux:subheading>
 
                 <div class="mb-6">
@@ -208,16 +275,19 @@
                         <flux:input
                             type="number"
                             min="5"
-                            max="40"
                             step="1"
+                            x-bind:max="maxLogoSize"
                             x-model.number="logoSize"
-                            label="Logo size (% of QR width)"
-                            description="Keep this under ~30% to stay scannable."
+                            label="Logo size (% of code width)"
                         />
+                        <flux:description class="-mt-2">
+                            Capped at <span x-text="maxLogoSize"></span>% by the current error correction, which is what
+                            rebuilds the modules the logo covers. Level H allows the most.
+                        </flux:description>
                         <flux:checkbox
-                            x-model="logoPadding"
-                            label="Add a clean background behind the logo"
-                            description="Improves scanability when the logo overlaps dark modules."
+                            x-model="logoClearance"
+                            label="Clear the modules behind the logo"
+                            description="Drops whole modules to make room, so none are left half-drawn. Turn it off to lay the logo straight over the code."
                         />
                     </div>
                 </div>
