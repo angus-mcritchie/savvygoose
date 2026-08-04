@@ -46,6 +46,11 @@ test('the qr code generator folds the advanced settings away by default', functi
 
 test('the qr code generator opens the advanced settings when a link changed one', function () {
     $this->get('/qr-code-generator?size=512')->assertOk()->assertSee('open: true', false);
+    $this->get('/qr-code-generator?dot=72')->assertOk()->assertSee('open: true', false);
+});
+
+test('the qr code generator offers a dot size control', function () {
+    $this->get('/qr-code-generator')->assertOk()->assertSee('Dot size');
 });
 
 test('the base64 encoder renders', function () {

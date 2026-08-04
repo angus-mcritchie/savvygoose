@@ -155,7 +155,7 @@
                     class="mt-8 border-t border-black/10 pt-4 dark:border-white/10"
                     transition
                 >
-                    <flux:accordion.item :expanded="request()->hasAny(['mod', 'eye', 'size', 'ec', 'margin'])">
+                    <flux:accordion.item :expanded="request()->hasAny(['mod', 'eye', 'dot', 'size', 'ec', 'margin'])">
                         <flux:accordion.heading>Advanced options</flux:accordion.heading>
                         <flux:accordion.content>
                             <flux:subheading class="mb-6" size="sm">
@@ -182,6 +182,32 @@
                                         <flux:select.option value="leaf">Leaf</flux:select.option>
                                     </flux:select>
                                     <flux:description>Applies to the three finder squares scanners look for.</flux:description>
+                                </flux:field>
+                            </div>
+
+                            {{-- Nothing else draws circles, so this has nothing to say unless the
+                                 module shape is dots. --}}
+                            <div class="mt-6" x-show="mod === 'dot'" x-cloak>
+                                <flux:field>
+                                    <flux:label>Dot size</flux:label>
+                                    <div class="flex items-center gap-3">
+                                        <input
+                                            type="range"
+                                            min="60"
+                                            max="100"
+                                            step="2"
+                                            x-model.number="dotSize"
+                                            class="h-1.5 w-full accent-zinc-900 dark:accent-white"
+                                            aria-label="Dot size, percent of a module"
+                                        />
+                                        <span class="w-10 shrink-0 text-sm tabular-nums opacity-70">
+                                            <span x-text="dotSize"></span>%
+                                        </span>
+                                    </div>
+                                    <flux:description>
+                                        How much of each module the dot fills. At 100% they touch; lower values leave
+                                        white between them, which prints lighter but gives a scanner less ink to find.
+                                    </flux:description>
                                 </flux:field>
                             </div>
 

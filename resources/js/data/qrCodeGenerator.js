@@ -1,6 +1,9 @@
 import QRCode from 'qrcode';
 import { withUrlState } from '../lib/urlState';
 import {
+    DOT_SIZE_DEFAULT,
+    DOT_SIZE_MAX,
+    DOT_SIZE_MIN,
     EYE_SHAPE_KEYS,
     MODULE_SHAPE_KEYS,
     QR_PRESETS,
@@ -29,6 +32,7 @@ const DEFAULTS = {
     margin: 4,
     mod: 'square',
     eye: 'square',
+    dotSize: DOT_SIZE_DEFAULT,
     logoSize: 16,
     logoClearance: true,
 };
@@ -133,6 +137,18 @@ const schema = {
     caption: { type: 'string', maxLength: 40 },
     mod: { type: 'enum', values: MODULE_SHAPE_KEYS, default: DEFAULTS.mod },
     eye: { type: 'enum', values: EYE_SHAPE_KEYS, default: DEFAULTS.eye },
+    // Only the dot shape draws anything with this, so a link that left the
+    // shape elsewhere should not carry it.
+    dotSize: {
+        type: 'integer',
+        alias: 'dot',
+        default: DEFAULTS.dotSize,
+        min: DOT_SIZE_MIN,
+        max: DOT_SIZE_MAX,
+        serialize: (value, state) => (
+            state.mod === 'dot' && Number.isFinite(value) ? { value: String(value) } : { skip: true }
+        ),
+    },
     size: { type: 'integer', default: DEFAULTS.size, min: 64, max: 2048 },
     ec: {
         type: 'enum',
@@ -174,7 +190,7 @@ export default withUrlState(schema, () => ({
         this.clampLogoSize();
 
         [
-            'text', 'size', 'ec', 'fg', 'bg', 'margin', 'mod', 'eye',
+            'text', 'size', 'ec', 'fg', 'bg', 'margin', 'mod', 'eye', 'dotSize',
             'frame', 'caption', 'logo', 'logoSize', 'logoClearance',
         ].forEach((prop) => {
             this.$watch(prop, () => this.scheduleRender());
@@ -374,6 +390,7 @@ export default withUrlState(schema, () => ({
         const geo = buildQrGeometry(qr.modules.data, count, {
             module: this.mod,
             eye: this.eye,
+            dot: parseInt(this.dotSize, 10) || DEFAULTS.dotSize,
             margin: parseInt(this.margin, 10) || 0,
             clear: box && this.logoClearance ? clearAreaFor(box, box.pad) : null,
         });
@@ -402,12 +419,30 @@ export default withUrlState(schema, () => ({
         return parseInt(this.size, 10) || DEFAULTS.size;
     },
 
+    // Whole pixels a single module needs before a raster export stops decoding.
+    //
+    // A shrunken dot puts less ink in the same module, so the two pixels that
+    // carry a full-width shape leave it a smear. Holding the count up in
+    // proportion to the default dot keeps the ink itself at two pixels, which
+    // takes anything under 90% to three.
+    //
+    // The result is rounded up to a whole number for the same reason the
+    // preview is: at a fractional module size each dot lands on a different
+    // subpixel phase, and measured against zbar that alone cost more decodes
+    // than the thinner ink did.
+    modulePixelFloor() {
+        if (this.mod !== 'dot') return MIN_EXPORT_MODULE_PX;
+
+        const dot = parseInt(this.dotSize, 10) || DEFAULTS.dotSize;
+        return Math.ceil((MIN_EXPORT_MODULE_PX * DEFAULTS.dotSize) / dot);
+    },
+
     // Exports honour the requested size, except that a dense symbol is never
     // squeezed below the point where it stops decoding. The size is the width
     // of the finished image, so a frame eats into what the code itself gets and
     // the floor rises to match.
     exportPixels(layout) {
-        return Math.max(this.displaySize(), Math.ceil(layout.width * MIN_EXPORT_MODULE_PX));
+        return Math.max(this.displaySize(), Math.ceil(layout.width * this.modulePixelFloor()));
     },
 
     paintOptions(width, layout) {
