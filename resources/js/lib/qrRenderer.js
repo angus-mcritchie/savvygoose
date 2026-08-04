@@ -17,6 +17,14 @@ const FINDER = 7;
 export const MODULE_SHAPE_KEYS = ['square', 'rounded', 'fluid', 'dot'];
 export const EYE_SHAPE_KEYS = ['square', 'rounded', 'circle', 'leaf'];
 
+// How wide a dot is drawn, as a percentage of the module it sits in. At 100 the
+// dots touch; below it they separate and the code reads lighter. The floor is
+// where ink per module gets thin enough to cost scans on a small print, so it
+// stops well short of a pinprick.
+export const DOT_SIZE_DEFAULT = 90;
+export const DOT_SIZE_MIN = 60;
+export const DOT_SIZE_MAX = 100;
+
 // One-click combinations. The picker highlights whichever preset matches the
 // current module/eye pair, so these are shortcuts rather than a third setting.
 export const QR_PRESETS = {
@@ -87,10 +95,12 @@ function inClearArea(clear, row, col) {
         && row < clear.y + clear.h;
 }
 
-function modulePath(shape, dark, row, col) {
+function modulePath(shape, dark, row, col, dotSize) {
     switch (shape) {
+        // dotSize is a diameter as a percentage of the module, so halving it
+        // twice over gets the radius in module units.
         case 'dot':
-            return circlePath(col + 0.5, row + 0.5, 0.45);
+            return circlePath(col + 0.5, row + 0.5, dotSize / 200);
 
         case 'rounded':
             return roundedRectPath(col, row, 1, 1, 0.32);
@@ -166,14 +176,16 @@ function eyePaths(shape, x, y) {
  *
  * @param {Uint8Array|number[]} data row-major module matrix, truthy = dark
  * @param {number} count modules per side
- * @param {object} options { module, eye, margin, clear }
+ * @param {object} options { module, eye, dot, margin, clear }
+ *   dot: dot diameter as a percentage of a module; only the 'dot' shape uses it.
  *   clear: {x, y, w, h} in module units relative to the symbol, whose data
  *   modules are left out entirely to make room for a centre logo.
  */
-export function buildQrGeometry(data, count, { module = 'square', eye = 'square', margin = 4, clear = null } = {}) {
+export function buildQrGeometry(data, count, { module = 'square', eye = 'square', dot = DOT_SIZE_DEFAULT, margin = 4, clear = null } = {}) {
     const moduleShape = MODULE_SHAPE_KEYS.includes(module) ? module : 'square';
     const eyeShape = EYE_SHAPE_KEYS.includes(eye) ? eye : 'square';
     const quiet = Math.max(0, Math.round(margin) || 0);
+    const dotSize = Math.min(DOT_SIZE_MAX, Math.max(DOT_SIZE_MIN, Number(dot) || DOT_SIZE_DEFAULT));
 
     // Neighbour lookups for the fluid shape have to see the cleared area as
     // empty too, or modules along its edge round as though still joined.
@@ -189,7 +201,7 @@ export function buildQrGeometry(data, count, { module = 'square', eye = 'square'
         for (let col = 0; col < count; col++) {
             if (!dark(row, col)) continue;
             if (inFinder(count, row, col)) continue;
-            modules.push(modulePath(moduleShape, dark, row, col));
+            modules.push(modulePath(moduleShape, dark, row, col, dotSize));
         }
     }
 
@@ -205,6 +217,7 @@ export function buildQrGeometry(data, count, { module = 'square', eye = 'square'
     return {
         module: moduleShape,
         eye: eyeShape,
+        dot: dotSize,
         crisp: moduleShape === 'square' && eyeShape === 'square',
         count,
         margin: quiet,

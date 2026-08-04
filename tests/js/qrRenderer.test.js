@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
+    DOT_SIZE_DEFAULT,
+    DOT_SIZE_MAX,
+    DOT_SIZE_MIN,
     EYE_SHAPE_KEYS,
     MODULE_SHAPE_KEYS,
     QR_PRESETS,
@@ -67,6 +70,26 @@ describe('qr geometry', () => {
     it('renders dot modules as circles', () => {
         const geo = geometryFor([[10, 10]], { module: 'dot' });
         expect(geo.paths.modules).toBe('M10.05 10.5A0.45 0.45 0 1 0 10.95 10.5A0.45 0.45 0 1 0 10.05 10.5Z');
+    });
+
+    it('shrinks a dot to the requested share of its module', () => {
+        // 76% of a module is a radius of 0.38, so the circle pulls in from the
+        // 0.45 the default draws.
+        const geo = geometryFor([[10, 10]], { module: 'dot', dot: 76 });
+        expect(geo.dot).toBe(76);
+        expect(geo.paths.modules).toContain('A0.38 0.38');
+    });
+
+    it('holds dot size inside the range a scanner can still read', () => {
+        expect(geometryFor([], { module: 'dot', dot: 5 }).dot).toBe(DOT_SIZE_MIN);
+        expect(geometryFor([], { module: 'dot', dot: 400 }).dot).toBe(DOT_SIZE_MAX);
+        expect(geometryFor([], { module: 'dot', dot: 'wide' }).dot).toBe(DOT_SIZE_DEFAULT);
+    });
+
+    it('leaves the other module shapes alone when dot size changes', () => {
+        const wide = geometryFor([[10, 10]], { module: 'square', dot: 100 });
+        const narrow = geometryFor([[10, 10]], { module: 'square', dot: 60 });
+        expect(narrow.paths.modules).toBe(wide.paths.modules);
     });
 
     it('rounds every corner of an isolated fluid module', () => {
