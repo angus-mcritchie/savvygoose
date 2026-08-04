@@ -118,9 +118,9 @@ describe('qr svg output', () => {
         expect(qrToSvg(geometryFor([], { module: 'dot' }))).not.toContain('shape-rendering');
     });
 
-    it('appends overlay markup inside the root element', () => {
+    it('appends overlay markup inside the root element, in the symbol\'s own coordinates', () => {
         const svg = qrToSvg(geometryFor([]), { overlay: '<image href="x"/>' });
-        expect(svg.endsWith('<image href="x"/></svg>')).toBe(true);
+        expect(svg.endsWith('<g transform="translate(0 0)"><image href="x"/></g></svg>')).toBe(true);
     });
 });
 

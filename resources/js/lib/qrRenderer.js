@@ -38,7 +38,8 @@ function circlePath(cx, cy, r) {
 }
 
 // radii: a single number or [topLeft, topRight, bottomRight, bottomLeft].
-function roundedRectPath(x, y, w, h, radii = 0) {
+// Exported for qrFrame.js, which builds its borders out of the same shapes.
+export function roundedRectPath(x, y, w, h, radii = 0) {
     const list = Array.isArray(radii) ? radii : [radii, radii, radii, radii];
     const cap = Math.min(w, h) / 2;
     const [tl, tr, br, bl] = list.map((r) => Math.max(0, Math.min(r, cap)));
@@ -216,51 +217,110 @@ export function buildQrGeometry(data, count, { module = 'square', eye = 'square'
     };
 }
 
+// A frame layout (see qrFrame.js) says how big the finished image is and where
+// the symbol sits inside it. Unframed output is the same thing with the symbol
+// filling the whole image, so both painters below only ever deal with a layout.
+function layoutOr(geo, frame) {
+    return frame ?? { width: geo.total, height: geo.total, qr: { x: 0, y: 0 }, shapes: [], caption: null };
+}
+
+// Frame parts name a role rather than a colour, so a frame follows whatever the
+// code itself is drawn in.
+function paintFor(role, fg, bg) {
+    return role === 'bg' ? bg : fg;
+}
+
+function escapeXml(value) {
+    return String(value).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
 /**
  * Serialise geometry to an SVG string.
  *
  * `bg` may be null for a transparent background, and `fg` accepts any CSS
  * colour (including `currentColor`, which the theme thumbnails rely on).
- * `overlay` is raw SVG markup appended inside the root, in viewBox units.
+ * `overlay` is raw SVG markup placed in the symbol's own coordinates, and
+ * `frame` is an optional layout to wrap it all in.
  */
-export function qrToSvg(geo, { width, fg = '#000000', bg = '#ffffff', overlay = '' } = {}) {
-    const { total, margin, paths, crisp } = geo;
-    const sized = width ? ` width="${n(width)}" height="${n(width)}"` : '';
+export function qrToSvg(geo, { width, fg = '#000000', bg = '#ffffff', overlay = '', frame = null } = {}) {
+    const { margin, paths, crisp } = geo;
+    const layout = layoutOr(geo, frame);
+    const sized = width ? ` width="${n(width)}" height="${n((width * layout.height) / layout.width)}"` : '';
+    // Scoped to the symbol: a frame's curves want the same antialiasing as
+    // any other shape, even when the modules themselves are hard squares.
     const rendering = crisp ? ' shape-rendering="crispEdges"' : '';
-    const backdrop = bg ? `<rect width="${n(total)}" height="${n(total)}" fill="${bg}"/>` : '';
+    const backdrop = bg ? `<rect width="${n(layout.width)}" height="${n(layout.height)}" fill="${bg}"/>` : '';
+
+    const shapes = layout.shapes
+        .map((shape) => {
+            const paint = paintFor(shape.fill, fg, bg);
+            if (!paint) return '';
+            return `<path d="${shape.d}" fill="${paint}" fill-rule="${shape.rule || 'nonzero'}"/>`;
+        })
+        .join('');
+
+    const cap = layout.caption;
+    const capPaint = cap ? paintFor(cap.fill, fg, bg) : null;
+    const caption = cap && capPaint
+        ? `<text x="${n(cap.x)}" y="${n(cap.y)}" fill="${capPaint}" font-family="${cap.font}" font-size="${n(cap.size)}" font-weight="${cap.weight}" text-anchor="middle" dominant-baseline="central">${escapeXml(cap.text)}</text>`
+        : '';
 
     return [
-        `<svg xmlns="http://www.w3.org/2000/svg"${sized} viewBox="0 0 ${n(total)} ${n(total)}"${rendering}>`,
+        `<svg xmlns="http://www.w3.org/2000/svg"${sized} viewBox="0 0 ${n(layout.width)} ${n(layout.height)}">`,
         backdrop,
-        `<g transform="translate(${n(margin)} ${n(margin)})" fill="${fg}" fill-rule="evenodd">`,
+        shapes,
+        caption,
+        `<g transform="translate(${n(layout.qr.x + margin)} ${n(layout.qr.y + margin)})" fill="${fg}" fill-rule="evenodd"${rendering}>`,
         `<path d="${paths.modules}"/>`,
         `<path d="${paths.eyeFrames}"/>`,
         `<path d="${paths.eyeBalls}"/>`,
         '</g>',
-        overlay,
+        overlay ? `<g transform="translate(${n(layout.qr.x)} ${n(layout.qr.y)})">${overlay}</g>` : '',
         '</svg>',
     ].join('');
 }
 
 /**
- * Fill geometry onto a canvas at `width` device pixels square.
+ * Fill geometry onto a canvas `width` device pixels wide. The height follows
+ * from the frame layout, so an unframed code stays square.
  */
-export function qrToCanvas(canvas, geo, { width, fg = '#000000', bg = '#ffffff' } = {}) {
+export function qrToCanvas(canvas, geo, { width, fg = '#000000', bg = '#ffffff', frame = null } = {}) {
+    const layout = layoutOr(geo, frame);
     const px = Math.max(1, Math.round(width));
     canvas.width = px;
-    canvas.height = px;
+    canvas.height = Math.max(1, Math.round((px * layout.height) / layout.width));
 
     const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, px, px);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (bg) {
         ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, px, px);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    const scale = px / geo.total;
+    const scale = px / layout.width;
+
     ctx.save();
-    ctx.translate(geo.margin * scale, geo.margin * scale);
+    ctx.scale(scale, scale);
+    for (const shape of layout.shapes) {
+        const paint = paintFor(shape.fill, fg, bg);
+        if (!paint) continue;
+        ctx.fillStyle = paint;
+        ctx.fill(new Path2D(shape.d), shape.rule || 'nonzero');
+    }
+    const cap = layout.caption;
+    const capPaint = cap ? paintFor(cap.fill, fg, bg) : null;
+    if (cap && capPaint) {
+        ctx.fillStyle = capPaint;
+        ctx.font = `${cap.weight} ${n(cap.size)}px ${cap.font}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(cap.text, cap.x, cap.y);
+    }
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate((layout.qr.x + geo.margin) * scale, (layout.qr.y + geo.margin) * scale);
     ctx.scale(scale, scale);
     ctx.fillStyle = fg;
     for (const d of [geo.paths.modules, geo.paths.eyeFrames, geo.paths.eyeBalls]) {

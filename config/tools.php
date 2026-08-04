@@ -255,12 +255,13 @@ return [
             'icon' => ['type' => 'flux', 'name' => 'qr-code'],
             'meta' => [
                 'title' => 'QR Code Generator: Styled QR Codes with a Logo',
-                'description' => 'Make QR codes for URLs, text, Wi-Fi credentials, or contacts. Choose the module and corner shapes, drop a logo in the middle, and export as PNG or SVG.',
+                'description' => 'Make QR codes for URLs, text, Wi-Fi credentials, or contacts. Pick a theme, wrap it in a frame with a "Scan me" caption, drop a logo in the middle, and export as PNG or SVG.',
             ],
             'howto' => [
                 'Enter the URL or text you want to encode.',
-                'Pick a theme, or set the module and corner shapes separately.',
-                'Set the size, colors, and error correction, and add a centre logo if you want one.',
+                'Pick a theme, then set the foreground and background colors.',
+                'Add a frame if you want a border or a caption, and a centre logo if you want one.',
+                'Open Advanced options to mix your own shapes or change the size, error correction, and quiet zone.',
                 'Download the finished code as a PNG or an SVG.',
             ],
             'faqs' => [
@@ -268,7 +269,9 @@ return [
                 ['q' => 'Do the styled shapes still scan?', 'a' => 'They should. Styling changes how each module is drawn, never the grid underneath, and every shape combination here is checked against a real decoder at a range of sizes. Print a test copy anyway before you order a thousand of them.'],
                 ['q' => 'Which shapes should I use?', 'a' => 'Square modules with square corners is the most forgiving on small prints and cheap cameras. Dots and rounded corners want a bit more room, so they suit posters and screens. Whatever you choose, more contrast and a bigger quiet zone help more than the shape does.'],
                 ['q' => 'Can I put a logo in the middle?', 'a' => 'Add one under Logo. Error correction jumps to H automatically, since that redundancy is what rebuilds whatever the logo covers, and the pattern is re-encoded to suit. The modules underneath are then removed whole rather than painted over, so nothing is left half drawn.'],
-                ['q' => 'Why did the pattern change when I added a logo?', 'a' => 'Because the error correction level went up, and that changes how the data is encoded. It is the same link either way. Set the level back down under Design and the original pattern returns, along with a smaller cap on the logo.'],
+                ['q' => 'Why did the pattern change when I added a logo?', 'a' => 'Because the error correction level went up, and that changes how the data is encoded. It is the same link either way. Set the level back down under Advanced options and the original pattern returns, along with a smaller cap on the logo.'],
+                ['q' => 'Do the frames affect scanning?', 'a' => 'A frame sits outside the code and leaves the quiet zone intact, so the symbol underneath is untouched. Pick a border, corner brackets, or a caption bar above or below, and the caption shrinks to fit rather than running past the edge.'],
+                ['q' => 'Can I change the "Scan me" wording?', 'a' => 'Type whatever you like in the caption field, up to 40 characters. Leave it empty for a bar with no text.'],
                 ['q' => 'Will it work for Wi-Fi credentials?', 'a' => 'Encode a Wi-Fi connection string and a phone\'s camera will offer to join the network.'],
                 ['q' => 'Is data sent to a server?', 'a' => 'No. QR codes are generated locally in your browser.'],
             ],

@@ -37,7 +37,15 @@ test('the markdown converter renders', function () {
 });
 
 test('the qr code generator renders', function () {
-    $this->get('/qr-code-generator')->assertOk();
+    $this->get('/qr-code-generator')->assertOk()->assertSee('Frame');
+});
+
+test('the qr code generator folds the advanced settings away by default', function () {
+    $this->get('/qr-code-generator')->assertOk()->assertSee('{ open: false }', false);
+});
+
+test('the qr code generator opens the advanced settings when a link changed one', function () {
+    $this->get('/qr-code-generator?size=512')->assertOk()->assertSee('{ open: true }', false);
 });
 
 test('the base64 encoder renders', function () {
