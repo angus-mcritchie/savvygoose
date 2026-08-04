@@ -18,7 +18,7 @@ const DEFAULTS = {
     margin: 4,
     mod: 'square',
     eye: 'square',
-    logoSize: 20,
+    logoSize: 16,
     logoClearance: true,
 };
 
@@ -115,14 +115,20 @@ export default withUrlState(schema, () => ({
     themeThumbs: presetThumbnails(),
     renderToken: 0,
     renderTimer: null,
+    logoToken: 0,
     contrastWarning: false,
     capacityError: '',
     renderError: '',
     downloadError: '',
     logoClamped: false,
+    ecRaised: false,
     exportSize: 0,
 
     init() {
+        // `ec` comes from the URL, so the default logo size may already be
+        // above what this code can carry.
+        this.clampLogoSize();
+
         [
             'text', 'size', 'ec', 'fg', 'bg', 'margin', 'mod', 'eye',
             'logo', 'logoSize', 'logoClearance',
@@ -134,12 +140,11 @@ export default withUrlState(schema, () => ({
             if (this.activePreset) this.applyPreset(this.activePreset);
         });
 
-        // Dropping to a weaker error-correction level leaves less redundancy
-        // to rebuild whatever the logo covers, so the logo has to give way.
-        // Applied whether or not a logo is set, to keep the field's value and
-        // its max in step.
-        this.$watch('ec', () => {
-            if (this.logoSize > this.maxLogoSize) this.logoSize = this.maxLogoSize;
+        this.$watch('ec', (value) => {
+            // Dropping to a weaker level leaves less redundancy to rebuild
+            // whatever the logo covers, so the logo has to give way.
+            this.clampLogoSize();
+            if (value !== 'H') this.ecRaised = false;
         });
 
         this.$nextTick(() => this.render());
@@ -152,10 +157,17 @@ export default withUrlState(schema, () => ({
     },
 
     // Building path data for a dense symbol is not free, so typing coalesces
-    // into one render instead of one per keystroke.
+    // into one render instead of one per keystroke. Bumping the token here
+    // rather than in render() retires any in-flight render straight away, so
+    // one still waiting on a logo image cannot paint over the newer settings.
     scheduleRender() {
+        this.renderToken++;
         clearTimeout(this.renderTimer);
         this.renderTimer = setTimeout(() => this.render(), RENDER_DEBOUNCE_MS);
+    },
+
+    clampLogoSize() {
+        if (this.logoSize > this.maxLogoSize) this.logoSize = this.maxLogoSize;
     },
 
     applyTheme(key) {
@@ -197,10 +209,14 @@ export default withUrlState(schema, () => ({
             return;
         }
 
+        // A slow read must not resurrect itself over a preset picked, or a
+        // second file chosen, while it was still going.
+        const token = ++this.logoToken;
         const reader = new FileReader();
         reader.onload = () => {
+            if (token !== this.logoToken) return;
             this.activePreset = null;
-            this.logo = reader.result;
+            this.setLogo(reader.result);
         };
         reader.readAsDataURL(file);
     },
@@ -210,25 +226,45 @@ export default withUrlState(schema, () => ({
         if (!preset) return;
 
         const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${this.fg}">${preset.path}</svg>`;
+        this.logoToken++;
         this.activePreset = key;
-        this.logo = `data:image/svg+xml;base64,${btoa(svg)}`;
+        this.setLogo(`data:image/svg+xml;base64,${btoa(svg)}`);
         if (this.$refs.logoInput) this.$refs.logoInput.value = '';
+    },
+
+    // Anything the logo covers has to be rebuilt from redundancy, so a code
+    // that was fine bare may not be with a logo on it. Other generators do the
+    // same; the level stays editable, and the note says what happened.
+    setLogo(dataUrl) {
+        this.logo = dataUrl;
         this.logoError = null;
+
+        if (this.ec !== 'H') {
+            this.ec = 'H';
+            this.ecRaised = true;
+        }
     },
 
     clearLogo() {
+        this.logoToken++;
         this.logo = null;
         this.logoError = null;
         this.activePreset = null;
+        this.ecRaised = false;
         if (this.$refs.logoInput) this.$refs.logoInput.value = '';
     },
 
+    // Resolves to null rather than rejecting when the image will not decode,
+    // so a bad logo costs you the logo, not the whole QR code.
     loadLogoImage() {
         if (!this.logo) return Promise.resolve(null);
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             const img = new Image();
             img.onload = () => resolve(img);
-            img.onerror = reject;
+            img.onerror = () => {
+                this.logoError = 'That image could not be loaded, so it has been left off the code.';
+                resolve(null);
+            };
             img.src = this.logo;
         });
     },
@@ -388,8 +424,12 @@ export default withUrlState(schema, () => ({
         } catch (err) {
             if (token !== this.renderToken) return;
             console.error('QR render failed:', err);
+            // Only the canvas path can fail here: a logo that will not decode
+            // resolves to null instead of throwing, so SVG is still good.
             this.renderError = 'Your browser could not draw this QR code. The SVG download should still work.';
             this.contrastWarning = false;
+            this.logoClamped = false;
+            this.exportSize = 0;
             this.blankCanvas(canvas);
         }
     },

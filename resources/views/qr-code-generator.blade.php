@@ -208,6 +208,15 @@
                     Drop a logo into the centre. The modules underneath come out whole, so none are left half-drawn, and how big it can go depends on your error correction — that redundancy is what rebuilds the covered data. Level <strong>H</strong> gives you the most room.
                 </flux:subheading>
 
+                <div
+                    x-show="ecRaised"
+                    x-cloak
+                    class="mb-6 rounded-md border border-black/10 px-3 py-2 text-sm opacity-70 dark:border-white/10"
+                >
+                    Error correction was raised to <strong>H</strong> to make room for the logo. Lower it again under
+                    Design if you'd rather have the smaller, simpler code.
+                </div>
+
                 <div class="mb-6">
                     <flux:label>Quick picks</flux:label>
                     <div class="mt-2 flex flex-wrap gap-2">
