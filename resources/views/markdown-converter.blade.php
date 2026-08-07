@@ -64,6 +64,7 @@
                         </div>
                         <flux:textarea
                             name="input"
+                            x-ref="input"
                             x-model="input"
                             x-bind:placeholder="inputPlaceholder"
                             rows="14"

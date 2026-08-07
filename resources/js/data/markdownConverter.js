@@ -30,6 +30,22 @@ const schema = {
 };
 
 export default withUrlState(schema, () => ({
+    init() {
+        this.focusInput();
+    },
+
+    focusInput() {
+        // Someone arriving on a shared ?input= link came to read the result, and
+        // on touch devices stealing focus just throws up the keyboard.
+        if (this.input) return;
+        if (window.matchMedia?.('(pointer: coarse)').matches) return;
+
+        this.$nextTick(() => {
+            // preventScroll keeps the heading in view on short screens.
+            this.$refs.input?.focus({ preventScroll: true });
+        });
+    },
+
     get output() {
         if (!this.input) return '';
         try {
