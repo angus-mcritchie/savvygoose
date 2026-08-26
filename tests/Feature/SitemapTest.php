@@ -98,6 +98,21 @@ test('a mistyped static page date key cannot change which urls the sitemap lists
         ->and($lastmods[$base.'/about'])->toBe('2026-07-23');
 });
 
+/*
+ * The omit-on-bad-date path is a safety net, not a licence to ship undated URLs.
+ * As shipped, every URL should carry a date; anything without one is a page whose
+ * 'updated' was forgotten. This asserts the whole sitemap at once, so it catches a
+ * missing static-page date and a tool added without 'updated' alike.
+ */
+test('every url in the shipped sitemap carries a lastmod', function () {
+    $lastmods = sitemapLastmods($this->get('/sitemap.xml')->getContent());
+
+    $undated = array_keys(array_filter($lastmods, fn ($date) => $date === null));
+
+    expect($undated)->toBe([])
+        ->and(count($lastmods))->toBe(40);
+});
+
 test('every static page date key names a page the sitemap actually lists', function () {
     $base = rtrim(config('app.url'), '/');
     $listed = array_keys(sitemapLastmods($this->get('/sitemap.xml')->getContent()));
