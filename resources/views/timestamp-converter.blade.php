@@ -182,6 +182,9 @@
             <p class="mb-3">
                 Paste the ISO string into the input and the Unix timestamp appears in both seconds and
                 milliseconds. The direction is detected from what you paste, so there is no mode to switch.
+                The one input that needs care is an all-digits date: <span class="font-mono">20240301</span> is
+                valid ISO 8601 basic format, but anything made only of digits is read as an epoch value, so write
+                that date as <span class="font-mono">2024-03-01</span> to have it treated as a date.
             </p>
             <p class="mb-4">
                 The part that trips people up is the timezone designator at the end. An ISO 8601 string is only
