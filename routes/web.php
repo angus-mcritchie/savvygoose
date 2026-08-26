@@ -27,37 +27,53 @@ Route::view('/atrek-rc-header-card', 'atrek-rc-header-card')->name('atrek-rc-hea
 
 Route::get('/sitemap.xml', function () {
     $base = rtrim(config('app.url'), '/');
+    $tools = config('tools.tools');
 
-    // lastmod from the max mtime of the page's Blade view and the tool registry,
-    // so a content edit to either bumps the freshness signal Google uses.
-    $configMtime = is_file(config_path('tools.php')) ? filemtime(config_path('tools.php')) : time();
-    $lastmod = function (string $view) use ($configMtime) {
-        $full = resource_path('views/'.$view);
-        $times = [$configMtime];
-        if (is_file($full)) {
-            $times[] = filemtime($full);
+    // lastmod comes from the declared 'updated' date on each tool, never from
+    // filemtime: Laravel Cloud deploys a fresh checkout, so mtimes are all the
+    // deploy time and every URL would share one date that moves on each deploy.
+    // An unknown date omits <lastmod> rather than inventing one, because a
+    // wrong date is worse than none — Google stops trusting the field entirely.
+    // Returns the date only if it is a real calendar day in YYYY-MM-DD form.
+    // createFromFormat accepts 2026-13-45 and rolls it over, so compare the
+    // round-trip back to the input to reject anything that was not already valid.
+    $valid = function (?string $date): ?string {
+        if (! is_string($date)) {
+            return null;
         }
 
-        return date('Y-m-d', max($times));
+        $parsed = DateTimeImmutable::createFromFormat('!Y-m-d', $date);
+
+        return $parsed && $parsed->format('Y-m-d') === $date ? $date : null;
+    };
+
+    // A category or the dashboard is a listing of its tools, so it is as fresh
+    // as the most recently updated tool it lists.
+    $newestOf = function (array $subset) use ($valid) {
+        $dates = array_filter(array_map(fn ($tool) => $valid($tool['updated'] ?? null), $subset));
+
+        return $dates === [] ? null : max($dates);
     };
 
     $urls = [[
         'loc' => $base.'/',
         'changefreq' => 'weekly',
         'priority' => '1.0',
-        'lastmod' => $lastmod('dashboard.blade.php'),
+        'lastmod' => $newestOf($tools),
     ]];
 
     foreach (array_keys(config('tools.categories')) as $key) {
-        $urls[] = ['loc' => $base.'/'.$key, 'changefreq' => 'weekly', 'priority' => '0.8', 'lastmod' => $lastmod('category.blade.php')];
+        $inCategory = array_filter($tools, fn ($tool) => $tool['category'] === $key);
+
+        $urls[] = ['loc' => $base.'/'.$key, 'changefreq' => 'weekly', 'priority' => '0.8', 'lastmod' => $newestOf($inCategory)];
     }
 
-    foreach (config('tools.tools') as $tool) {
-        $urls[] = ['loc' => $base.'/'.$tool['slug'], 'changefreq' => 'monthly', 'priority' => '0.7', 'lastmod' => $lastmod($tool['slug'].'.blade.php')];
+    foreach ($tools as $tool) {
+        $urls[] = ['loc' => $base.'/'.$tool['slug'], 'changefreq' => 'monthly', 'priority' => '0.7', 'lastmod' => $valid($tool['updated'] ?? null)];
     }
 
-    foreach (['about', 'privacy', 'contact'] as $page) {
-        $urls[] = ['loc' => $base.'/'.$page, 'changefreq' => 'yearly', 'priority' => '0.3', 'lastmod' => $lastmod('pages/'.$page.'.blade.php')];
+    foreach (config('tools.static_pages') as $page => $updated) {
+        $urls[] = ['loc' => $base.'/'.$page, 'changefreq' => 'yearly', 'priority' => '0.3', 'lastmod' => $valid($updated)];
     }
 
     return response()

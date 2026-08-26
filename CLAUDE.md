@@ -45,9 +45,17 @@ The tool list is driven by `config/tools.php` — routes, the dashboard, and bot
     'name' => 'Word Counter',
     'tagline' => 'Count words, sentences, and paragraphs.',
     'category' => 'text', // existing key from `categories`, or add a new one
+    'updated' => '2026-08-26', // YYYY-MM-DD, feeds <lastmod> in the sitemap
     'icon' => ['type' => 'flux', 'name' => 'hashtag'],
 ],
 ```
+
+`updated` is required and `SitemapTest` fails without it. Bump it when you change what a
+page says or does; leave it alone for refactors and redeploys. It is declared rather than
+read from the filesystem because Laravel Cloud deploys a fresh checkout, so `filemtime()`
+returns the deploy time for every file and used to collapse all 40 sitemap URLs onto one
+date that moved on every deploy. Non-tool pages carry the same contract in
+`config/tools.php` under `static_pages`.
 
 Icons are a tagged union: `['type' => 'image', 'src' => 'image/foo.png']` for PNGs in `public/image/`, or `['type' => 'flux', 'name' => 'code-bracket-square']` for a Flux icon. `<x-tool-icon>` handles both.
 
