@@ -182,8 +182,8 @@ return [
             'category' => 'numbers',
             'icon' => ['type' => 'flux', 'name' => 'clock'],
             'meta' => [
-                'title' => 'Unix Timestamp Converter (Epoch ↔ ISO ↔ Human)',
-                'description' => 'Convert Unix timestamps to ISO 8601 and human-readable dates, or back the other way. Handles timezones, seconds, and milliseconds.',
+                'title' => 'Unix Timestamp Converter (Epoch ↔ ISO 8601 ↔ Human)',
+                'description' => 'Convert a Unix timestamp to ISO 8601, or an ISO 8601 string back to epoch seconds and milliseconds. Handles offsets, timezones, and fractional seconds.',
             ],
             'howto' => [
                 'Paste a Unix timestamp (seconds or milliseconds), or pick a date.',
@@ -192,7 +192,9 @@ return [
             ],
             'faqs' => [
                 ['q' => 'How do I convert a Unix timestamp to a date?', 'a' => 'Paste the timestamp and the date appears as ISO 8601 (UTC), a zoned ISO string, RFC 2822, and a human-readable date, all at once.'],
-                ['q' => 'How do I convert ISO 8601 to a Unix timestamp?', 'a' => 'Paste an ISO 8601 string like 2026-01-15T09:30:00Z and the Unix timestamp appears in both seconds and milliseconds.'],
+                ['q' => 'How do I convert ISO 8601 to a Unix timestamp?', 'a' => 'Paste an ISO 8601 string like 2026-01-15T09:30:00Z and the Unix timestamp appears in both seconds and milliseconds, in this case 1768469400 and 1768469400000. The direction is detected from what you paste, so there is no mode to switch first.'],
+                ['q' => 'Why do two ISO strings give the same Unix timestamp?', 'a' => 'Because the offset is part of the instant. 2024-03-01T09:30:00+05:30 and 2024-03-01T04:00:00Z describe the same moment written from two timezones, so both convert to 1709265600.'],
+                ['q' => 'What happens if my ISO string has no Z or offset?', 'a' => 'A date and time such as 2024-03-01T09:30:00 is read in your browser\'s own timezone, which is why the same string can convert to different timestamps on two machines. A date on its own, like 2024-03-01, is read as UTC instead. Add a Z or an offset when you want the result pinned either way.'],
                 ['q' => 'How do I convert epoch to ISO 8601?', 'a' => 'Enter the epoch (Unix) value and read the ISO 8601 (UTC) row. Epoch 0 is 1970-01-01T00:00:00Z, the moment Unix time starts counting.'],
                 ['q' => 'How do I convert a timestamp to my timezone (IST, PST, GMT)?', 'a' => 'Pick any IANA timezone (for example Asia/Kolkata for IST, America/Los_Angeles for PST, or UTC for GMT) and the zoned outputs update instantly.'],
                 ['q' => 'What is ISO 8601 format?', 'a' => 'ISO 8601 writes dates as YYYY-MM-DDThh:mm:ss followed by a timezone: Z for UTC, or an offset like +05:30. It sorts chronologically as plain text, which is why it is the default for logs and APIs.'],

@@ -178,6 +178,47 @@
         </div>
 
         <div>
+            <flux:heading level="2" class="!mb-4 !text-2xl !font-semibold tracking-tight">Converting ISO 8601 to a Unix timestamp</flux:heading>
+            <p class="mb-3">
+                Paste the ISO string into the input and the Unix timestamp appears in both seconds and
+                milliseconds. The direction is detected from what you paste, so there is no mode to switch.
+            </p>
+            <p class="mb-4">
+                The part that trips people up is the timezone designator at the end. An ISO 8601 string is only
+                unambiguous if it carries one, and it changes the answer:
+                <span class="font-mono">2024-03-01T09:30:00+05:30</span> and
+                <span class="font-mono">2024-03-01T04:00:00Z</span> are the same instant, so both give
+                <span class="font-mono">1709265600</span>. Leave the designator off and the rules change under you: a
+                full date and time is read in your browser's own timezone, while a bare date such as
+                <span class="font-mono">2024-03-01</span> is read as UTC. That split is why the same text can produce
+                different timestamps on two machines.
+            </p>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="border-b border-black/10 dark:border-white/10">
+                        <tr>
+                            <th class="py-2 pr-4 font-semibold">ISO 8601 input</th>
+                            <th class="py-2 pr-4 font-semibold">Seconds</th>
+                            <th class="py-2 font-semibold">Milliseconds</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-black/5 font-mono dark:divide-white/10">
+                        <tr><td class="py-2 pr-4">2023-11-14T22:13:20Z</td><td class="py-2 pr-4">1700000000</td><td class="py-2">1700000000000</td></tr>
+                        <tr><td class="py-2 pr-4">2026-01-15T09:30:00Z</td><td class="py-2 pr-4">1768469400</td><td class="py-2">1768469400000</td></tr>
+                        <tr><td class="py-2 pr-4">2024-03-01T09:30:00+05:30</td><td class="py-2 pr-4">1709265600</td><td class="py-2">1709265600000</td></tr>
+                        <tr><td class="py-2 pr-4">2023-11-14T22:13:20.500Z</td><td class="py-2 pr-4">1700000000</td><td class="py-2">1700000000500</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="mt-4">
+                Fractional seconds are kept in the milliseconds column and dropped from the seconds column, so
+                <span class="font-mono">.500</span> becomes a trailing <span class="font-mono">500</span> in one and
+                nothing in the other. Reach for milliseconds when you are feeding a JavaScript
+                <span class="font-mono">Date</span>, and seconds for most database columns and APIs.
+            </p>
+        </div>
+
+        <div>
             <flux:heading level="2" class="!mb-4 !text-2xl !font-semibold tracking-tight">Notable epoch values</flux:heading>
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
