@@ -9,6 +9,18 @@ return [
         'og_image' => '/image/og.jpg',
     ],
 
+    /*
+     * Internal pages that are reachable but deliberately not part of the public
+     * site: no tool registry entry, no dashboard card, no nav link, no sitemap.
+     * Being unlisted is not the same as being unindexable, so these also get a
+     * noindex robots tag (see App\Support\Seo). The route name, the view name,
+     * and the URL path are all this string.
+     */
+    'private_pages' => [
+        'on-it-rc-header-card',
+        'atrek-rc-header-card',
+    ],
+
     'categories' => [
         'text' => 'Text & Writing',
         'data' => 'Data & Encoding',
