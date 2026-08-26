@@ -37,7 +37,10 @@ Route::get('/sitemap.xml', function () {
     // Returns the date only if it is a real calendar day in YYYY-MM-DD form.
     // createFromFormat accepts 2026-13-45 and rolls it over, so compare the
     // round-trip back to the input to reject anything that was not already valid.
-    $valid = function (?string $date): ?string {
+    // Takes mixed, not ?string: config is hand-edited, and a value that is a
+    // list or an int must degrade to "no date" like any other bad value rather
+    // than throw a TypeError and take the whole sitemap down with a 500.
+    $valid = function (mixed $date): ?string {
         if (! is_string($date)) {
             return null;
         }
@@ -72,8 +75,12 @@ Route::get('/sitemap.xml', function () {
         $urls[] = ['loc' => $base.'/'.$tool['slug'], 'changefreq' => 'monthly', 'priority' => '0.7', 'lastmod' => $valid($tool['updated'] ?? null)];
     }
 
-    foreach (config('tools.static_pages') as $page => $updated) {
-        $urls[] = ['loc' => $base.'/'.$page, 'changefreq' => 'yearly', 'priority' => '0.3', 'lastmod' => $valid($updated)];
+    // The routed pages are the source of truth for which URLs exist; the config
+    // only supplies their dates. Driving membership off the config keys instead
+    // would let a typo there drop a real page from the sitemap and advertise a
+    // a 404 in its place, which is a worse failure than a missing lastmod.
+    foreach (['about', 'privacy', 'contact'] as $page) {
+        $urls[] = ['loc' => $base.'/'.$page, 'changefreq' => 'yearly', 'priority' => '0.3', 'lastmod' => $valid(config('tools.static_pages.'.$page))];
     }
 
     return response()

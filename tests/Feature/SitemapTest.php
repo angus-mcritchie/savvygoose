@@ -80,6 +80,50 @@ test('the sitemap does not stamp every url with one identical date', function ()
     expect(count(array_unique($lastmods)))->toBeGreaterThan(1);
 });
 
+/*
+ * The static-page dates are a lookup keyed by page, not the list of pages. If
+ * they were the list, a typo in config would silently drop a real page from the
+ * sitemap and advertise a 404 in its place — a worse failure than a missing date.
+ */
+test('a mistyped static page date key cannot change which urls the sitemap lists', function () {
+    $base = rtrim(config('app.url'), '/');
+    $before = array_keys(sitemapLastmods($this->get('/sitemap.xml')->getContent()));
+
+    config(['tools.static_pages' => ['about' => '2026-07-23', 'privcy' => '2026-07-23']]);
+    $lastmods = sitemapLastmods($this->get('/sitemap.xml')->getContent());
+
+    expect(array_keys($lastmods))->toBe($before)
+        ->and($lastmods)->not->toHaveKey($base.'/privcy')
+        ->and($lastmods[$base.'/privacy'])->toBeNull()
+        ->and($lastmods[$base.'/about'])->toBe('2026-07-23');
+});
+
+test('every static page date key names a page the sitemap actually lists', function () {
+    $base = rtrim(config('app.url'), '/');
+    $listed = array_keys(sitemapLastmods($this->get('/sitemap.xml')->getContent()));
+
+    foreach (array_keys(config('tools.static_pages')) as $page) {
+        expect(in_array($base.'/'.$page, $listed, true))
+            ->toBeTrue("static_pages key '$page' is not a sitemap URL");
+    }
+});
+
+test('a non-string updated value omits lastmod instead of throwing', function () {
+    $tools = config('tools.tools');
+    $tools[0]['updated'] = [];
+    $tools[1]['updated'] = 20260804;
+    config(['tools.tools' => $tools]);
+
+    $response = $this->get('/sitemap.xml');
+    $response->assertOk();
+
+    $lastmods = sitemapLastmods($response->getContent());
+    $base = rtrim(config('app.url'), '/');
+
+    expect($lastmods[$base.'/'.$tools[0]['slug']])->toBeNull()
+        ->and($lastmods[$base.'/'.$tools[1]['slug']])->toBeNull();
+});
+
 test('a tool with no usable updated date omits lastmod instead of inventing one', function () {
     $tools = config('tools.tools');
     $tools[0]['updated'] = '2026-13-45';
