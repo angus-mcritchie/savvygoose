@@ -12,6 +12,9 @@
 <title>{{ $title ?? $seo['title'] }}</title>
 <meta name="description" content="{{ $seo['description'] }}" />
 <link rel="canonical" href="{{ $seo['canonical'] }}" />
+@if (! empty($seo['robots']))
+    <meta name="robots" content="{{ $seo['robots'] }}" />
+@endif
 
 <meta property="og:type" content="{{ $seo['type'] }}" />
 <meta property="og:site_name" content="{{ $seo['site_name'] }}" />

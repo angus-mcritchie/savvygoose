@@ -22,8 +22,11 @@ Route::view('/privacy', 'pages.privacy')->name('privacy');
 Route::view('/contact', 'pages.contact')->name('contact');
 
 // Private internal pages — not in the tool registry, dashboard, nav, or sitemap.
-Route::view('/on-it-rc-header-card', 'on-it-rc-header-card')->name('on-it-rc-header-card');
-Route::view('/atrek-rc-header-card', 'atrek-rc-header-card')->name('atrek-rc-header-card');
+// The registry in config/tools.php is what also marks them noindex, so adding a
+// page here without adding it there would leave it publicly indexable.
+foreach (config('tools.private_pages') as $privatePage) {
+    Route::view('/'.$privatePage, $privatePage)->name($privatePage);
+}
 
 Route::get('/sitemap.xml', function () {
     $base = rtrim(config('app.url'), '/');
@@ -77,7 +80,7 @@ Route::get('/sitemap.xml', function () {
 
     // The routed pages are the source of truth for which URLs exist; the config
     // only supplies their dates. Driving membership off the config keys instead
-    // would let a typo there drop a real page from the sitemap and advertise a
+    // would let a typo there drop a real page from the sitemap and advertise
     // a 404 in its place, which is a worse failure than a missing lastmod.
     foreach (['about', 'privacy', 'contact'] as $page) {
         $urls[] = ['loc' => $base.'/'.$page, 'changefreq' => 'yearly', 'priority' => '0.3', 'lastmod' => $valid(config('tools.static_pages.'.$page))];

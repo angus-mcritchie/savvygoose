@@ -25,7 +25,23 @@ class Seo
             'og_image' => $ogImage,
             'locale' => str_replace('_', '-', app()->getLocale()),
             'type' => 'website',
+            // Null means "say nothing", which leaves the page indexable. Only the
+            // private pages below set this.
+            'robots' => null,
         ];
+
+        // Private internal pages are unlisted rather than protected, so nothing
+        // stops a crawler that finds the URL some other way from indexing them.
+        if ($routeName !== null && in_array($routeName, config('tools.private_pages', []), true)) {
+            return array_merge($base, [
+                'title' => ucfirst(str_replace('-', ' ', $routeName)).' — '.$siteName,
+                'description' => 'Internal page.',
+                'canonical' => $siteUrl.'/'.$routeName,
+                'breadcrumbs' => [],
+                'json_ld' => [],
+                'robots' => 'noindex, nofollow',
+            ]);
+        }
 
         if ($routeName === 'dashboard') {
             return array_merge($base, [
