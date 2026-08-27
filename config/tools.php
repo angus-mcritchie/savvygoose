@@ -220,7 +220,7 @@ return [
             'name' => 'Timestamp Converter',
             'tagline' => 'Unix epoch ↔ ISO ↔ human, with timezones.',
             'category' => 'numbers',
-            'updated' => '2026-08-04',
+            'updated' => '2026-08-27',
             'icon' => ['type' => 'flux', 'name' => 'clock'],
             'meta' => [
                 'title' => 'Unix Timestamp Converter (Epoch ↔ ISO 8601 ↔ Human)',
