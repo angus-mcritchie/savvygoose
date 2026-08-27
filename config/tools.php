@@ -19,6 +19,14 @@ return [
     'private_pages' => [
         'on-it-rc-header-card',
         'atrek-rc-header-card',
+     * Last content change for the pages that aren't tools, as YYYY-MM-DD.
+     * Same contract as a tool's 'updated': bump it when the page's content
+     * changes, leave it alone for a redeploy. See the note on 'updated' below.
+     */
+    'static_pages' => [
+        'about' => '2026-07-23',
+        'privacy' => '2026-07-23',
+        'contact' => '2026-07-22',
     ],
 
     'categories' => [
@@ -57,12 +65,24 @@ return [
         ],
     ],
 
+    /*
+     * Every tool carries an 'updated' date (YYYY-MM-DD) that feeds <lastmod> in
+     * the sitemap. It is declared rather than derived from the filesystem on
+     * purpose: Laravel Cloud deploys from a fresh checkout, so every file's
+     * mtime is the deploy time, which used to collapse all 40 sitemap URLs onto
+     * one identical date that moved on every deploy. Google discards a lastmod
+     * it cannot trust, so that told it nothing.
+     *
+     * Bump a tool's 'updated' when you change what the page says or does. Do not
+     * bump it for a refactor or a redeploy. SitemapTest enforces the format.
+     */
     'tools' => [
         [
             'slug' => 'character-counter',
             'name' => 'Character Counter',
             'tagline' => 'Count characters & words.',
             'category' => 'text',
+            'updated' => '2026-07-22',
             'icon' => ['type' => 'flux', 'name' => 'hashtag'],
             'meta' => [
                 'title' => 'Character & Word Counter',
@@ -85,6 +105,7 @@ return [
             'name' => 'Case Converter',
             'tagline' => 'camelCase, snake_case, kebab-case & more.',
             'category' => 'text',
+            'updated' => '2026-08-04',
             'icon' => ['type' => 'flux', 'name' => 'language'],
             'related' => ['slug-generator', 'character-counter'],
             'meta' => [
@@ -110,6 +131,7 @@ return [
             'name' => 'Diff Viewer',
             'tagline' => 'Compare two pieces of text.',
             'category' => 'text',
+            'updated' => '2026-08-04',
             'icon' => ['type' => 'flux', 'name' => 'arrows-right-left'],
             'meta' => [
                 'title' => 'Text Diff Viewer: Compare Two Texts',
@@ -131,6 +153,7 @@ return [
             'name' => 'Markdown Converter',
             'tagline' => 'Convert between Markdown & HTML.',
             'category' => 'text',
+            'updated' => '2026-08-07',
             'icon' => ['type' => 'flux', 'name' => 'code-bracket-square'],
             'meta' => [
                 'title' => 'Markdown to HTML Converter',
@@ -152,6 +175,7 @@ return [
             'name' => 'Percentage Calculator',
             'tagline' => 'Common percentage calculations.',
             'category' => 'numbers',
+            'updated' => '2026-07-22',
             'icon' => ['type' => 'flux', 'name' => 'calculator'],
             'meta' => [
                 'title' => 'Percentage Calculator',
@@ -172,6 +196,7 @@ return [
             'name' => 'Unit Converter',
             'tagline' => 'Length, weight, temperature, volume & data sizes.',
             'category' => 'numbers',
+            'updated' => '2026-08-04',
             'icon' => ['type' => 'flux', 'name' => 'scale'],
             'meta' => [
                 'title' => 'Unit Converter: Length, Weight, Temp, Volume, Data',
@@ -192,6 +217,7 @@ return [
             'name' => 'Timestamp Converter',
             'tagline' => 'Unix epoch ↔ ISO ↔ human, with timezones.',
             'category' => 'numbers',
+            'updated' => '2026-08-04',
             'icon' => ['type' => 'flux', 'name' => 'clock'],
             'meta' => [
                 'title' => 'Unix Timestamp Converter (Epoch ↔ ISO ↔ Human)',
@@ -216,6 +242,7 @@ return [
             'name' => 'Time Between Dates',
             'tagline' => 'Calendar days, business days & holidays between two dates.',
             'category' => 'numbers',
+            'updated' => '2026-08-04',
             'icon' => ['type' => 'flux', 'name' => 'calendar-days'],
             'meta' => [
                 'title' => 'Time Between Dates: Calendar, Business Days & Holidays',
@@ -236,6 +263,7 @@ return [
             'name' => 'Barcode Generator',
             'tagline' => 'Generate & print Code 128 barcodes.',
             'category' => 'generators',
+            'updated' => '2026-07-23',
             'icon' => ['type' => 'flux', 'name' => 'tag'],
             'meta' => [
                 'title' => 'Code 128 Barcode Generator: Print & Share',
@@ -264,6 +292,7 @@ return [
             'name' => 'QR Code Generator',
             'tagline' => 'Generate styled QR codes for URLs, text, and more.',
             'category' => 'generators',
+            'updated' => '2026-08-05',
             'icon' => ['type' => 'flux', 'name' => 'qr-code'],
             'meta' => [
                 'title' => 'QR Code Generator: Styled QR Codes with a Logo',
@@ -293,6 +322,7 @@ return [
             'name' => 'Base64 Encoder',
             'tagline' => 'Encode & decode Base64 for text or files.',
             'category' => 'data',
+            'updated' => '2026-08-04',
             'icon' => ['type' => 'flux', 'name' => 'arrows-right-left'],
             'meta' => [
                 'title' => 'Base64 Encoder & Decoder (Text and Files)',
@@ -313,6 +343,7 @@ return [
             'name' => 'Image to Base64',
             'tagline' => 'Convert an image to a Base64 data URI.',
             'category' => 'data',
+            'updated' => '2026-07-22',
             'icon' => ['type' => 'flux', 'name' => 'photo'],
             'related' => ['base64-encoder', 'image-resizer', 'hash-generator'],
             'meta' => [
@@ -336,6 +367,7 @@ return [
             'name' => 'URL Encoder',
             'tagline' => 'Percent-encode & decode URL components.',
             'category' => 'data',
+            'updated' => '2026-07-22',
             'icon' => ['type' => 'flux', 'name' => 'link'],
             'related' => ['base64-encoder', 'slug-generator'],
             'meta' => [
@@ -356,6 +388,7 @@ return [
             'name' => 'JWT Decoder',
             'tagline' => 'Inspect a JWT: header, payload, expiry.',
             'category' => 'data',
+            'updated' => '2026-08-04',
             'icon' => ['type' => 'flux', 'name' => 'key'],
             'meta' => [
                 'title' => 'JWT Decoder: Inspect Header, Payload, Expiry',
@@ -375,6 +408,7 @@ return [
             'name' => 'Hash Generator',
             'tagline' => 'MD5, SHA-1, SHA-256 & SHA-512 for text or file.',
             'category' => 'data',
+            'updated' => '2026-08-04',
             'icon' => ['type' => 'flux', 'name' => 'finger-print'],
             'meta' => [
                 'title' => 'Hash Generator: MD5, SHA-1, SHA-256, SHA-512',
@@ -395,6 +429,7 @@ return [
             'name' => 'Color Converter',
             'tagline' => 'HEX ↔ RGB ↔ HSL with a contrast checker.',
             'category' => 'data',
+            'updated' => '2026-08-04',
             'icon' => ['type' => 'flux', 'name' => 'swatch'],
             'related' => ['image-resizer'],
             'meta' => [
@@ -418,6 +453,7 @@ return [
             'name' => 'JSON Formatter',
             'tagline' => 'Pretty-print, minify, and validate JSON.',
             'category' => 'data',
+            'updated' => '2026-07-22',
             'icon' => ['type' => 'flux', 'name' => 'code-bracket'],
             'meta' => [
                 'title' => 'JSON Formatter: Pretty-print, Minify, Validate',
@@ -438,6 +474,7 @@ return [
             'name' => 'Format Converter',
             'tagline' => 'Convert between JSON, YAML, CSV & XML.',
             'category' => 'data',
+            'updated' => '2026-07-22',
             'icon' => ['type' => 'flux', 'name' => 'arrow-path-rounded-square'],
             'meta' => [
                 'title' => 'Format Converter: JSON, YAML, CSV, XML',
@@ -463,6 +500,7 @@ return [
             'name' => 'Regex Tester',
             'tagline' => 'Build and debug regular expressions.',
             'category' => 'data',
+            'updated' => '2026-08-04',
             'icon' => ['type' => 'flux', 'name' => 'magnifying-glass'],
             'meta' => [
                 'title' => 'Regex Tester: Build & Debug Regular Expressions',
@@ -482,6 +520,7 @@ return [
             'name' => 'Browser Info',
             'tagline' => 'Viewport, screen size, DPR, browser & OS.',
             'category' => 'data',
+            'updated' => '2026-08-04',
             'icon' => ['type' => 'flux', 'name' => 'computer-desktop'],
             'meta' => [
                 'title' => 'Browser Info: Viewport, Screen, DPR, Device',
@@ -500,6 +539,7 @@ return [
             'name' => 'Password Generator',
             'tagline' => 'Strong, random passwords with a strength meter.',
             'category' => 'generators',
+            'updated' => '2026-08-04',
             'icon' => ['type' => 'flux', 'name' => 'lock-closed'],
             'meta' => [
                 'title' => 'Password Generator: Strong & Random',
@@ -520,6 +560,7 @@ return [
             'name' => 'Passphrase Generator',
             'tagline' => 'Memorable, random word-based passphrases.',
             'category' => 'generators',
+            'updated' => '2026-08-04',
             'icon' => ['type' => 'flux', 'name' => 'key'],
             'meta' => [
                 'title' => 'Passphrase Generator: Random, Memorable',
@@ -541,6 +582,7 @@ return [
             'name' => 'UUID Generator',
             'tagline' => 'Generate v4 or v7 UUIDs in bulk.',
             'category' => 'generators',
+            'updated' => '2026-08-04',
             'icon' => ['type' => 'flux', 'name' => 'identification'],
             'meta' => [
                 'title' => 'UUID Generator: v4 and v7 in Bulk',
@@ -564,6 +606,7 @@ return [
             'name' => 'Favicon Generator',
             'tagline' => 'Turn an image into favicons and a .ico file.',
             'category' => 'generators',
+            'updated' => '2026-07-23',
             'icon' => ['type' => 'flux', 'name' => 'sparkles'],
             'related' => ['image-resizer', 'image-to-base64', 'qr-code-generator'],
             'meta' => [
@@ -588,6 +631,7 @@ return [
             'name' => 'Image Resizer',
             'tagline' => 'Resize and convert images in your browser.',
             'category' => 'generators',
+            'updated' => '2026-08-04',
             'icon' => ['type' => 'flux', 'name' => 'photo'],
             'related' => ['color-converter', 'favicon-generator'],
             'meta' => [
@@ -609,6 +653,7 @@ return [
             'name' => 'Slug Generator',
             'tagline' => 'Turn any string into a URL slug.',
             'category' => 'generators',
+            'updated' => '2026-08-04',
             'icon' => ['type' => 'flux', 'name' => 'link'],
             'related' => ['case-converter', 'url-encoder'],
             'meta' => [
@@ -633,6 +678,7 @@ return [
             'name' => 'Lorem Ipsum',
             'tagline' => 'Generate placeholder text.',
             'category' => 'generators',
+            'updated' => '2026-08-04',
             'icon' => ['type' => 'flux', 'name' => 'document-text'],
             'meta' => [
                 'title' => 'Lorem Ipsum Generator: Placeholder Text',
@@ -652,6 +698,7 @@ return [
             'name' => 'Mermaid Editor',
             'tagline' => 'Write Mermaid, preview live, export SVG or PNG.',
             'category' => 'diagrams',
+            'updated' => '2026-08-04',
             'icon' => ['type' => 'flux', 'name' => 'rectangle-group'],
             'meta' => [
                 'title' => 'Mermaid Editor: Live Diagram Preview & Export',
@@ -676,6 +723,7 @@ return [
             'name' => 'Cron Expression Generator',
             'tagline' => 'Build and explain cron schedules, with next run times.',
             'category' => 'dev',
+            'updated' => '2026-08-04',
             'icon' => ['type' => 'flux', 'name' => 'clock'],
             'related' => ['timestamp-converter', 'time-between-dates'],
             'meta' => [
@@ -700,6 +748,7 @@ return [
             'name' => 'GitHub Dependency Starrer',
             'tagline' => "Star every GitHub repo behind your project's dependencies.",
             'category' => 'dev',
+            'updated' => '2026-07-02',
             'icon' => ['type' => 'flux', 'name' => 'star'],
             'related' => ['cron-expression-generator'],
             'meta' => [
