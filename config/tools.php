@@ -19,6 +19,9 @@ return [
     'private_pages' => [
         'on-it-rc-header-card',
         'atrek-rc-header-card',
+    ],
+
+    /*
      * Last content change for the pages that aren't tools, as YYYY-MM-DD.
      * Same contract as a tool's 'updated': bump it when the page's content
      * changes, leave it alone for a redeploy. See the note on 'updated' below.

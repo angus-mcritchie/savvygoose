@@ -80,7 +80,7 @@ Route::get('/sitemap.xml', function () {
 
     // The routed pages are the source of truth for which URLs exist; the config
     // only supplies their dates. Driving membership off the config keys instead
-    // would let a typo there drop a real page from the sitemap and advertise a
+    // would let a typo there drop a real page from the sitemap and advertise
     // a 404 in its place, which is a worse failure than a missing lastmod.
     foreach (['about', 'privacy', 'contact'] as $page) {
         $urls[] = ['loc' => $base.'/'.$page, 'changefreq' => 'yearly', 'priority' => '0.3', 'lastmod' => $valid(config('tools.static_pages.'.$page))];
