@@ -5,6 +5,7 @@
 //
 // Usage:
 //   $copy(text, 'mykey')            — writes text, flashes 'mykey' for 1.5s.
+//   $copyRich(html, 'mykey')         — writes HTML so it pastes formatted.
 //   $store.copy.is('mykey')          — true while the flash is active.
 
 const FLASH_MS = 1500;
@@ -43,6 +44,45 @@ export function registerClipboard(Alpine) {
             ta.select();
             try { document.execCommand('copy'); } catch {}
             document.body.removeChild(ta);
+        }
+
+        Alpine.store('copy').flash(key);
+    });
+
+    // Writes both text/html and a plain-text fallback so the paste lands
+    // formatted in email, docs and chat, and readable everywhere else.
+    Alpine.magic('copyRich', () => async (html, key = '') => {
+        if (!html) return;
+
+        const tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        const text = tmp.innerText || tmp.textContent || '';
+
+        try {
+            await navigator.clipboard.write([
+                new ClipboardItem({
+                    'text/html': new Blob([html], { type: 'text/html' }),
+                    'text/plain': new Blob([text], { type: 'text/plain' }),
+                }),
+            ]);
+        } catch {
+            // Fallback for browsers without ClipboardItem support: select a
+            // contenteditable node so execCommand('copy') captures rich text.
+            const div = document.createElement('div');
+            div.contentEditable = 'true';
+            div.style.position = 'fixed';
+            div.style.left = '-9999px';
+            div.style.opacity = '0';
+            div.innerHTML = html;
+            document.body.appendChild(div);
+            const range = document.createRange();
+            range.selectNodeContents(div);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+            try { document.execCommand('copy'); } catch {}
+            sel.removeAllRanges();
+            document.body.removeChild(div);
         }
 
         Alpine.store('copy').flash(key);

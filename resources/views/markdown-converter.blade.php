@@ -105,6 +105,58 @@
                 </div>
             </div>
 
+            <div class="rounded-lg border border-black/10 p-8 dark:border-white/10" x-show="quotes.length" x-cloak>
+                <div class="mb-6 border-b border-black/10 pb-4 dark:border-white/10">
+                    <flux:heading size="xl">Quoted text</flux:heading>
+                    <flux:subheading>
+                        Pasted an answer with the draft wrapped in a blockquote? Take it out without the
+                        <code>&gt;</code> markers.
+                    </flux:subheading>
+                </div>
+
+                <div class="grid gap-4">
+                    <template x-for="quote in quotes" x-bind:key="quote.key">
+                        <div class="grid gap-3 rounded-lg bg-zinc-50 p-4 dark:bg-white/5">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <flux:text
+                                    class="font-medium"
+                                    x-text="quote.label"
+                                    x-show="quotes.length > 1"
+                                />
+                                <div class="ml-auto flex flex-wrap gap-2">
+                                    <flux:button
+                                        type="button"
+                                        size="xs"
+                                        variant="ghost"
+                                        x-bind:icon="$store.copy.is(quote.key + '-rich') ? 'check' : 'document-duplicate'"
+                                        x-on:click.stop="$copyRich(quote.html, quote.key + '-rich')"
+                                    >
+                                        <span x-show="!$store.copy.is(quote.key + '-rich')">Copy as rich text</span>
+                                        <span x-show="$store.copy.is(quote.key + '-rich')" x-cloak>Copied!</span>
+                                    </flux:button>
+                                    <x-copy-button
+                                        value="quote.markdown"
+                                        flash="quote.key + '-md'"
+                                        label="Copy Markdown"
+                                        size="xs"
+                                    />
+                                    <flux:button
+                                        type="button"
+                                        size="xs"
+                                        variant="ghost"
+                                        icon="arrow-up-tray"
+                                        x-on:click="extractQuote(quote.markdown)"
+                                    >
+                                        Use as input
+                                    </flux:button>
+                                </div>
+                            </div>
+                            <div class="prose max-h-48 max-w-none overflow-y-auto text-sm dark:prose-invert" x-html="quote.html"></div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
             <x-share-field
                 class="rounded-lg border border-black/10 p-8 dark:border-white/10"
                 subheading="The URL below carries the conversion direction and your input."
