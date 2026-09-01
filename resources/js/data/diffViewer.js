@@ -110,9 +110,13 @@ const serializeIfShortEnough = (value, state) => {
     return { value };
 };
 
+// Both sides share one budget, so cap each compressed half rather than letting
+// them add up to two full-size payloads.
+const MAX_URL_PACKED = 4000;
+
 const schema = {
-    original: { type: 'string', alias: 'a', serialize: serializeIfShortEnough },
-    modified: { type: 'string', alias: 'b', serialize: serializeIfShortEnough },
+    original: { type: 'string', alias: 'a', compressedMaxLength: MAX_URL_PACKED, serialize: serializeIfShortEnough },
+    modified: { type: 'string', alias: 'b', compressedMaxLength: MAX_URL_PACKED, serialize: serializeIfShortEnough },
     mode: { type: 'enum', values: ['side-by-side', 'unified', 'word'], default: 'side-by-side' },
     ignoreWhitespace: { type: 'boolean', default: false, alias: 'iw' },
 };

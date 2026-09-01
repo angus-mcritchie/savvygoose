@@ -7,6 +7,52 @@
 // The wrapped component gains `url`, `urlTooLong`, `initFromUrl()`, and
 // `updateUrl()`.
 
+import LZString from 'lz-string';
+
+// A string past its `maxLength` used to mean "no share link for you". It now
+// gets one more chance: a compressed copy stashed under `<key>.z`, the trick
+// the Mermaid editor has always used for its diagram source. Prose and markup
+// roughly halve, so a value two or three times over the plain budget still
+// fits, and the URL it produces is shorter than the percent-encoded original
+// would have been.
+const COMPRESSED_SUFFIX = '.z';
+
+// Same budget the Mermaid editor settled on: an 8k query string is well
+// inside what browsers, chat clients and link unfurlers tolerate.
+const COMPRESSED_BUDGET = 8000;
+
+// Below this, a value stays in the clear even when packing it would be
+// shorter, so a link you can read and hand-edit stays that way. Past it
+// nobody is reading the query string anyway, so length is all that's left
+// to optimise for.
+const PLAIN_BUDGET = 512;
+
+// LZ decoding can expand a lot, so a hostile `?input.z=` gets a ceiling.
+const MAX_DECOMPRESSED = 100000;
+
+function compress(value) {
+    try {
+        return LZString.compressToEncodedURIComponent(value) || null;
+    } catch {
+        return null;
+    }
+}
+
+function decompress(packed, budget) {
+    if (!packed || packed.length > budget) return null;
+    try {
+        // LZString's URI-safe alphabet includes '+', which survives our own
+        // URLSearchParams round-trip as %2B but comes back as a space from
+        // anything that decoded the link along the way. A space can't appear
+        // in the alphabet, so putting it back is unambiguous.
+        const out = LZString.decompressFromEncodedURIComponent(packed.replace(/ /g, '+'));
+        if (!out || out.length > MAX_DECOMPRESSED) return null;
+        return out;
+    } catch {
+        return null;
+    }
+}
+
 function defaultFor(def) {
     if (Object.prototype.hasOwnProperty.call(def, 'default')) return def.default;
     switch (def.type) {
@@ -57,9 +103,7 @@ function parseValue(raw, def, state) {
     }
 }
 
-function serializeValue(value, def, state) {
-    if (def.serialize) return def.serialize(value, state);
-
+function serializeByType(value, def) {
     switch (def.type) {
         case 'string': {
             if (value == null || value === '') return { skip: true };
@@ -87,6 +131,35 @@ function serializeValue(value, def, state) {
         default:
             return { value: String(value) };
     }
+}
+
+function pack(value, def) {
+    if (typeof value !== 'string') return null;
+    const out = compress(value);
+    if (!out || out.length > (def.compressedMaxLength ?? COMPRESSED_BUDGET)) return null;
+    return { value: out, compressed: true };
+}
+
+function serializeValue(value, def, state) {
+    const result = def.serialize ? def.serialize(value, state) : serializeByType(value, def);
+
+    // A field dropped purely for length gets a second chance: compressed, it
+    // often fits, and a share link that works beats one that says it can't.
+    // This catches the tools that budget across several fields at once too,
+    // since they signal the same way.
+    if (result.tooLong) return pack(value, def) ?? result;
+
+    // Past the point where anyone reads the query string, pack whatever else
+    // is long, provided packing actually wins.
+    if (!result.skip && !result.compressed && typeof result.value === 'string') {
+        const plain = encodeURIComponent(result.value).length;
+        if (plain > PLAIN_BUDGET) {
+            const out = pack(result.value, def);
+            if (out && out.value.length < plain) return out;
+        }
+    }
+
+    return result;
 }
 
 export function withUrlState(schema, factory) {
@@ -123,9 +196,21 @@ export function withUrlState(schema, factory) {
             const params = new URLSearchParams(window.location.search);
             for (const [key, def] of Object.entries(schema)) {
                 const urlKey = def.alias || key;
-                if (!params.has(urlKey)) continue;
-                const raw = params.get(urlKey);
-                const parsed = parseValue(raw, def, this);
+                let raw = params.get(urlKey);
+                let activeDef = def;
+
+                if (raw === null) {
+                    const packed = params.get(urlKey + COMPRESSED_SUFFIX);
+                    if (packed === null) continue;
+                    raw = decompress(packed, def.compressedMaxLength ?? COMPRESSED_BUDGET);
+                    if (raw === null) continue;
+                    // `maxLength` caps how much text may sit in the URL in the
+                    // clear, which is exactly what compressing it got around.
+                    // MAX_DECOMPRESSED is the limit that applies here.
+                    activeDef = { ...def, maxLength: undefined };
+                }
+
+                const parsed = parseValue(raw, activeDef, this);
                 if (parsed !== undefined) this[key] = parsed;
             }
             if (userInitFromUrl) userInitFromUrl.call(this);
@@ -137,11 +222,13 @@ export function withUrlState(schema, factory) {
 
             for (const [key, def] of Object.entries(schema)) {
                 const urlKey = def.alias || key;
+                const zKey = urlKey + COMPRESSED_SUFFIX;
                 const value = this[key];
                 const dflt = defaultFor(def);
 
                 if (value === dflt || value == null) {
                     params.delete(urlKey);
+                    params.delete(zKey);
                     continue;
                 }
 
@@ -149,7 +236,12 @@ export function withUrlState(schema, factory) {
                 if (result.tooLong) urlTooLong = true;
                 if (result.skip) {
                     params.delete(urlKey);
+                    params.delete(zKey);
+                } else if (result.compressed) {
+                    params.delete(urlKey);
+                    params.set(zKey, result.value);
                 } else {
+                    params.delete(zKey);
                     params.set(urlKey, result.value);
                 }
             }
