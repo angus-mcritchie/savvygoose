@@ -58,6 +58,9 @@ const schema = {
     test: {
         type: 'string',
         alias: 't',
+        // The three fields share one budget, so cap each compressed payload
+        // instead of letting them stack up to three full-size ones.
+        compressedMaxLength: 3000,
         serialize: (value, state) => {
             if (!value) return { skip: true };
             if (totalInputTooLong(state)) return { skip: true, tooLong: true };
@@ -67,6 +70,7 @@ const schema = {
     replacement: {
         type: 'string',
         alias: 'r',
+        compressedMaxLength: 1500,
         serialize: (value, state) => {
             if (!value || !state.replaceMode) return { skip: true };
             if (totalInputTooLong(state)) return { skip: true, tooLong: true };

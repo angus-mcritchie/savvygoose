@@ -25,4 +25,15 @@ export default [
             'no-constant-condition': ['warn', { checkLoops: false }],
         },
     },
+    {
+        files: ['tests/js/**/*.js'],
+        languageOptions: {
+            ecmaVersion: 2023,
+            sourceType: 'module',
+            globals: {
+                ...globals.browser,
+                ...globals.node,
+            },
+        },
+    },
 ];
