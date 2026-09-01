@@ -157,11 +157,6 @@
                 </div>
             </div>
 
-            <x-share-field
-                class="rounded-lg border border-black/10 p-8 dark:border-white/10"
-                subheading="The URL below carries the conversion direction and your input."
-                tooLongMessage="Input is too long to include in the URL."
-            />
 
             <div class="rounded-lg border border-black/10 p-8 dark:border-white/10">
                 <div class="mb-6 flex items-center justify-between gap-4 border-b border-black/10 pb-4 dark:border-white/10">
@@ -186,6 +181,11 @@
                     <flux:text>Type something on the left to see a rendered preview here.</flux:text>
                 </div>
             </div>
+            <x-share-field
+                class="rounded-lg border border-black/10 p-8 dark:border-white/10"
+                subheading="The URL below carries the conversion direction and your input."
+                tooLongMessage="Input is too long to include in the URL."
+            />
         </div>
 
         <flux:modal name="swap-confirm" class="md:w-96">
