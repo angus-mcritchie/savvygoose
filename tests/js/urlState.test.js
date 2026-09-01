@@ -22,6 +22,14 @@ function mount(schema, factory = () => ({}), search = '') {
 
 const longText = 'The quick brown fox jumps over the lazy dog. '.repeat(60); // 2640 chars
 
+// The URL this value would have produced in the clear, built the way
+// updateUrl builds one. encodeURIComponent is not a stand-in: it spends three
+// characters on a space where URLSearchParams spends one, so it overstates the
+// plain form by about 40% and would let a packed URL "win" without trying.
+function plainUrlFor(key, value) {
+    return 'https://savvygoose.com/markdown-converter?' + new URLSearchParams([[key, value]]).toString();
+}
+
 // Deterministic pseudo-random alphanumerics: nothing for LZ to find, and
 // URL-safe, so the plain form is exactly `n` characters long.
 function incompressible(n) {
@@ -52,7 +60,7 @@ describe('withUrlState compression', () => {
 
         const params = new URLSearchParams(new URL(scope.url).search);
         expect(params.has('input.z')).toBe(true);
-        expect(scope.url.length).toBeLessThan(encodeURIComponent(longText).length);
+        expect(scope.url.length).toBeLessThan(plainUrlFor('input', longText).length);
         expect(LZString.decompressFromEncodedURIComponent(params.get('input.z'))).toBe(longText);
     });
 
@@ -67,6 +75,35 @@ describe('withUrlState compression', () => {
         expect(params.has('input.z')).toBe(false);
     });
 
+    it('does not pack a value that only looks like a win under encodeURIComponent', () => {
+        // Space-heavy incompressible text: encodeURIComponent spends three
+        // characters on each space and calls packing a win, URLSearchParams
+        // spends one and knows better. Packing here would lengthen the URL.
+        const spaced = incompressible(800).replace(/(.{4})/g, '$1 ').trim();
+        expect(LZString.compressToEncodedURIComponent(spaced).length)
+            .toBeLessThan(encodeURIComponent(spaced).length);
+
+        const { scope } = mount({ input: { type: 'string' } }, () => ({ input: spaced }));
+
+        const params = new URLSearchParams(new URL(scope.url).search);
+        expect(params.has('input.z')).toBe(false);
+        expect(params.get('input')).toBe(spaced);
+    });
+
+    it('holds the compressed budget against the query string, not the decoded value', () => {
+        const packed = LZString.compressToEncodedURIComponent(longText);
+        expect(packed).toContain('+'); // three characters once URLSearchParams writes it
+
+        const overBudget = (budget) => {
+            const schema = { input: { type: 'string', maxLength: 10, compressedMaxLength: budget } };
+            return mount(schema, () => ({ input: longText })).scope;
+        };
+
+        // A budget of exactly the decoded length fits by the wrong measure.
+        expect(overBudget(packed.length).urlTooLong).toBe(true);
+        expect(overBudget(new URLSearchParams([['', packed]]).toString().length - 1).urlTooLong).toBe(false);
+    });
+
     it('compresses an over-budget value into <key>.z instead of dropping it', () => {
         const { scope } = mount({ input: { type: 'string', maxLength: 1000 } }, () => ({ input: longText }));
 
@@ -79,7 +116,7 @@ describe('withUrlState compression', () => {
     it('produces a shorter URL than the plain value would have', () => {
         const { scope } = mount({ input: { type: 'string', maxLength: 1000 } }, () => ({ input: longText }));
 
-        expect(scope.url.length).toBeLessThan(encodeURIComponent(longText).length);
+        expect(scope.url.length).toBeLessThan(plainUrlFor('input', longText).length);
     });
 
     it('reads a compressed value back out of the URL', () => {

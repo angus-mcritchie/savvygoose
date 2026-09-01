@@ -30,6 +30,15 @@ const PLAIN_BUDGET = 512;
 // LZ decoding can expand a lot, so a hostile `?input.z=` gets a ceiling.
 const MAX_DECOMPRESSED = 100000;
 
+// Every budget here is a budget on the query string, so measure with the thing
+// that writes it. URLSearchParams escapes more than encodeURIComponent does:
+// it spends three characters on the '+' and '$' that LZ output is full of, and
+// only one on a space that encodeURIComponent would spend three on. Comparing
+// decoded lengths gets both sides wrong, in opposite directions.
+function encodedLength(value) {
+    return new URLSearchParams([['', value]]).toString().length - 1; // less the '='
+}
+
 function compress(value) {
     try {
         return LZString.compressToEncodedURIComponent(value) || null;
@@ -39,6 +48,9 @@ function compress(value) {
 }
 
 function decompress(packed, budget) {
+    // Deliberately the decoded length, which can only be shorter than what the
+    // budget was checked against on the way out. Anything this app wrote still
+    // opens; the bound is here to stop a hostile link, not to be exact.
     if (!packed || packed.length > budget) return null;
     try {
         // LZString's URI-safe alphabet includes '+', which survives our own
@@ -136,7 +148,7 @@ function serializeByType(value, def) {
 function pack(value, def) {
     if (typeof value !== 'string') return null;
     const out = compress(value);
-    if (!out || out.length > (def.compressedMaxLength ?? COMPRESSED_BUDGET)) return null;
+    if (!out || encodedLength(out) > (def.compressedMaxLength ?? COMPRESSED_BUDGET)) return null;
     return { value: out, compressed: true };
 }
 
@@ -152,10 +164,10 @@ function serializeValue(value, def, state) {
     // Past the point where anyone reads the query string, pack whatever else
     // is long, provided packing actually wins.
     if (!result.skip && !result.compressed && typeof result.value === 'string') {
-        const plain = encodeURIComponent(result.value).length;
+        const plain = encodedLength(result.value);
         if (plain > PLAIN_BUDGET) {
             const out = pack(result.value, def);
-            if (out && out.value.length < plain) return out;
+            if (out && encodedLength(out.value) < plain) return out;
         }
     }
 
