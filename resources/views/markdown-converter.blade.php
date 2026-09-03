@@ -185,7 +185,36 @@
                 class="rounded-lg border border-black/10 p-8 dark:border-white/10"
                 subheading="The URL below carries the conversion direction and your input."
                 tooLongMessage="Input is too long to include in the URL."
-            />
+            >
+                <div class="mt-8 border-t border-black/10 pt-8 dark:border-white/10">
+                    <flux:heading class="mb-2" size="xl">Share as a document</flux:heading>
+                    <flux:subheading class="mb-4">
+                        A read-only page holding just the rendered document. Use it when the other person needs to
+                        read what you wrote, not edit it.
+                    </flux:subheading>
+                    <p x-show="documentTooLong" x-cloak class="mb-4 text-sm text-amber-600 dark:text-amber-400">
+                        This document is too long to fit inside a link, even compressed.
+                    </p>
+                    <flux:input type="url" x-model="documentUrl" readonly copyable label="Document link" />
+                    <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+                        <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                            Opens the Document Viewer. Nothing is uploaded, so whoever you send it to needs the link
+                            itself to read it.
+                        </p>
+                        <flux:button
+                            href="{{ route('document-viewer') }}"
+                            x-bind:href="documentUrl"
+                            x-bind:disabled="!documentUrl"
+                            target="_blank"
+                            rel="noopener"
+                            icon="arrow-top-right-on-square"
+                            size="sm"
+                        >
+                            Open document
+                        </flux:button>
+                    </div>
+                </div>
+            </x-share-field>
         </div>
 
         <flux:modal name="swap-confirm" class="md:w-96">

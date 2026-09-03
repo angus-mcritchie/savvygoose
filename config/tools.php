@@ -156,8 +156,9 @@ return [
             'name' => 'Markdown Converter',
             'tagline' => 'Convert between Markdown & HTML.',
             'category' => 'text',
-            'updated' => '2026-09-02',
+            'updated' => '2026-09-04',
             'icon' => ['type' => 'flux', 'name' => 'code-bracket-square'],
+            'related' => ['document-viewer'],
             'meta' => [
                 'title' => 'Markdown to HTML Converter',
                 'description' => 'Convert Markdown to HTML and HTML back to Markdown. CommonMark-compatible with GitHub-flavored extensions, and it lifts quoted drafts out of blockquotes.',
@@ -167,12 +168,47 @@ return [
                 'Switch direction to convert either way.',
                 'Copy the converted output.',
                 'Any blockquotes get their own section, ready to copy without the > markers.',
+                'Share it as a read-only document if the other person only needs to read it.',
             ],
             'faqs' => [
                 ['q' => 'Which Markdown flavor is supported?', 'a' => 'CommonMark with GitHub-flavored extensions, including tables and fenced code blocks.'],
                 ['q' => 'Does it support tables?', 'a' => 'GFM tables convert in both directions.'],
                 ['q' => 'How do I remove the > from quoted text?', 'a' => 'Paste the whole thing in. Every blockquote it finds is listed under Quoted text, so you can copy one as plain Markdown, copy it as rich text for an email or a doc, or send it back to the editor as the entire document.'],
                 ['q' => 'Is my content sent to a server?', 'a' => 'No. The conversion happens locally in your browser.'],
+                ['q' => 'Can I send someone the formatted result without the editor?', 'a' => 'Use the document link under Share. It opens the Document Viewer, which shows the rendered page on its own, with no textareas and nothing to sign into.'],
+            ],
+        ],
+        [
+            'slug' => 'document-viewer',
+            'name' => 'Document Viewer',
+            'tagline' => 'Share Markdown as a read-only page.',
+            'category' => 'text',
+            'updated' => '2026-09-04',
+            'icon' => ['type' => 'flux', 'name' => 'document-text'],
+            'related' => ['markdown-converter'],
+            /*
+             * The shared document lives entirely in the query string, so an
+             * indexed copy would be a visitor's own writing sitting in search
+             * results under our domain. The bare page is the thing worth
+             * ranking; see App\Support\Seo for what this flag does.
+             */
+            'noindex_with_query' => true,
+            'meta' => [
+                'title' => 'Markdown Document Viewer: Share a Read-only Page',
+                'description' => 'Paste Markdown and get a clean reading page you can send to anyone. The document travels inside the link, so there is nothing to upload and no account to make.',
+            ],
+            'howto' => [
+                'Paste Markdown, or open a link someone shared with you.',
+                'The page renders it as a formatted document with no editor around it.',
+                'Copy the URL out of the address bar to send the document on.',
+                'Print it, or save it as a PDF, straight from the page.',
+            ],
+            'faqs' => [
+                ['q' => 'Where is the document stored?', 'a' => 'In the link. The text is compressed into the URL itself, so there is no upload step and no database behind the page.'],
+                ['q' => 'Can the person I send it to change it?', 'a' => 'Not the link you sent. Edit a copy opens the document in the Markdown Converter, which produces a separate link and leaves yours alone.'],
+                ['q' => 'How long can the document be?', 'a' => 'Roughly six to eight thousand characters of prose once compressed. Past that the Markdown Converter says the link cannot be built rather than handing you a broken one.'],
+                ['q' => 'Is the link private?', 'a' => 'Unguessable, but not secret. Anyone holding it can read the document, so treat it the way you would an unlisted link.'],
+                ['q' => 'Will search engines index what I share?', 'a' => 'No. Any URL carrying a document is served with a noindex tag and points its canonical at the empty tool page.'],
             ],
         ],
         [
