@@ -153,6 +153,29 @@ test('the contact page renders', function () {
     $this->get('/contact')->assertOk()->assertSee('Contact');
 });
 
+test('the document viewer renders', function () {
+    $this->get('/document-viewer')->assertOk()->assertSee('Document Viewer');
+});
+
+test('the document viewer is indexable when empty and noindex once it carries a document', function () {
+    $this->get('/document-viewer')
+        ->assertOk()
+        ->assertDontSee('name="robots"', false);
+
+    // The document lives in the query string, so an indexed copy would be a
+    // visitor's own writing ranking under our domain.
+    $this->get('/document-viewer?d=%23+Hello')
+        ->assertOk()
+        ->assertSee('<meta name="robots" content="noindex, follow" />', false)
+        ->assertSee('<link rel="canonical" href="'.config('app.url').'/document-viewer"', false);
+});
+
+test('other tools stay indexable with a query string', function () {
+    $this->get('/markdown-converter?input=hello')
+        ->assertOk()
+        ->assertDontSee('name="robots"', false);
+});
+
 test('a missing page returns a branded 404', function () {
     $this->get('/no-such-tool-abc123')
         ->assertNotFound()

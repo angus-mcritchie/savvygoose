@@ -174,6 +174,19 @@ function serializeValue(value, def, state) {
     return result;
 }
 
+// Build the query pair a schema field would write, without going anywhere near
+// window.location. This is how one tool hands another a link to itself: both
+// sides share the field definition, so the plain cap, the compressed budget and
+// the `.z` suffix all agree. Null means the value does not fit even compressed,
+// which is the caller's cue to say so rather than hand over a link that opens
+// blank.
+export function toQueryParam(urlKey, value, def, state = null) {
+    const result = serializeValue(value, def, state);
+    if (result.skip) return null;
+
+    return result.compressed ? [urlKey + COMPRESSED_SUFFIX, result.value] : [urlKey, result.value];
+}
+
 export function withUrlState(schema, factory) {
     return () => {
         const base = factory();

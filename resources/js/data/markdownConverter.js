@@ -1,21 +1,7 @@
-import { marked } from 'marked';
-import { markedHighlight } from 'marked-highlight';
-import hljs from 'highlight.js/lib/common';
 import TurndownService from 'turndown';
-import DOMPurify from 'dompurify';
 import { withUrlState } from '../lib/urlState';
-
-marked.use(
-    markedHighlight({
-        emptyLangClass: 'hljs',
-        langPrefix: 'hljs language-',
-        highlight(code, lang) {
-            const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-            return hljs.highlight(code, { language }).value;
-        },
-    }),
-);
-marked.setOptions({ gfm: true, breaks: false });
+import { marked, renderMarkdown } from '../lib/markdown';
+import { documentUrl as buildDocumentUrl, CONVERTER_INPUT_FIELD } from '../lib/markdownLinks';
 
 const turndown = new TurndownService({
     headingStyle: 'atx',
@@ -45,12 +31,25 @@ function collectQuotes(tokens, out = []) {
 
 const schema = {
     direction: { type: 'enum', values: ['md-to-html', 'html-to-md'], default: 'md-to-html', alias: 'dir' },
-    input: { type: 'string', maxLength: 3000 },
+    // Shared with the document viewer, which has to accept whatever link the
+    // "Share as a document" field here hands out.
+    input: CONVERTER_INPUT_FIELD,
 };
 
 export default withUrlState(schema, () => ({
+    documentUrl: '',
+    documentTooLong: false,
+
     init() {
         this.focusInput();
+    },
+
+    // withUrlState calls this after it has written its own params, which is also
+    // exactly when the document link needs rebuilding.
+    updateUrl() {
+        const markdown = this.markdownSource;
+        this.documentUrl = buildDocumentUrl(markdown);
+        this.documentTooLong = markdown !== '' && this.documentUrl === '';
     },
 
     focusInput() {
@@ -77,17 +76,13 @@ export default withUrlState(schema, () => ({
     },
 
     get preview() {
-        if (!this.input) return '';
-        try {
-            const html = this.direction === 'md-to-html'
-                ? this.output
-                : marked.parse(this.output);
-            // The preview is injected via x-html, and `input` is read from the
-            // shareable URL — sanitize so a crafted ?input= link can't run JS.
-            return DOMPurify.sanitize(html);
-        } catch (e) {
-            return '';
-        }
+        // The preview is injected via x-html, and `input` is read from the
+        // shareable URL, so it goes through renderMarkdown's sanitizer either
+        // way. In html-to-md the round trip through Markdown is what strips the
+        // pasted HTML back to what the conversion actually kept.
+        return this.direction === 'md-to-html'
+            ? renderMarkdown(this.input)
+            : renderMarkdown(this.output);
     },
 
     // Whichever side is holding Markdown right now.
@@ -104,7 +99,7 @@ export default withUrlState(schema, () => ({
                 key: `md-quote-${index}`,
                 label: `Quote ${index + 1}`,
                 markdown,
-                html: DOMPurify.sanitize(marked.parse(markdown)),
+                html: renderMarkdown(markdown),
             }));
         } catch (e) {
             return [];

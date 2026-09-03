@@ -50,6 +50,13 @@ The tool list is driven by `config/tools.php` — routes, the dashboard, and bot
 ],
 ```
 
+An optional `'noindex_with_query' => true` marks a tool whose query string carries the
+visitor's own content rather than a setting (the Document Viewer carries a whole
+shared document). `App\Support\Seo` then serves any request with a query string as
+`noindex, follow`, still canonicalised to the bare page, so nobody's shared writing
+ends up in search results. Leave it off for ordinary tools: their self-referencing
+canonical is already the right treatment.
+
 `updated` is required and `SitemapTest` fails without it. Bump it when you change what a
 page says or does; leave it alone for refactors and redeploys. It is declared rather than
 read from the filesystem because Laravel Cloud deploys a fresh checkout, so `filemtime()`
@@ -181,7 +188,9 @@ When extending an existing tool, mirror the surrounding entries' tone — terse,
 - **`withUrlState(schema, factory)`** in `resources/js/lib/urlState.js` — URL ↔ state binding, used by every tool with shareable settings.
 - **`$copy(text, key)` magic + `$store.copy.is(key)`** — `resources/js/lib/clipboard.js`. The `<x-copy-button value="..." flash="'unique-key'" />` component wraps both; pass `flash` as an Alpine expression (e.g. `'static-key'` or `c.key` inside an `x-for`).
 - **`$download(blobOrText, filename, mime?)`** magic — `resources/js/lib/download.js`. Accepts `Blob`, `ArrayBuffer`, `Uint8Array`, or string.
-- **`<x-share-field />`** — drop-in Share section. Props: `subheading`, `tooLongMessage`, `heading` (pass `false` to suppress and use your own).
+- **`<x-share-field />`** — drop-in Share section. Props: `subheading`, `tooLongMessage`, `heading` (pass `false` to suppress and use your own). The default slot lands at the bottom of the card; the Markdown Converter uses it for its second, document-shaped link.
+- **`toQueryParam(urlKey, value, def)`** in `resources/js/lib/urlState.js` — builds the query pair a schema field *would* write, without touching `window.location`. This is how one tool links to another carrying state (`resources/js/lib/markdownLinks.js`). Both ends must import the same field definition, or the sender builds links the receiver rejects. Returns `null` when the value will not fit even compressed.
+- **`marked` + `renderMarkdown(md)` + `firstHeading(md)`** in `resources/js/lib/markdown.js` — the one configured `marked` for the whole bundle. `marked.use` mutates a module singleton and `app.js` imports every tool on every page, so a second `marked.use(markedHighlight(...))` would highlight each code block twice and escape the first pass. Never configure `marked` in a tool's own data file; import this.
 
 A few existing tools have non-trivial schemas worth mirroring:
 - `resources/js/data/regexTester.js` — cross-field `serialize` (skip `test`/`replacement` if total exceeds budget).
@@ -191,7 +200,8 @@ A few existing tools have non-trivial schemas worth mirroring:
 
 ### Layouts and Flux
 
-- `resources/views/components/layouts/app.blade.php` is the only layout — wraps content in `<flux:main>` plus the header from `layouts/app/header.blade.php`.
+- `resources/views/components/layouts/app.blade.php` is the layout for every tool — wraps content in `<flux:main>` plus the header from `layouts/app/header.blade.php`.
+- `resources/views/components/layouts/document.blade.php` is the one exception: the Document Viewer serves someone else's shared writing, so it drops the header, sidebar and breadcrumbs and keeps only a footer back into the site. Reach for it only if a page has the same job; a tool page belongs in `x-layouts.app`.
 - Flux Pro is a paid composer package served from `https://composer.fluxui.dev` (configured in `composer.json` `repositories`). CI authenticates via `FLUX_USERNAME` / `FLUX_LICENSE_KEY` GitHub secrets. Local installs need `auth.json` with the same credentials.
 
 ### Vite entry points

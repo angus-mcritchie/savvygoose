@@ -100,12 +100,22 @@ class Seo
                 $jsonLd[] = self::faqJsonLd($tool['faqs']);
             }
 
+            // A tool may declare that its query string carries a visitor's own
+            // content rather than a setting worth ranking (the Document Viewer
+            // does). The canonical already points at the bare page; this also
+            // asks the crawler not to index the copy it is looking at. 'follow'
+            // rather than 'nofollow', because the links on it are ours.
+            $robots = ($tool['noindex_with_query'] ?? false) && Request::getQueryString() !== null
+                ? 'noindex, follow'
+                : null;
+
             return array_merge($base, [
                 'title' => $metaTitle.' — '.$siteName,
                 'description' => $description,
                 'canonical' => $url,
                 'breadcrumbs' => $breadcrumbs,
                 'json_ld' => $jsonLd,
+                'robots' => $robots,
             ]);
         }
 

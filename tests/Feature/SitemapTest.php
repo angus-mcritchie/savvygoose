@@ -110,7 +110,7 @@ test('every url in the shipped sitemap carries a lastmod', function () {
     $undated = array_keys(array_filter($lastmods, fn ($date) => $date === null));
 
     expect($undated)->toBe([])
-        ->and(count($lastmods))->toBe(40);
+        ->and(count($lastmods))->toBe(41);
 });
 
 test('every static page date key names a page the sitemap actually lists', function () {
